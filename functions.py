@@ -35,9 +35,9 @@ LQCD = 0.5
 
 ####################################################################################################
 
-def make_params_BsEtas():
-    Fit['momenta'] = []
+def make_params_BsEtas(Fits,Masses,Twists):
     for Fit in Fits:
+        Fit['momenta'] = []
         Fit['a'] = w0/(hbar*clight*0.01)*Fit['w0/a'] #in GeV^-1
         j = 0
         for i in range(len(Fit['masses'])):
@@ -57,7 +57,7 @@ def make_params_BsEtas():
 
 ####################################################################################################
 
-def make_params_BK():
+def make_params_BK(Fits,Masses,Twists):
     Fit['momenta'] = []
     daughters = []
     for Fit in Fits:
@@ -81,42 +81,42 @@ def make_params_BK():
 
 ####################################################################################################
 
-def get_results(Fit):
+def get_results(Fit,thpts):
     p = gv.gload(Fit['filename'],method='pickle')
     # We should only need goldstone masses and energies here
     for mass in Fit['masses']:
         Fit['M_parent_m{0}'.format(mass)] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0]
-    Fit['M_daughter'] = p['dE:{0}'.format(Fit['daghter-Tag'][0])][0]
+    Fit['M_daughter'] = p['dE:{0}'.format(Fit['daughter-Tag'][0])][0]
     for t,twist in enumerate(Fit['twists']):
         #Fit is the actual measured value, theory is obtained from the momentum
         Fit['E_daughter_tw{0}_fit'.format(twist)] = p['dE:{0}'.format(Fit['daughter-Tag'][t])][0]
         Fit['E_daughter_tw{0}_theory'.format(twist)] = gv.sqrt(Fit['M_daughter']**2+Fit['momenta'][t]**2)
         for m, mass in enumerate(Fit['masses']):
-            for 3pt in 3pts[Fit['conf']]:
-                if twist != '0' or 3pt != 'T':
-                    Fit['{0}_m{1}_tw{2}'.format(3pt,mass,twist)] = 2 * 2 * Fit['Zdisc'][m] * gv.sqrt(Fit['M_parent_m{0}'.format(mass)]*Fit['E_daughter_tw{0}_theory'.format(twist)]) * p['{0}Vnn_m{0}_tw{1}'][0][0]
+            for thpt in thpts[Fit['conf']]:
+                if twist != '0' or thpt != 'T':
+                    Fit['{0}_m{1}_tw{2}'.format(thpt,mass,twist)] = 2 * 2 * Fit['Zdisc'][m] * gv.sqrt(Fit['M_parent_m{0}'.format(mass)]*Fit['E_daughter_tw{0}_theory'.format(twist)]) * p['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)][0][0]
                     #check zdisc is correctly implemented here
     return()
     
 ####################################################################################################
 
-def make_fs(Fit,fs):
+def make_fs(Fit,fs,thpts):
     for m,mass in enumerate(Fit['masses']):
-        Z_v = (float(mass) - float(Fit['ms']))*Fit['S_m{0}_tw0'.format(mass)]/((Fit['M_parent_m{0}'.format(mass)] - Fit['M_daughter']) * Fit ['V_m{0}_tw0'.format(mass)])
+        Z_v = (float(mass) - float(Fit['m_s']))*Fit['S_m{0}_tw0'.format(mass)]/((Fit['M_parent_m{0}'.format(mass)] - Fit['M_daughter']) * Fit ['V_m{0}_tw0'.format(mass)])
         fs['Z_v_m{0}'.format(mass)] = Z_v
         for t,twist in enumerate(Fit['twists']):
             delta = (float(mass) - float(Fit['m_s']))*(Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(twist)])
-            qsq = (Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'].format(twist))**2 - Fit['momenta'][t]**2
+            qsq = (Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(twist)])**2 - Fit['momenta'][t]**2
             f0 = ((float(mass) - float(Fit['m_s']))*(1/(Fit['M_parent_m{0}'.format(mass)]**2 - Fit['M_daughter']**2))*Fit['S_m{0}_tw{1}'.format(mass,twist)])
             
-            A = Fit['M_parent_m{0}'.format(mass)] + Fit['E_daughter_tw{0}'.format(twist)]
-            B = (Fit['M_parent_m{0}'.format(mass)]**2 - Fit['M_daughter']**2)*(Fit['M_parent_m{0}'.format(mass)] - Fit['E_daughter_tw{0}'.format(twist)])/qsq
+            A = Fit['M_parent_m{0}'.format(mass)] + Fit['E_daughter_tw{0}_theory'.format(twist)]
+            B = (Fit['M_parent_m{0}'.format(mass)]**2 - Fit['M_daughter']**2)*(Fit['M_parent_m{0}'.format(mass)] - Fit['E_daughter_tw{0}_theory'.format(twist)])/qsq
             fp = None
             fT = None
             if twist != '0':
-                fp = (1/(A-B))*(Z_v*Fit['Vm{0}_tw{1}'.format(mass,twist)] - B*f0)
-                if 'T' in 3pts[Fit['conf']]:
-                    fT =  tensornorm*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*Fit['momenta'][t]])
+                fp = (1/(A-B))*(Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0)
+                if 'T' in thpts[Fit['conf']]:
+                    fT =  tensornorm*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*Fit['momenta'][t])
             fs['qsq_m{0}_tw{0}'.format(mass,twist)] = qsq
             fs['f0_m{0}_tw{0}'.format(mass,twist)] = f0
             fs['fp_m{0}_tw{0}'.format(mass,twist)] = fp
@@ -131,7 +131,7 @@ def make_z(qsq,t_0,M_parent,M_daughter):
 
 #########################################################################################################
 
-def make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,di000pri,di10npri):
+def make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cvalpri,di000pri,di10npri):
     prior = gv.BufferDict()
     f = gv.BufferDict()
     for Fit in Fits:
@@ -141,6 +141,7 @@ def make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,di0
         ms0val = float(Fit['m_s']) # valence untuned s mass
         Metas = Fit['M_daughter']/Fit['a'] # in GeV
         prior['Metac_{0}'.format(fit)] = globals()['Metac{0}'.format(fit)]/Fit['a'] #in GeV
+        prior['Metacphys'] = Metacphys
         prior['mstuned_{0}'.format(fit)] = ms0val*(Metasphys/Metas)**2
         mltuned = prior['mstuned_{0}'.format(Fit['conf'])]/slratio 
         prior['MDs_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units
@@ -175,7 +176,7 @@ def make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,di0
             prior['0d'][i][0][0][0] = gv.gvar(di000pri)
             for n in range(Npow):
                 prior['0d'][i][1][0][n] = gv.gvar(di10npri)
-                prior['plusd'][i][1][0][n] = gv.gvar(di10npri)
+                prior['pd'][i][1][0][n] = gv.gvar(di10npri)
     prior['pcl'] = gv.gvar(Npow*[cpri])
     prior['pcs'] = gv.gvar(Npow*[cpri])
     prior['pcc'] = gv.gvar(Npow*[cpri])
@@ -184,16 +185,16 @@ def make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,di0
                 
 ##########################################################################################################
     
-def make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass): # tag is 0,p,T in this way, we can set fp(0)=f0(0) by just putting 0 for n=0 a is lattice spacing so we can use this to evaluate at different lattice spacings p is dict containing all values (prior or posterior or anything)
+def make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass): # tag is 0,p,T in this way, we can set fp(0)=f0(0) by just putting 0 for n=0 alat is lattice spacing (mean) so we can use this to evaluate at different lattice spacings p is dict containing all values (prior or posterior or anything)
     fit = Fit['conf']
     an = 0
     for i in range(Nijk):
         for j in range(Nijk):
             for k in range(Nijk):
                 if addrho:
-                    an += (1 + p['{0}rho'.format(tag)][n]*gv.log(p['MHs_{0}_m{1}'.format(fit,mass)]/p['MDs_{0}'.format(fit)])) * (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tag)][i][j][k][n] * (LQCD*alat/p['MHh_{0}_m{1}'.format(fit,mass)])**int(i) * (float(mass)/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
+                    an += (1 + p['{0}rho'.format(tag)][n]*gv.log(p['MHs_{0}_m{1}'.format(fit,mass)]/p['MDs_{0}'.format(fit)])) * (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tag)][i][j][k][n] * (LQCD*alat/p['MHs_{0}_m{1}'.format(fit,mass)])**int(i) * (float(mass)/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
                 else:
-                    an += (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tag)][i][j][k][n] * (LQCD*alat/p['MHh_{0}_m{1}'.format(fit,mass)])**int(i) * (float(mass)/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
+                    an += (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tag)][i][j][k][n] * (LQCD*alat/p['MHs_{0}_m{1}'.format(fit,mass)])**int(i) * (float(mass)/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
     return(an)
 
 ##########################################################################################################
@@ -202,7 +203,8 @@ def make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass):
     tag = '0'
     f0 = 0
     for n in range(Npow):
-        f0 += 1/(1-qsq/p['MHs0_{0}_m{1}'.format(Fit['conf'],mass)]**2) * make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat) * z**n
+        an = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass)
+        f0 += 1/(1-qsq/p['MHs0_{0}_m{1}'.format(Fit['conf'],mass)]**2) * an * z**n
     return(f0)
 
 ###########################################################################################################
@@ -214,30 +216,31 @@ def make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same):
             tag = '0'
         else:
             tag = 'p'
-        fp += 1/(1-qsq/p['MHsstar_{0}_m{1}'.format(Fit['conf'],mass)]**2) * make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat) * (z**n - (n/Npow) * (-1)**(n-N) *  z**N)
-    return(f0)
+        an = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass)
+        fp += 1/(1-qsq/p['MHsstar_{0}_m{1}'.format(Fit['conf'],mass)]**2) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
+    return(fp)
 
 ############################################################################################################
 
-def do_fit_BsEtas(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,f):
+def do_fit_BsEtas(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same):
     # have to define function in here so it only takes p as an argument (I think)
     ###############################
-    def fit_function_BsEtas(p):
-    models = {}
-    for Fit in Fits:
-        for mass in Fit['masses']:
-            for twist in Fit['twists']:
-                tag = '{0}_m{1}_tw{2}'.format(Fit['conf'],mass,twist)
-                if 'f0_{0}'.format(tag) in f:
-                    models['f0_{0}'.format(tag)] = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,Fit['a'],p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass)
-                if 'fp_{0}'.format(tag) in f:
-                    models['fp_{0}'.format(tag)] = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,Fit['a'],p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass)
-    return(models)
+    def fcn(p):
+        models = gv.BufferDict()
+        for Fit in Fits:
+            for mass in Fit['masses']:
+                for twist in Fit['twists']:
+                    tag = '{0}_m{1}_tw{2}'.format(Fit['conf'],mass,twist)
+                    if 'f0_{0}'.format(tag) in f:
+                        models['f0_{0}'.format(tag)] = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass)
+                    if 'fp_{0}'.format(tag) in f:
+                        models['fp_{0}'.format(tag)] = make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass,fpf0same)
+        return(models)
     #################################
     
     p0 = None
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fit_function_BsEtas, svdcut=1e-15 ,add_svdnoise=svdnoise, add_priornoise=priornoise,fitter='gsl_multifit', alg='subspace2D', solver='cholesky', maxit=5000, tol=(1e-6,0.0,0.0) )
-    gv.dump(fit.p,'Fits/{0}{1}chi{2:.3f}'.format(AddRho,Npow,fit.chi2/fit.dof))
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
+    gv.dump(fit.p,'Fits/{0}{1}chi{2:.3f}'.format(addrho,Npow,fit.chi2/fit.dof))
     print(fit.format(maxline=True))
     return(fit.p)
 
