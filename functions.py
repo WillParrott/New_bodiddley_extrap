@@ -33,7 +33,7 @@ MetacUF = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
 x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2 
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
-
+qsqmaxphys = (MBsphys-Metasphys)**2
 ####################################################################################################
 
 def make_params_BsEtas(Fits,Masses,Twists):
@@ -268,5 +268,23 @@ def make_p_physical_point_BsEtas(pfit,Fits,Del):
         if key not in p:
             p[key] = pfit[key]
     return(p)
+
+######################################################################################################
+
+def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del):
+    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
+    qsq = 0
+    z = make_z(qsq,t_0,MBsphys,Metasphys)
+    f00 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],0)
+    fp0 = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    qsq = qsqmaxphys.mean
+    z = make_z(qsq,t_0,MBsphys,Metasphys)
+    f0max = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],0)
+    fpmax = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    print('f_0(0) = {0}  error: {1:.2%}'.format(f00,f00.sdev/f00.mean))
+    print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
+    print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
+    print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
+    return()
 
 ######################################################################################################

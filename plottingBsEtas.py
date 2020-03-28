@@ -42,7 +42,7 @@ symbs = ['o','^','*']    # for each conf
 lines = ['-','--','-.'] # for each conf
 major = 15
 minor = 8 
-qsqmaxphys = (MBsphys-Metasphys)**2
+
 #####################################################################################################
 
 def unmake_gvar_vec(vec):
@@ -129,10 +129,11 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho):
             plt.figure(2,figsize=figsize)
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
-            
+            plt.close()
             plt.figure(3,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.close()
             j += 1
         i += 1
     qsq = []
@@ -162,11 +163,12 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho):
     plt.axes().yaxis.set_ticks_position('both')
     plt.axes().xaxis.set_major_locator(MultipleLocator(5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
-    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
-    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.02))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
     plt.savefig('Plots/f0poleinqsq.pdf')
-
+    plt.close()
+    
     plt.figure(3,figsize=figsize)
     plt.plot(z,ymean, color='b')
     plt.fill_between(z,ylow,yupp, color='b',alpha=alpha)
@@ -181,11 +183,11 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho):
     plt.axes().yaxis.set_ticks_position('both')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
-    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
-    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.02))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
     plt.savefig('Plots/f0poleinz.pdf')
-
+    plt.close()
     return()
 
 ################################################################################################

@@ -117,7 +117,8 @@ for Fit in Fits:
 prior,f = make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cvalpri,di000pri,di10npri)
 
 pfit = do_fit_BsEtas(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same)
-
+#print values
+fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 speed_of_light(Fits)
 f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho)
