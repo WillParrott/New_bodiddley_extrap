@@ -30,16 +30,16 @@ slratio = gv.gvar('27.18(10)')
 MetacF = gv.gvar('1.367014(40)')        #lattice units
 MetacSF = gv.gvar('0.896806(48)')       #where are these from? 
 MetacUF = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
-x =  MBsphys*(MBsstarphys-MBsphys) # gv.gvar('0.2474(81)') #GeV new way
+x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2 
 LQCD = 0.5
-mbphys = gv.gvar('4.18(04)') # b mass 
+mbphys = gv.gvar('4.18(04)') # b mass GeV
 
 ####################################################################################################
 
 def make_params_BsEtas(Fits,Masses,Twists):
     for Fit in Fits:
         Fit['momenta'] = []
-        Fit['a'] = w0/(hbar*clight*0.01)*Fit['w0/a'] #in GeV^-1
+        Fit['a'] = w0/(hbar*clight*0.01*Fit['w0/a']) #in GeV^-1
         j = 0
         for i in range(len(Fit['masses'])):
             if i not in Masses[Fit['conf']]:
@@ -118,10 +118,10 @@ def make_fs(Fit,fs,thpts):
                 fp = (1/(A-B))*(Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0)
                 if 'T' in thpts[Fit['conf']]:
                     fT =  tensornorm*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*Fit['momenta'][t])
-            fs['qsq_m{0}_tw{0}'.format(mass,twist)] = qsq
-            fs['f0_m{0}_tw{0}'.format(mass,twist)] = f0
-            fs['fp_m{0}_tw{0}'.format(mass,twist)] = fp
-            fs['fT_m{0}_tw{0}'.format(mass,twist)] = fT
+            fs['qsq_m{0}_tw{1}'.format(mass,twist)] = qsq
+            fs['f0_m{0}_tw{1}'.format(mass,twist)] = f0
+            fs['fp_m{0}_tw{1}'.format(mass,twist)] = fp
+            fs['fT_m{0}_tw{1}'.format(mass,twist)] = fT
     return()
 #######################################################################################################    
 
@@ -136,8 +136,8 @@ def make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cva
     prior = gv.BufferDict()
     f = gv.BufferDict()
     for Fit in Fits:
-        prior['LQCD_{0}'.format(fit)] = LQCD*Fit['a']#have to convert this now so can evaluate in GeV later
         fit = Fit['conf']
+        prior['LQCD_{0}'.format(fit)] = LQCD*Fit['a']#have to convert this now so can evaluate in GeV later
         ms0 = Fit['m_ssea']
         ml0 = Fit['m_lsea']
         ms0val = float(Fit['m_s']) # valence untuned s mass
@@ -153,14 +153,14 @@ def make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cva
         for mass in Fit['masses']:
             prior['MHs_{0}_m{1}'.format(fit,mass)] = Fit['M_parent_m{0}'.format(mass)]
             prior['MHs0_{0}_m{1}'.format(fit,mass)] = prior['MHs_{0}_m{1}'.format(fit,mass)] + Fit['a']*Del
-            prior['MHsstar_{0}_m{1}'.format(fit,mass)] = prior['MHs_{0}_m{1}'.format(fit,mass)] + x*Fit['a']/prior['MHs_{0}_m{1}'.format(fit,mass)]
+            prior['MHsstar_{0}_m{1}'.format(fit,mass)] = prior['MHs_{0}_m{1}'.format(fit,mass)] + x*Fit['a']**2/prior['MHs_{0}_m{1}'.format(fit,mass)] #x in GeV^2*a^2/mass in lat units
             for twist in Fit['twists']:
                 tag = '{0}_m{1}_tw{2}'.format(fit,mass,twist)
-                qsq = fs_data[fit]['qsq_m{0}_tw{0}'.format(mass,twist)]
+                qsq = fs_data[fit]['qsq_m{0}_tw{1}'.format(mass,twist)]
                 prior['z_{0}'.format(tag)] = make_z(qsq,t_0,prior['MHs_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])    # x values go in prior
                 prior['qsq_{0}'.format(tag)] = qsq
-                f['f0_{0}'.format(tag)] = fs_data[fit]['f0_m{0}_tw{0}'.format(mass,twist)]   # y values go in f   
-                f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{0}'.format(mass,twist)]
+                f['f0_{0}'.format(tag)] = fs_data[fit]['f0_m{0}_tw{1}'.format(mass,twist)]   # y values go in f   
+                f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
                 for key in f:
                     if f[key] == None:
                         del f[key]   #removes vector tw 0 etc
@@ -206,7 +206,7 @@ def make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh):
     f0 = 0
     for n in range(Npow):
         an = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass,amh)
-        f0 += 1/(1-qsq/p['MHs0_{0}_m{1}'.format(Fit['conf'],mass)]**2) * an * z**n
+        f0 += 1/(1-qsq/(p['MHs0_{0}_m{1}'.format(Fit['conf'],mass)]**2)) * an * z**n
     return(f0)
 
 ###########################################################################################################
@@ -219,7 +219,7 @@ def make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh):
         else:
             tag = 'p'
         an = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass,amh)
-        fp += 1/(1-qsq/p['MHsstar_{0}_m{1}'.format(Fit['conf'],mass)]**2) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
+        fp += 1/(1-qsq/(p['MHsstar_{0}_m{1}'.format(Fit['conf'],mass)]**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
     return(fp)
 
 ############################################################################################################
@@ -248,20 +248,21 @@ def do_fit_BsEtas(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same):
 
 #######################################################################################################
 
-def make_p_physical_point_BsEtas(pfit,Fits):
+def make_p_physical_point_BsEtas(pfit,Fits,Del):
     #only need to evaluate at one Fit one mass but change all anyway
+    # everything should now be in GeV
     p = gv.BufferDict()
     for Fit in Fits:
         fit = Fit['conf']
-        Fit['LQCD_{0}'.format(fit)] = LQCD
+        p['LQCD_{0}'.format(fit)] = LQCD
         p['Metac_{0}'.format(fit)] = Metacphys
-        prior['deltas_{0}'.format(fit)] = 0     
-        prior['deltasval_{0}'.format(fit)] = 0
-        prior['deltal_{0}'.format(fit)] = 0
+        p['deltas_{0}'.format(fit)] = 0     
+        p['deltasval_{0}'.format(fit)] = 0
+        p['deltal_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
             p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
-            p['MD_s_{0}'.format(fit)] = MDsphys
-            p['MBs0_{0}_m{1}'.format(fit,mass)] = p['MBs_{0}_m{1}'.format(fit,mass)] + Del
+            p['MDs_{0}'.format(fit)] = MDsphys
+            p['MHs0_{0}_m{1}'.format(fit,mass)] = p['MHs_{0}_m{1}'.format(fit,mass)] + Del
             p['MHsstar_{0}_m{1}'.format(fit,mass)] = MBsstarphys
     for key in pfit:
         if key not in p:

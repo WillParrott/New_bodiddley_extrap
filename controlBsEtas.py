@@ -113,12 +113,11 @@ make_params_BsEtas(Fits,Masses,Twists) #change to BK in BK case
 for Fit in Fits:
     fs_data[Fit['conf']] = collections.OrderedDict()
     get_results(Fit,thpts)
-    make_fs(Fit,fs_data[Fit['conf']],thpts)
-    
+    make_fs(Fit,fs_data[Fit['conf']],thpts)    
 prior,f = make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cvalpri,di000pri,di10npri)
 
 pfit = do_fit_BsEtas(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t0,Nijk,Npow)
+f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho)
