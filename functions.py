@@ -241,8 +241,10 @@ def do_fit_BsEtas(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same):
     #################################
     
     p0 = None
+    if os.path.isfile('Fits/pmean{0}{1}{2}.pickle'.format(addrho,Npow,Nijk)):
+        p0 = gv.load('Fits/pmean{0}{1}{2}.pickle'.format(addrho,Npow,Nijk))
     fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
-    gv.dump(fit.p,'Fits/{0}{1}chi{2:.3f}'.format(addrho,Npow,fit.chi2/fit.dof))
+    gv.dump(fit.pmean,'Fits/pmean{0}{1}{2}.pickle'.format(addrho,Npow,Nijk))
     print(fit.format(maxline=True))
     return(fit.p)
 
@@ -271,14 +273,18 @@ def make_p_physical_point_BsEtas(pfit,Fits,Del):
 
 ######################################################################################################
 
-def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del):
+def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
     qsq = 0
     z = make_z(qsq,t_0,MBsphys,Metasphys)
+    z = z.mean
+    print(z)
     f00 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],0)
+    #     make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
     fp0 = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     qsq = qsqmaxphys.mean
     z = make_z(qsq,t_0,MBsphys,Metasphys)
+    z = z.mean
     f0max = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],0)
     fpmax = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     print('f_0(0) = {0}  error: {1:.2%}'.format(f00,f00.sdev/f00.mean))

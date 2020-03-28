@@ -129,11 +129,11 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho):
             plt.figure(2,figsize=figsize)
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
-            plt.close()
+            
             plt.figure(3,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
-            plt.close()
+            
             j += 1
         i += 1
     qsq = []
@@ -145,10 +145,9 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho):
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
         z.append(zed.mean)
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
-        y.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed,Fits[0]['masses'][0],0)) #only need one fit
+        y.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],0)) #only need one fit
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
-    
     plt.figure(2,figsize=figsize)
     plt.plot(qsq, ymean, color='b')
     plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
