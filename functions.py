@@ -273,6 +273,29 @@ def make_p_physical_point_BsEtas(pfit,Fits,Del):
 
 ######################################################################################################
 
+def make_p_Mh_BsEtas(pfit,Fits,Del,MH_s):
+    #only need to evaluate at one Fit one mass but change all anyway
+    # everything should now be in GeV
+    p = gv.BufferDict()
+    for Fit in Fits:
+        fit = Fit['conf']
+        p['LQCD_{0}'.format(fit)] = LQCD
+        p['Metac_{0}'.format(fit)] = Metacphys
+        p['deltas_{0}'.format(fit)] = 0     
+        p['deltasval_{0}'.format(fit)] = 0
+        p['deltal_{0}'.format(fit)] = 0
+        for mass in Fit['masses']:
+            p['MHs_{0}_m{1}'.format(fit,mass)] = MH_s
+            p['MDs_{0}'.format(fit)] = MDsphys
+            p['MHs0_{0}_m{1}'.format(fit,mass)] = p['MHs_{0}_m{1}'.format(fit,mass)] + Del
+            p['MHsstar_{0}_m{1}'.format(fit,mass)] = MH_s + x/MH_s
+    for key in pfit:
+        if key not in p:
+            p[key] = pfit[key]
+    return(p)
+
+######################################################################################################
+
 def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
     qsq = 0

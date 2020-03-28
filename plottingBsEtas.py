@@ -17,14 +17,14 @@ from collections import defaultdict
 
 ################# plots ######################
 # speed of light (we use theory value but worth checking this) ###done
-# data and f0/fp with and without pole in z and qsq individually
-# f0/fp together in qsq and z
+# data and f0/fp with and without pole in z and qsq individually ###done
+# f0/fp together in qsq ### done 
 # error in qsq
 # f0(0) fp(max) and f0(max) in Mh
 # ratio in E compared with expectation
 # ratio in qsq compared with HQET
 # beta and delta
-# data at different lattice spacings
+# f0 fp with data at different lattice spacings
 ################## table outputs ############################
 # aMh (aq)^2 aEeta S V N f0 fp on each lattice spacing
 # ans and pole masses
@@ -442,3 +442,91 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     return()
 
 ################################################################################################
+
+def f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+    qsq = []
+    z = []
+    y0 = []
+    yp = []
+    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
+    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
+        z.append(zed.mean)
+        #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
+        y0.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],0)) #only need one fit
+        yp.append(make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
+    y0mean,y0err = unmake_gvar_vec(y0)
+    y0upp,y0low = make_upp_low(y0)
+    ypmean,yperr = unmake_gvar_vec(yp)
+    ypupp,yplow = make_upp_low(yp)
+    plt.figure(10,figsize=figsize)
+    plt.plot(qsq, y0mean, color='b')
+    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
+    plt.plot(qsq, ypmean, color='r')
+    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
+    plt.errorbar(0,0.297, yerr=0.047,fmt='k*',ms=12,mfc='none',label = 'arXiv:1406.2279')
+    plt.errorbar(qsqmaxphys.mean,0.816, yerr=0.035,fmt='k*',ms=12,mfc='none')
+    plt.errorbar(qsqmaxphys.mean,2.293, yerr=0.091,fmt='k*',ms=12,mfc='none')
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
+    plt.tight_layout()
+    plt.savefig('Plots/f0fpinqsq.pdf')
+    plt.close()
+    return()
+
+
+################################################################################################
+
+def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+    MHs = []
+    f00 = []
+    f0max = []
+    fpmax = []
+    p = make_p_Mh_BsEtas(pfit,Fits,Del)
+    for Mh in np.linspace(MDsphys.mean,MBsphys.mean,nopts): #q2 now in GeV
+        qsqmax = (Mh-Metasphys)**2
+        zmax = make_z(qsqmax,t_0,Mh,Metasphys)
+        MHs.append(Mh)
+        #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
+        f00.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,0,zed,0,Fits[0]['masses'][0],0)) #only need one fit
+        f0max.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsqmax.mean,zmax,Fits[0]['masses'][0],0))
+        fpmax.append(make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsqmax.mean,zmax.mean,Fits[0]['masses'][0],fpf0same,0))
+    f00mean,f00err = unmake_gvar_vec(f00)
+    f0maxmean,f0maxerr = unmake_gvar_vec(f00)
+    fpmaxmean,fpmaxerr = unmake_gvar_vec(f00)
+    f00upp,f00low = make_upp_low(f00)
+    f0maxupp,f0maxlow = make_upp_low(f0max)
+    fpmaxupp,fpmaxlow = make_upp_low(f0max)
+    plt.figure(10,figsize=figsize)
+    plt.plot(MHs, f00mean, color='k')
+    plt.fill_between(MHs,f00low,f00upp, color='k',alpha=alpha)
+    plt.plot(MHs, f0maxmean, color='b')
+    plt.fill_between(MHs,f0maxlow,f0maxupp, color='b',alpha=alpha)
+    plt.plot(MHs, f0maxmean, color='r')
+    plt.fill_between(MHs,f0maxlow,f0maxupp, color='r',alpha=alpha)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
+    plt.tight_layout()
+    plt.savefig('Plots/f0f0fpinmh.pdf')
+    plt.close()
+    return()
+
+#####################################################################################################
