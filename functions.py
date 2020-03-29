@@ -378,9 +378,9 @@ def eval_at_different_spacings_BsEtas(asfm,pfit,Fits,Del,fpf0same,Npow,Nijk,addr
     #asfm is a list of lattice spacings in fm
     Fit = Fits[0]
     mass = Fit['masses'][0]
-    convert_Gev()
+    fit = Fit['conf']
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    forchris = collection.OrderedDict()
+    forchris = collections.OrderedDict()
     forchris['M_B_s^*'] = p['MHsstar_{0}_m{1}'.format(fit,mass)]
     forchris['M_B_s^0'] = p['MHs0_{0}_m{1}'.format(fit,mass)]
     forchris['M_B_s'] = MBsphys
@@ -392,9 +392,9 @@ def eval_at_different_spacings_BsEtas(asfm,pfit,Fits,Del,fpf0same,Npow,Nijk,addr
             else:
                 tag ='p'
 
-            forchris['a_plusa{0}n{1}'.format(afm,n)] = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,convert_Gev(afm),mass,convert_Gev(afm)*mbphys)
+            forchris['a_plusa{0}n{1}'.format(afm,n)] = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,convert_Gev(afm).mean,mass,convert_Gev(afm).mean*mbphys)
             tag = '0'
-            forchris['a_0a{0}n{1}'.format(afm,n)] = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,convert_Gev(afm),mass,convert_Gev(afm)*mbphys)
+            forchris['a_0a{0}n{1}'.format(afm,n)] = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,convert_Gev(afm).mean,mass,convert_Gev(afm).mean*mbphys)
     gv.dump(forchris,'Tables/forchris.pickle')
     return()
 

@@ -731,7 +731,7 @@ def f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,afm):
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
         z.append(zed.mean)
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
-        y.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],convert_Gev(afm),q2,zed.mean,Fits[0]['masses'][0],convert_Gev(afm)*mbphys)) #only need one fit
+        y.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],convert_Gev(afm).mean,q2,zed.mean,Fits[0]['masses'][0],convert_Gev(afm).mean*mbphys)) #only need one fit
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
     plt.figure(15,figsize=figsize)
@@ -790,7 +790,7 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
         z.append(zed.mean)
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
-        y.append(make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],convert_Gev(afm),q2,zed.mean,Fits[0]['masses'][0],fpf0same,convert_gev(a)*mbphys)) #only need one fit
+        y.append(make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],convert_Gev(afm).mean,q2,zed.mean,Fits[0]['masses'][0],fpf0same,convert_Gev(afm).mean*mbphys)) #only need one fit
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
        
