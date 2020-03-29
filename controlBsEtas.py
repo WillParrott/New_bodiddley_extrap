@@ -12,6 +12,8 @@ import copy
 import os.path
 import pickle
 from collections import defaultdict
+import warnings
+warnings.filterwarnings("ignore")
 ################################## F PARAMETERS ##########################
 F = collections.OrderedDict()
 F['conf']='F'
