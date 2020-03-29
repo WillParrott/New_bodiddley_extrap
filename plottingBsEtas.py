@@ -21,8 +21,8 @@ from collections import defaultdict
 # f0/fp together in qsq ### done 
 # error in qsq
 # f0(0) fp(max) and f0(max) in Mh   #done
-# ratio in E compared with expectation
-# ratio in qsq compared with HQET 
+# ratio in E compared with expectation 
+# ratio in qsq compared with HQET #done 
 # beta and delta   # done 
 # f0 fp with data at different lattice spacings
 ################## table outputs ############################
@@ -621,3 +621,59 @@ def HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
     return()
 
 ####################################################################################################
+
+def Hill_ratios_in_E(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
+    Es = []
+    rat0 = []
+    ratp = []
+    Emax = (MDsphys**2 + Metasphys**2)/MDsphys
+    theory = gv.sqrt(MBsphys/MDsphys)
+    for E in np.linspace(Metasphys.mean,Emax.mean,nopts): #q2 now in GeV
+        pD = make_p_Mh_BsEtas(pfit,Fits,Del,MDsphys.mean)
+        pB = make_p_physical_point_BsEtas(pfit,Fits,Del)
+        qsqD = MDsphys**2 + Metasphys**2 - 2*MDsphys*E
+        qsqB =  MBsphys**2 + Metasphys**2 - 2*MBsphys*E
+        zD = make_z(qsqD,t_0,MDsphys,E)
+        zB = make_z(qsqB,t_0,MBsphys,E)
+        Es.append(E)
+        f0D = make_f0_BsEtas(Nijk,Npow,addrho,pD,Fits[0],0,qsqD,zD,Fits[0]['masses'][0],0)
+        fpD = make_fp_BsEtas(Nijk,Npow,addrho,pD,Fits[0],0,qsqD,zD,Fits[0]['masses'][0],fpf0same,0)
+        f0B = make_f0_BsEtas(Nijk,Npow,addrho,pB,Fits[0],0,qsqB,zB,Fits[0]['masses'][0],0)
+        fpB = make_fp_BsEtas(Nijk,Npow,addrho,pB,Fits[0],0,qsqB,zB,Fits[0]['masses'][0],fpf0same,0)
+        rat0.append(fpB/fpD)
+        ratp.append(f0D/f0P)
+    rat0mean,rat0err = unmake_gvar_vec(rat0)
+    ratpmean,ratperr = unmake_gvar_vec(ratp)
+    rat0upp,rat0low = make_upp_low(rat0)
+    ratpupp,ratplow = make_upp_low(ratp)
+    plt.figure(14,figsize=figsize)
+    plt.plot(E, rat0mean, color='b')
+    plt.fill_between(E,rat0low,rat0upp, color='b',alpha=alpha)
+    plt.plot(E, ratpmean, color='r')
+    plt.fill_between(E,ratplow, ratpupp, color='r',alpha=alpha)
+    plt.plot([Metasphys.mean,Emax.mean],[theory.mean,theory.mean],color='k')
+    plt.fill_between([Metasphys.mean,Emax.mean],[theory.mean-theory.sdev,theory.mean-theory.sdev],[theory.mean+theory.sdev,theory.mean+theory.sdev],color='k',alpha=alpha/2)
+    plt.xlabel('$E[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    #plt.text(4.5,0.3,r'$\delta$',fontsize=fontsizelab)
+    #plt.text(2.7,0.7,r'$\beta^{-1}$',fontsize=fontsizelab)
+    #plt.axes().set_ylim([-0.5,1.0])
+    plt.axes().set_xlim([Metasphys.mean,Emax.mean])
+    plt.tight_layout()
+    plt.savefig('Plots/HillratinE.pdf')
+    plt.close()
+    return()
+
+#####################################################################################################
+
+
+
+
+    
