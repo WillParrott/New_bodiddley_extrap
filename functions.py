@@ -318,22 +318,28 @@ def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
 
 ######################################################################################################
 
-def make_beta_delta(Fits,t_0,Nijk,addrho,p,fpf0same,Del,MH_s):
+def make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,Del,MH_s):
     #an = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass,amh)
-    Fit = Fits['0']
+    z0 = make_z(0,t_0,MH_s,Metasphys).mean
+    Fit = Fits[0]
     mass = Fit['masses'][0]
     fit = Fit['conf']
     if fpf0same:
         tag = '0'
     else:
         tag = 'p'
-    ap0 = make_an_BsEtas(0,Nijk,addrho,p,tag,Fit,0,mass,0) 
-    a01 = make_an_BsEtas(1,Nijk,addrho,p,'0',Fit,0,mass,0)
-    ap1 = make_an_BsEtas(1,Nijk,addrho,p,'p',Fit,0,mass,0)
+    fp0 = make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,0,0,z0,mass,fpf0same,0)
+    f00 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,0,0,z0,mass,0)
     t_plus = (MH_s + Metasphys)**2
-    zprime = - 1 / (2* (t_plus + gv.sqrt( t_plus * (t_plus - t_0) ) ) )
-    delta = 1 - (MH_s**2-Metasphys**2)/ap0 * zprime * (ap1/p['MHsstar_{0}_m{1}'.format(fit,mass)]**2 - a01/p['MHs0_{0}_m{1}'.format(fit,mass)]**2)
-    invbeta = (MH_s**2-Metasphys**2)/ap0 * zprime * a01/p['MHs0_{0}_m{1}'.format(fit,mass)]**2
+    zprime = (-1) / (2* (t_plus + gv.sqrt( t_plus * (t_plus - t_0) ) ) )
+    f0prime = (f00/p['MHs0_{0}_m{1}'.format(fit,mass)]**2)
+    fpprime = (fp0/p['MHsstar_{0}_m{1}'.format(fit,mass)]**2)
+    for n in range(1,Npow):
+        f0prime += zprime * n * make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0) * z0**(n-1)
+    for n in range(1,Npow):
+        fpprime += zprime * n * make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0) * ( z0**(n-1) - (-1)**(n-Npow) * z0**(Npow-1))
+    delta = 1 - ((MH_s**2-Metasphys**2)/fp0) * (fpprime-f0prime)
+    invbeta = ((MH_s**2-Metasphys**2)/fp0) * f0prime
     return(delta,invbeta)
 
 #####################################################################################################
