@@ -34,6 +34,36 @@ x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
+
+#####################################################################################################
+
+def unmake_gvar_vec(vec):
+    #A function which extracts the mean and standard deviation of a list of gvars
+    mean = []
+    sdev = []
+    for element in vec:
+        mean.append(element.mean)
+        sdev.append(element.sdev)
+    return(mean,sdev)
+
+####################################################################################################
+
+def make_upp_low(vec):
+    #A function which extracts the upper and lower error bars of a list of gvars
+    upp = []
+    low = []
+    for element in vec:
+        upp.append(element.mean + element.sdev)
+        low.append(element.mean - element.sdev)
+    return(upp,low)
+
+####################################################################################################
+
+def convert_Gev(a):
+    #converts lattice spacings from fm to GeV-1
+    aGev = gv.gvar(a)/(gv.gvar(hbar)*clight*1e-2) #bar in x10^-25 GeV seconds so hence 1e-2 
+    return(aGev)
+
 ####################################################################################################
 
 def make_params_BsEtas(Fits,Masses,Twists):
@@ -341,5 +371,31 @@ def make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,Del,MH_s):
     delta = 1 - ((MH_s**2-Metasphys**2)/fp0) * (fpprime-f0prime)
     invbeta = ((MH_s**2-Metasphys**2)/fp0) * f0prime
     return(delta,invbeta)
+
+#####################################################################################################
+
+def eval_at_different_spacings_BsEtas(asfm,pfit,Fits,Del,fpf0same,Npow,Nijk,addrho):
+    #asfm is a list of lattice spacings in fm
+    Fit = Fits[0]
+    mass = Fit['masses'][0]
+    convert_Gev()
+    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
+    forchris = collection.OrderedDict()
+    forchris['M_B_s^*'] = p['MHsstar_{0}_m{1}'.format(fit,mass)]
+    forchris['M_B_s^0'] = p['MHs0_{0}_m{1}'.format(fit,mass)]
+    forchris['M_B_s'] = MBsphys
+    forchris['M_eta_s'] = Metasphys
+    for afm in asfm:
+        for n in range(Npow):
+            if n==0 and fpf0same:
+                tag = '0'
+            else:
+                tag ='p'
+
+            forchris['a_plusa{0}n{1}'.format(afm,n)] = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,convert_Gev(afm),mass,convert_Gev(afm)*mbphys)
+            tag = '0'
+            forchris['a_0a{0}n{1}'.format(afm,n)] = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,convert_Gev(afm),mass,convert_Gev(afm)*mbphys)
+    gv.dump(forchris,'Tables/forchris.pickle')
+    return()
 
 #####################################################################################################
