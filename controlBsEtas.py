@@ -104,8 +104,7 @@ SHOWPLOTS = False
 Del = 0.4 #0.4
 t_0 = 0 # for z conversion
 
-############################################################################
-figsca = 14  #size for saving figs
+
 ############################################################################
 
 fs_data = collections.OrderedDict() #fs from data fs_data[Fit][]
@@ -129,3 +128,5 @@ f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho)
 fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
+beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Del,addrho,fpf0same)
+HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same)

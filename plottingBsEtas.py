@@ -20,10 +20,10 @@ from collections import defaultdict
 # data and f0/fp with and without pole in z and qsq individually ###done
 # f0/fp together in qsq ### done 
 # error in qsq
-# f0(0) fp(max) and f0(max) in Mh
+# f0(0) fp(max) and f0(max) in Mh   #done
 # ratio in E compared with expectation
-# ratio in qsq compared with HQET
-# beta and delta
+# ratio in qsq compared with HQET 
+# beta and delta   # done 
 # f0 fp with data at different lattice spacings
 ################## table outputs ############################
 # aMh (aq)^2 aEeta S V N f0 fp on each lattice spacing
@@ -445,14 +445,12 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
 
 def f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     qsq = []
-    z = []
     y0 = []
     yp = []
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
     for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
-        z.append(zed.mean)
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
         y0.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],0)) #only need one fit
         yp.append(make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
@@ -510,7 +508,7 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     f00upp,f00low = make_upp_low(f00)
     f0maxupp,f0maxlow = make_upp_low(f0max)
     fpmaxupp,fpmaxlow = make_upp_low(fpmax)
-    plt.figure(10,figsize=figsize)
+    plt.figure(11,figsize=figsize)
     plt.plot(MHs, f00mean, color='k')
     plt.fill_between(MHs,f00low,f00upp, color='k',alpha=alpha)
     plt.plot(MHs, f0maxmean, color='b')
@@ -526,6 +524,9 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.text(MDsphys.mean+0.02,0.05,'$M_{D_s}$',fontsize=fontsizelab)
     plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=1)
     plt.text(MBsphys.mean-0.02,0.05,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='right')
+    plt.text(3.5,2.0,'$f_+(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
+    plt.text(2.5,0.3,'$f_{0,+}(0)$',fontsize=fontsizelab)
+    plt.text(4.5,1.0,'$f_0(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
@@ -537,3 +538,85 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     return()
 
 #####################################################################################################
+
+def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Del,addrho,fpf0same):
+    MHs = []
+    delta = []
+    invbeta = []
+    for Mh in np.linspace(MDsphys.mean,MBsphys.mean,nopts): #q2 now in GeV
+        p = make_p_Mh_BsEtas(pfit,Fits,Del,Mh)
+        MHs.append(Mh)
+        d,invb = make_beta_delta(Fits,t_0,Nijk,addrho,p,fpf0same,Del,MH_s)
+        delta.append(d) 
+        invbeta.append(invb)
+    deltamean,deltaerr = unmake_gvar_vec(delta)
+    invbetamean,invbetaerr = unmake_gvar_vec(invbeta)
+    deltaupp,deltalow = make_upp_low(delta)
+    invebetaupp,invbetalow = make_upp_low(invbeta)
+    plt.figure(12,figsize=figsize)
+    plt.plot(MHs, invbetamean, color='b')
+    plt.fill_between(MHs,invbetalow,invbetaupp, color='b',alpha=alpha)
+    plt.plot(MHs, deltamean, color='r')
+    plt.fill_between(MHs,deltalow, deltaupp, color='r',alpha=alpha)
+    plt.xlabel('$M_{H_s}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=1)
+    plt.text(MDsphys.mean+0.02,0.05,'$M_{D_s}$',fontsize=fontsizelab)
+    plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=1)
+    plt.text(MBsphys.mean-0.02,0.05,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='right')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.text(4,0.5,'$\delta$',fontsize=fontsizelab)
+    plt.text(3.0,1.7,'$\beta^{-1}$',fontsize=fontsizelab)
+    plt.axes().set_ylim([-0.5,2.8])
+    plt.tight_layout()
+    plt.savefig('Plots/betadeltainmh.pdf')
+    plt.close()
+    return()
+
+#####################################################################################################
+
+def HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same):
+    qsq = []
+    z = []
+    rat = []
+    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
+    for q2 in np.linspace(0,(MBsphys**2).mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        z = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
+        #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
+        f0 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,z.mean,Fits[0]['masses'][0],0)
+        fp = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,z.mean,Fits[0]['masses'][0],fpf0same,0)
+        rat.append(f0/fp*(1/(1-q2/MBsstarphys**2))) #only need one fit
+    ratmean,raterr = unmake_gvar_vec(rat)
+    ratupp,ratlow = make_upp_low(rat)
+    plt.figure(13,figsize=figsize)
+    plt.plot(qsq, ratmean, color='b')
+    plt.fill_between(qsq,ratlow,ratupp, color='b',alpha=alpha)
+    plt.plot([0,(MBsphys**2).mean],[2.33,2.33],color='r')
+    plt.fill_between([0,(MBsphys**2).mean],[2.33-0.42,2.33-0.42],[2.33+0.42,2.33+0.42],color='r',alpha=alpha)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel(r'$\frac{f_0(q^2)}{f_+(q^2)} \left(1-\frac{q^2}{M^2_{B^*_s}}\right)^{-1}$',fontsize=fontsizelab)
+    plt.plot([qsqmaxphys.mean,qsqmaxphys.mean],[-10,10],'k--',lw=1)
+    plt.text(qsqmaxphys.mean-0.02,1.4,'$q^2{\mathrm{max}}$',fontsize=fontsizelab,horizontalalignment='right')
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().set_ylim([0.8,2.8])
+    plt.axes().set_xlim([0,(MBsphys**2).mean])
+    plt.tight_layout()
+    plt.savefig('Plots/HQETrat.pdf')
+    plt.close()
+    return()
+
+####################################################################################################

@@ -317,3 +317,23 @@ def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
     return()
 
 ######################################################################################################
+
+def make_beta_delta(Fits,t_0,Nijk,addrho,p,fpf0same,Del,MH_s):
+    #an = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass,amh)
+    Fit = Fits['0']
+    mass = Fit['masses'][0]
+    fit = Fit['conf']
+    if fpf0same:
+        tag = '0'
+    else:
+        tag = 'p'
+    ap0 = make_an_BsEtas(0,Nijk,addrho,p,tag,Fit,0,mass,0) 
+    a01 = make_an_BsEtas(1,Nijk,addrho,p,'0',Fit,0,mass,0)
+    ap1 = make_an_BsEtas(1,Nijk,addrho,p,'p',Fit,0,mass,0)
+    t_plus = (MH_s + Metasphys)**2
+    zprime = - 1 / (2* (t_plus + gv.sqrt( t_plus * (t_plus - t_0) ) ) )
+    delta = 1 - (MH_s**2-Metasphys**2)/ap0 * zprime * (ap1/p['MHsstar_{0}_m{1}'.format(fit,mass)]**2 - a01/p['MHs0_{0}_m{1}'.format(fit,mass)]**2)
+    invbeta = (MH_s**2-Metasphys**2)/ap0 * zprime * a01/p['MHs0_{0}_m{1}'.format(fit,mass)]**2
+    return(delta,invbeta)
+
+#####################################################################################################
