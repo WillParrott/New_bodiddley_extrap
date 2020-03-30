@@ -20,7 +20,9 @@ from collections import defaultdict
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.98390(50)')  # PDG says 2.9839(5) previously had '2.9863(27)' not sure where from
 MBsphys = gv.gvar('5.36688(17)') # PDG
-MDsphys = gv.gvar('1.968340(70)')  #PDG 
+MDsphys = gv.gvar('1.968340(70)')  #PDG
+MBphys = gv.gvar('5.27933(13)') # PDG
+MDphys = gv.gvar('1.86965(5)')  #PDG
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
 tensornorm = gv.gvar('1.09024(56)') # from Dan
 w0 = gv.gvar('0.1715(9)')  #fm
@@ -115,6 +117,7 @@ def make_params_BK(Fits,Masses,Twists):
 def get_results(Fit,thpts):
     p = gv.gload(Fit['filename'],method='pickle')
     # We should only need goldstone masses and energies here
+    Fit['M_parent_m{0}'.format(Fit['m_c'])] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],Fit['m_c']))][0]
     for mass in Fit['masses']:
         Fit['M_parent_m{0}'.format(mass)] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0]
     Fit['M_daughter'] = p['dE:{0}'.format(Fit['daughter-Tag'][0])][0]
@@ -335,7 +338,6 @@ def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
     qsq = 0
     z = make_z(qsq,t_0,MBsphys,Metasphys)
     z = z.mean
-    print(z)
     f00 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     #     make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
     fp0 = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
@@ -344,6 +346,7 @@ def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
     z = z.mean
     f0max = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     fpmax = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    print('f_+(0)/f_0(0) = {0}'.format(fp0/f00))
     print('f_0(0) = {0}  error: {1:.2%}'.format(f00,f00.sdev/f00.mean))
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
@@ -355,22 +358,32 @@ def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
 def make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,Del,MH_s):
     #an = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass,amh,f0fpsame)
     z0 = make_z(0,t_0,MH_s,Metasphys).mean
+    zHsstar = make_z(((MH_s+x/MH_s)**2).mean,t_0,MH_s,Metasphys).mean
     Fit = Fits[0]
     mass = Fit['masses'][0]
     fit = Fit['conf']
     fp0 = make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,0,0,z0,mass,fpf0same,0)
+    fpHsstar = make_an_BsEtas(0,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same) 
     f00 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,0,0,z0,mass,fpf0same,0)
     t_plus = (MH_s + Metasphys)**2
     zprime = (-1) / (2* (t_plus + gv.sqrt( t_plus * (t_plus - t_0) ) ) )
     f0prime = (f00/p['MHs0_{0}_m{1}'.format(fit,mass)]**2)
     fpprime = (fp0/p['MHsstar_{0}_m{1}'.format(fit,mass)]**2)
     for n in range(1,Npow):
-        f0prime += zprime * n * make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,f0fpsame) * z0**(n-1)
-    for n in range(1,Npow):
-        fpprime += zprime * n * make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,f0fpsame) * ( z0**(n-1) - (-1)**(n-Npow) * z0**(Npow-1))
+        f0prime += zprime * n * make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same) * z0**(n-1)
+        fpprime += zprime * n * make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same) * ( z0**(n-1) - (-1)**(n-Npow) * z0**(Npow-1))
+        fpHsstar += make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same) * ( zHsstar**(n) - (n/Npow) * (-1)**(n-Npow) * zHsstar**(Npow))
     delta = 1 - ((MH_s**2-Metasphys**2)/fp0) * (fpprime-f0prime)
     invbeta = ((MH_s**2-Metasphys**2)/fp0) * f0prime
-    return(delta,invbeta)
+    alpha = 1 - (fp0/fpHsstar)
+    if MH_s == MBsphys.mean:
+        print('delta at MBs = ',delta)
+        print('alpha at MBs = ',alpha)
+    if MH_s == MDsphys.mean:
+        print('delta at MDs = ',delta)
+        print('alpha at MDs = ',alpha)
+    return(alpha,delta,invbeta)
+
 
 #####################################################################################################
 
@@ -409,13 +422,14 @@ def output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same
     for Fit in Fits:
         extinputs.append(prior['Metac_{0}'.format(Fit['conf'])])
     for n in range(Npow):
-        heavylist.append(prior['0rho'][n])
+        if addrho:
+            heavylist.append(prior['0rho'][n])
         qmislist.append(prior['0cl'][n])
         qmislist.append(prior['0cs'][n])
         qmislist.append(prior['0cc'][n])
         qmislist.append(prior['0csval'][n])
-        
-        heavylist.append(prior['prho'][n])
+        if addrho:
+            heavylist.append(prior['prho'][n])
         qmislist.append(prior['pcl'][n])
         qmislist.append(prior['pcs'][n])
         qmislist.append(prior['pcc'][n])

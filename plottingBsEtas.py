@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
 
-plt.rc("font",**{"size":18})
+plt.rc("font",**{"size":20})
 plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 plt.rc('text', usetex=True)
 import collections
@@ -35,8 +35,8 @@ figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 nopts = 200 #number of points on plot
 ms = 20 #markersize
 alpha = 0.4
-fontsizeleg = 18 #legend
-fontsizelab = 30 #legend
+fontsizeleg = 25 #legend
+fontsizelab = 35 #legend
 cols = ['b','r','g','c'] #for each mass
 symbs = ['o','^','*']    # for each conf
 lines = ['-','--','-.'] # for each conf
@@ -71,10 +71,10 @@ def speed_of_light(Fits):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
-    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.02))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.02))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
     plt.tight_layout()
     plt.savefig('Plots/speedoflight.pdf')
     plt.show()
@@ -313,7 +313,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.fill_between(z,ylow,yupp, color='b',alpha=alpha)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$z$',fontsize=fontsizelab)
     plt.ylabel(r'$\left(1-\frac{q^2}{M^2_{H_{s}^0}} \right)f_0(z)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -398,7 +398,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.fill_between(z,ylow,yupp, color='r',alpha=alpha)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2)
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper right')
     plt.xlabel('$z$',fontsize=fontsizelab)
     plt.ylabel(r'$\left(1-\frac{q^2}{M^2_{H_{s}^*}} \right)f_+(z)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -407,8 +407,8 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().yaxis.set_ticks_position('both')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
     plt.savefig('Plots/fpnopoleinz.pdf')
     plt.close()
@@ -473,7 +473,7 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
         MHs.append(Mh)
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
         f00.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,0,0,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
-        f0max.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsqmax.mean,zmax,Fits[0]['masses'][0],,fpf0same,0))
+        f0max.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsqmax.mean,zmax,Fits[0]['masses'][0],fpf0same,0))
         fpmax.append(make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsqmax.mean,zmax.mean,Fits[0]['masses'][0],fpf0same,0))
     f00mean,f00err = unmake_gvar_vec(f00)
     f0maxmean,f0maxerr = unmake_gvar_vec(f0max)
@@ -494,17 +494,27 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=1)
-    plt.text(MDsphys.mean+0.02,0.05,'$M_{D_s}$',fontsize=fontsizelab)
+    plt.text(MDsphys.mean,-0.5,'$M_{D_s}$',fontsize=fontsizelab,horizontalalignment='center')
     plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=1)
-    plt.text(MBsphys.mean-0.02,0.05,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='right')
-    plt.text(3.1,2.0,'$f_+(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
+    plt.text(MBsphys.mean,-0.5,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.text(4.0,2.5,'$f_+(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
     plt.text(2.5,0.3,'$f_{0,+}(0)$',fontsize=fontsizelab)
     plt.text(4.5,1.0,'$f_0(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.axes().set_ylim([0,2.8])
+    ############ add data ############
+    plt.errorbar(MBsphys.mean,0.323, yerr=0.063,fmt='k*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279')
+    plt.errorbar(MBphys.mean,0.20, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839')
+    plt.errorbar(MBphys.mean,0.319, yerr=0.066,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384')
+    plt.errorbar(MDphys.mean,0.612, yerr=0.035,fmt='ro',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017')
+    plt.errorbar(MDphys.mean,0.765, yerr=0.031,fmt='bo',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017')
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper left')
+    ##################################
+    plt.axes().set_ylim([0,3.0])
     plt.tight_layout()
     plt.savefig('Plots/f0f0fpinmh.pdf')
     plt.close()
@@ -516,17 +526,23 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     MHs = []
     delta = []
     invbeta = []
+    alp =[]
     for Mh in np.linspace(MDsphys.mean,MBsphys.mean,nopts): #q2 now in GeV
         p = make_p_Mh_BsEtas(pfit,Fits,Del,Mh)
         MHs.append(Mh)
-        d,invb = make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,Del,Mh)
+        al,d,invb = make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,Del,Mh)
         delta.append(d) 
         invbeta.append(invb)
+        alp.append(al)
+    alphamean,alphaerr = unmake_gvar_vec(alp)
     deltamean,deltaerr = unmake_gvar_vec(delta)
     invbetamean,invbetaerr = unmake_gvar_vec(invbeta)
+    alphaupp,alphalow = make_upp_low(alp)
     deltaupp,deltalow = make_upp_low(delta)
     invbetaupp,invbetalow = make_upp_low(invbeta)
     plt.figure(12,figsize=figsize)
+    plt.plot(MHs, alphamean, color='k')
+    plt.fill_between(MHs,alphalow,alphaupp, color='k',alpha=alpha)
     plt.plot(MHs, invbetamean, color='b')
     plt.fill_between(MHs,invbetalow,invbetaupp, color='b',alpha=alpha)
     plt.plot(MHs, deltamean, color='r')
@@ -537,15 +553,16 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=1)
-    plt.text(MDsphys.mean+0.02,-0.45,'$M_{D_s}$',fontsize=fontsizelab)
+    plt.text(MDsphys.mean+0.05,-0.45,'$M_{D_s}$',fontsize=fontsizelab)
     plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=1)
-    plt.text(MBsphys.mean-0.02,-0.45,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='right')
+    plt.text(MBsphys.mean-0.05,-0.45,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='right')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.text(4.5,0.3,r'$\delta$',fontsize=fontsizelab)
+    plt.text(3.5,-0.1,r'$\delta$',fontsize=fontsizelab)
     plt.text(2.7,0.7,r'$\beta^{-1}$',fontsize=fontsizelab)
+    plt.text(4.3,0.4,r'$\alpha$',fontsize=fontsizelab)
     plt.axes().set_ylim([-0.5,1.0])
     plt.tight_layout()
     plt.savefig('Plots/betadeltainmh.pdf')
@@ -586,7 +603,7 @@ def HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
     plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.axes().set_ylim([0.9,2.9])
+    plt.axes().set_ylim([0.8,2.8])
     plt.axes().set_xlim([0,(MBsphys**2).mean])
     plt.tight_layout()
     plt.savefig('Plots/HQETrat.pdf')
@@ -836,8 +853,8 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     #plt.gca().yaxis.set_ticks_position('both')
     ax1.xaxis.set_ticks_position('none')
     plt.setp(ax1.get_xticklabels(), visible=False)
-    ax1.yaxis.set_major_locator(MultipleLocator(10))
-    ax1.yaxis.set_minor_locator(MultipleLocator(2))
+    ax1.yaxis.set_major_locator(MultipleLocator(20))
+    ax1.yaxis.set_minor_locator(MultipleLocator(5))
     ax1.set_xlim([0,qsqmaxphys.mean])
     ####################################### right hand y axis ###
     ax1b.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
@@ -849,8 +866,24 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     ax1b.tick_params(width=2,labelsize=fontsizelab)
     ax1b.tick_params(which='major',length=major)
     ax1b.tick_params(which='minor',length=minor)
-    ax1b.set_yticks([4,9,16,25,36,49,64])
-    ax1b.set_yticklabels(['2','','4','','6','','8'])
+    low,upp = ax1.get_ylim()
+    ax1b.set_ylim([low,upp])
+    points = []
+    rootpoints = []
+    i = 2
+    while i != 'stop':
+        if i**2 < upp:
+            points.append(i**2)
+            if i%2 == 0:
+                rootpoints.append('{0}'.format(i))
+            else:
+                rootpoints.append('')
+            i+=1
+        else:
+            i ='stop'
+    ax1b.set_yticks(points)
+    ax1b.set_yticklabels(rootpoints)
+    
     plt.legend(loc='upper right',ncol=2,fontsize=fontsizeleg)
 
     ax2 = plt.subplot(212,sharex=ax1)
@@ -883,8 +916,23 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     ax2b.tick_params(width=2,labelsize=fontsizelab)
     ax2b.tick_params(which='major',length=major)
     ax2b.tick_params(which='minor',length=minor)
-    ax2b.set_yticks([4,9,16,25,36,49,64,81,100])
-    ax2b.set_yticklabels(['2','','4','','6','','8','','10'])
+    low,upp = ax2.get_ylim()
+    ax2b.set_ylim([low,upp])
+    points = []
+    rootpoints = []
+    i = 2
+    while i != 'stop':
+        if i**2 < upp:
+            points.append(i**2)
+            if i%2 == 0:
+                rootpoints.append('{0}'.format(i))
+            else:
+                rootpoints.append('')
+            i+=1
+        else:
+            i ='stop'
+    ax2b.set_yticks(points)
+    ax2b.set_yticklabels(rootpoints)
     plt.tight_layout()
     plt.savefig('Plots/f0fpluserr.pdf')
     plt.close()
@@ -892,22 +940,22 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
 
 ###################################################################################################
 
-def table_of_as(Fits,pfit,Nijk,Npow,fpf0same,addrho):
+def table_of_as(Fits,pfit,Nijk,Npow,fpf0same,addrho,Del):
     list0 = []
     listp = []
     Fit = Fits[0]
     mass = Fit['masses'][0]
     fit = Fit['conf']
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    atab = open('tabls/tablesofas.txt','w')
-    for n in range Npow:
+    atab = open('Tables/tablesofas.txt','w')
+    for n in range(Npow):
         if n == 0:
             atab.write('      {0}&'.format(make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same)))
         else:
             atab.write('{0}&'.format(make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same)))
         list0.append(make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same))
         listp.append(make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same))
-    for n in range Npow:           
+    for n in range(Npow):           
         atab.write('{0}&'.format(make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same)))
     atab.write('{0}&{1}\\\\ [1ex]\n'.format(p['MHs0_{0}_m{1}'.format(fit,mass)],p['MHsstar_{0}_m{1}'.format(fit,mass)]))
     atab.write('      \hline \n')
@@ -936,13 +984,13 @@ def results_tables(fs_data,Fit):
     for mass in Fit['masses']:
         table.write('      \hline \n')
         table.write('      &{0}'.format(mass))
-        for tw,twist in enumerate(twists):
-            if tw = 0:
+        for tw,twist in enumerate(Fit['twists']):
+            if tw == 0:
                 table.write('&{1}&{0}&{2}&{3}&{4}'.format(fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['M_parent_m{0}'.format(mass)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)]))
             else:
                 table.write('      &&&{0}&{1}&{2}&{3}'.format(fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)]))
-            if fs['fp_m{0}_tw{1}'.format(mass,twist)] != None:
-                table.write('&{0}&{1}\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)],fs_data['f0_m{0}_tw{1}'.format(mass,twist)]))
+            if fs_data['fp_m{0}_tw{1}'.format(mass,twist)] != None:
+                table.write('&{0}&{1}\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)],fs_data['fp_m{0}_tw{1}'.format(mass,twist)]))
             else:
                 table.write('&{0}&\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)]))
 
