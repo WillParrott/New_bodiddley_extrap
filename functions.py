@@ -401,9 +401,6 @@ def eval_at_different_spacings_BsEtas(asfm,pfit,Fits,Del,fpf0same,Npow,Nijk,addr
 #####################################################################################################
 
 def output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same):
-    Fit = Fits['0']
-    mass = Fit['masses'][0]
-    fit = Fit['conf']
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
     f0dict = collections.OrderedDict()
     fpdict = collections.OrderedDict()
@@ -435,23 +432,26 @@ def output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same
                 for k in range(Nijk):
                     if j != 0 or k != 0:
                         disclist.append(prior['0d'][i][j][k][n])
-                        disclist.append(prior['plusd'][i][j][k][n])
+                        disclist.append(prior['pd'][i][j][k][n])
                     else:
                         heavylist.append(prior['0d'][i][j][k][n])
-                        heavylist.append(prior['plusd'][i][j][k][n])
+                        heavylist.append(prior['pd'][i][j][k][n])
     for key in prior:
         if not isinstance(prior[key],(list,tuple,np.ndarray)):
             if prior[key] not in disclist + qmislist + heavylist + extinputs:
                 dat.append(prior[key])
     for key in f:
         dat.append(f[key])
+    Fit = Fits[0]
+    mass = Fit['masses'][0]
+    fit = Fit['conf']
     for qsq in qsqs:
         z = make_z(qsq,t_0,MBsphys,Metasphys).mean
         f0 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,0,qsq,z,mass,0)
         fp = make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,0,qsq,z,mass,fpf0same,0)
         var1 = (100*(f0.partialsdev(tuple(extinputs)))/f0.mean)**2
         var2 = (100*(f0.partialsdev(tuple(qmislist)))/f0.mean)**2
-        var3 = (100*(f0.partialsdev(tuple(data)))/f0.mean)**2
+        var3 = (100*(f0.partialsdev(tuple(dat)))/f0.mean)**2
         var4 = (100*(f0.partialsdev(tuple(heavylist)))/f0.mean)**2
         var5 = (100*(f0.partialsdev(tuple(disclist)))/f0.mean)**2
         f0dict[1].append(var1)
@@ -461,7 +461,7 @@ def output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same
         f0dict[5].append(var1+var2+var3+var4+var5)
         var1 = (100*(fp.partialsdev(tuple(extinputs)))/fp.mean)**2
         var2 = (100*(fp.partialsdev(tuple(qmislist)))/fp.mean)**2
-        var3 = (100*(fp.partialsdev(tuple(data)))/fp.mean)**2
+        var3 = (100*(fp.partialsdev(tuple(dat)))/fp.mean)**2
         var4 = (100*(fp.partialsdev(tuple(heavylist)))/fp.mean)**2
         var5 = (100*(fp.partialsdev(tuple(disclist)))/fp.mean)**2
         fpdict[1].append(var1)
@@ -470,3 +470,5 @@ def output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same
         fpdict[4].append(var1+var2+var3+var4)
         fpdict[5].append(var1+var2+var3+var4+var5)
     return(f0dict,fpdict)
+
+#######################################################################################################

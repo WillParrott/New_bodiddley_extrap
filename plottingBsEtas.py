@@ -19,7 +19,7 @@ from collections import defaultdict
 # speed of light (we use theory value but worth checking this) ###done
 # data and f0/fp with and without pole in z and qsq individually ###done
 # f0/fp together in qsq ### done 
-# error in qsq
+# error in qsq #done 
 # f0(0) fp(max) and f0(max) in Mh   #done
 # ratio in E compared with expectation #done 
 # ratio in qsq compared with HQET #done 
@@ -840,11 +840,11 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     ax1.yaxis.set_minor_locator(MultipleLocator(2))
     ax1.set_xlim([0,qsqmaxphys.mean])
     ####################################### right hand y axis ###
-    ax1b.plot(qsqs,f0var1,color='r', ls='--',lw=2,label='Inputs')
-    ax1b.plot(qsqs,f0var2,color='purple',ls=':',lw=2,label='q mistunings')
-    ax1b.plot(qsqs,f0var3,color='g',ls='-',lw=2,label='Statistics')
-    ax1b.plot(qsqs,f0var4,color='b',ls='-.',lw=2,label='HQET')
-    ax1b.plot(qsqs,f0var5,color='k',ls='-',lw=4,label='Discretisation')
+    ax1b.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
+    ax1b.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
+    ax1b.plot(qsqs,f0[3],color='g',ls='-',lw=2,label='Statistics')
+    ax1b.plot(qsqs,f0[4],color='b',ls='-.',lw=2,label='HQET')
+    ax1b.plot(qsqs,f0[5],color='k',ls='-',lw=4,label='Discretisation')
     ax1b.set_ylabel('$f_0(q^2)~\% \mathrm{err}$ ',fontsize=fontsizelab)
     ax1b.tick_params(width=2,labelsize=fontsizelab)
     ax1b.tick_params(which='major',length=major)
@@ -869,15 +869,15 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     ax2.xaxis.set_minor_locator(MultipleLocator(1))
     ax2.yaxis.set_major_locator(MultipleLocator(20))
     ax2.yaxis.set_minor_locator(MultipleLocator(5))
-    ax2.set_xlim([0,qsqmax.mean])
+    ax2.set_xlim([0,qsqmaxphys.mean])
     #plt.axes().set_ylim([-0.8,2.5])
     #plt.axes().set_xlim([lower-0.22,upper+0.22])
     ######## right hand axis ##
-    ax2b.plot(qsqs,fpvar1,color='r', ls='--',lw=2)
-    ax2b.plot(qsqs,fpvar2,color='purple',ls=':',lw=2)
-    ax2b.plot(qsqs,fpvar3,color='g',ls='-',lw=2)
-    ax2b.plot(qsqs,fpvar4,color='b',ls='-.',lw=2)
-    ax2b.plot(qsqs,fpvar5,color='k',ls='-',lw=4)
+    ax2b.plot(qsqs,fp[1],color='r', ls='--',lw=2)
+    ax2b.plot(qsqs,fp[2],color='purple',ls=':',lw=2)
+    ax2b.plot(qsqs,fp[3],color='g',ls='-',lw=2)
+    ax2b.plot(qsqs,fp[4],color='b',ls='-.',lw=2)
+    ax2b.plot(qsqs,fp[5],color='k',ls='-',lw=4)
     ax2b.set_xlabel(r'$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     ax2b.set_ylabel('$f_+(q^2)~\%\mathrm{err}$',fontsize=fontsizelab)
     ax2b.tick_params(width=2,labelsize=fontsizelab)
