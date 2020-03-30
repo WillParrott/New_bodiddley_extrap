@@ -21,14 +21,14 @@ from collections import defaultdict
 # f0/fp together in qsq ### done 
 # error in qsq
 # f0(0) fp(max) and f0(max) in Mh   #done
-# ratio in E compared with expectation 
+# ratio in E compared with expectation #done 
 # ratio in qsq compared with HQET #done 
 # beta and delta   # done 
-# f0 fp with data at different lattice spacings
+# f0 fp with data at different lattice spacings #done 
 ################## table outputs ############################
 # aMh (aq)^2 aEeta S V N f0 fp on each lattice spacing
 # ans and pole masses
-# dict of differnt lattice spacings
+# dict of different lattice spacings #done 
 ################### global variables ##########################################
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
@@ -815,4 +815,78 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
     plt.close()
     return()
 
+###################################################################################################
+
+def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
+    qsqs = np.linspace(0,qsqmaxphys.mean,nopts)
+    f0,fp = output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same)
+
+    plt.figure(17,figsize=figsize)
+    ax1 = plt.subplot(211)
+    ax1b = ax1.twinx()
+    ax1.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
+    ax1.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
+    ax1.plot(qsqs,f0[3],color='g',ls='-',lw=2,label='Statistics')
+    ax1.plot(qsqs,f0[4],color='b',ls='-.',lw=2,label='HQET')
+    ax1.plot(qsqs,f0[5],color='k',ls='-',lw=4,label='Discretisation')
+    ax1.set_ylabel('$(f_0(q^2)~\% \mathrm{err})^2 $ ',fontsize=fontsizelab)
+    ax1.tick_params(width=2,labelsize=fontsizelab)
+    ax1.tick_params(which='major',length=major)
+    ax1.tick_params(which='minor',length=minor)
+    #plt.gca().yaxis.set_ticks_position('both')
+    ax1.xaxis.set_ticks_position('none')
+    plt.setp(ax1.get_xticklabels(), visible=False)
+    ax1.yaxis.set_major_locator(MultipleLocator(10))
+    ax1.yaxis.set_minor_locator(MultipleLocator(2))
+    ax1.set_xlim([0,qsqmaxphys.mean])
+    ####################################### right hand y axis ###
+    ax1b.plot(qsqs,f0var1,color='r', ls='--',lw=2,label='Inputs')
+    ax1b.plot(qsqs,f0var2,color='purple',ls=':',lw=2,label='q mistunings')
+    ax1b.plot(qsqs,f0var3,color='g',ls='-',lw=2,label='Statistics')
+    ax1b.plot(qsqs,f0var4,color='b',ls='-.',lw=2,label='HQET')
+    ax1b.plot(qsqs,f0var5,color='k',ls='-',lw=4,label='Discretisation')
+    ax1b.set_ylabel('$f_0(q^2)~\% \mathrm{err}$ ',fontsize=fontsizelab)
+    ax1b.tick_params(width=2,labelsize=fontsizelab)
+    ax1b.tick_params(which='major',length=major)
+    ax1b.tick_params(which='minor',length=minor)
+    ax1b.set_yticks([4,9,16,25,36,49,64])
+    ax1b.set_yticklabels(['2','','4','','6','','8'])
+    plt.legend(loc='upper right',ncol=2,fontsize=fontsizeleg)
+
+    ax2 = plt.subplot(212,sharex=ax1)
+    ax2b = ax2.twinx()
+    ax2.plot(qsqs,fp[1],color='r', ls='--',lw=2)
+    ax2.plot(qsqs,fp[2],color='purple',ls=':',lw=2)
+    ax2.plot(qsqs,fp[3],color='g',ls='-',lw=2)
+    ax2.plot(qsqs,fp[4],color='b',ls='-.',lw=2)
+    ax2.plot(qsqs,fp[5],color='k',ls='-',lw=4)
+    ax2.set_xlabel(r'$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    ax2.set_ylabel('$(f_+(q^2)~\%\mathrm{err})^2$',fontsize=fontsizelab)
+    ax2.tick_params(width=2,labelsize=fontsizelab)
+    ax2.tick_params(which='major',length=major)
+    ax2.tick_params(which='minor',length=minor)
+    ax2.xaxis.set_major_locator(MultipleLocator(5))
+    ax2.xaxis.set_minor_locator(MultipleLocator(1))
+    ax2.yaxis.set_major_locator(MultipleLocator(20))
+    ax2.yaxis.set_minor_locator(MultipleLocator(5))
+    ax2.set_xlim([0,qsqmax.mean])
+    #plt.axes().set_ylim([-0.8,2.5])
+    #plt.axes().set_xlim([lower-0.22,upper+0.22])
+    ######## right hand axis ##
+    ax2b.plot(qsqs,fpvar1,color='r', ls='--',lw=2)
+    ax2b.plot(qsqs,fpvar2,color='purple',ls=':',lw=2)
+    ax2b.plot(qsqs,fpvar3,color='g',ls='-',lw=2)
+    ax2b.plot(qsqs,fpvar4,color='b',ls='-.',lw=2)
+    ax2b.plot(qsqs,fpvar5,color='k',ls='-',lw=4)
+    ax2b.set_xlabel(r'$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    ax2b.set_ylabel('$f_+(q^2)~\%\mathrm{err}$',fontsize=fontsizelab)
+    ax2b.tick_params(width=2,labelsize=fontsizelab)
+    ax2b.tick_params(which='major',length=major)
+    ax2b.tick_params(which='minor',length=minor)
+    ax2b.set_yticks([4,9,16,25,36,49,64,81,100])
+    ax2b.set_yticklabels(['2','','4','','6','','8','','10'])
+    plt.tight_layout()
+    plt.savefig('Plots/f0fpluserr.pdf')
+    plt.close()
+    return()
 ###################################################################################################

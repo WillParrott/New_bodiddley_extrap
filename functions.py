@@ -399,3 +399,74 @@ def eval_at_different_spacings_BsEtas(asfm,pfit,Fits,Del,fpf0same,Npow,Nijk,addr
     return()
 
 #####################################################################################################
+
+def output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same):
+    Fit = Fits['0']
+    mass = Fit['masses'][0]
+    fit = Fit['conf']
+    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
+    f0dict = collections.OrderedDict()
+    fpdict = collections.OrderedDict()
+    for i in range(1,6):
+        f0dict[i] = []
+        fpdict[i] = []
+    disclist = []
+    qmislist = []
+    heavylist = []
+    dat = []
+    extinputs = [MBsphys,MBsphys+Del,MDsphys,MBsstarphys,prior['Metacphys']]
+    for Fit in Fits:
+        extinputs.append(prior['Metac_{0}'.format(Fit['conf'])])
+    for n in range(Npow):
+        heavylist.append(prior['0rho'][n])
+        qmislist.append(prior['0cl'][n])
+        qmislist.append(prior['0cs'][n])
+        qmislist.append(prior['0cc'][n])
+        qmislist.append(prior['0csval'][n])
+        
+        heavylist.append(prior['prho'][n])
+        qmislist.append(prior['pcl'][n])
+        qmislist.append(prior['pcs'][n])
+        qmislist.append(prior['pcc'][n])
+        qmislist.append(prior['pcsval'][n])
+        
+        for i in range(Nijk):
+            for j in range(Nijk):
+                for k in range(Nijk):
+                    if j != 0 or k != 0:
+                        disclist.append(prior['0d'][i][j][k][n])
+                        disclist.append(prior['plusd'][i][j][k][n])
+                    else:
+                        heavylist.append(prior['0d'][i][j][k][n])
+                        heavylist.append(prior['plusd'][i][j][k][n])
+    for key in prior:
+        if not isinstance(prior[key],(list,tuple,np.ndarray)):
+            if prior[key] not in disclist + qmislist + heavylist + extinputs:
+                dat.append(prior[key])
+    for key in f:
+        dat.append(f[key])
+    for qsq in qsqs:
+        z = make_z(qsq,t_0,MBsphys,Metasphys).mean
+        f0 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,0,qsq,z,mass,0)
+        fp = make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,0,qsq,z,mass,fpf0same,0)
+        var1 = (100*(f0.partialsdev(tuple(extinputs)))/f0.mean)**2
+        var2 = (100*(f0.partialsdev(tuple(qmislist)))/f0.mean)**2
+        var3 = (100*(f0.partialsdev(tuple(data)))/f0.mean)**2
+        var4 = (100*(f0.partialsdev(tuple(heavylist)))/f0.mean)**2
+        var5 = (100*(f0.partialsdev(tuple(disclist)))/f0.mean)**2
+        f0dict[1].append(var1)
+        f0dict[2].append(var1+var2)
+        f0dict[3].append(var1+var2+var3)
+        f0dict[4].append(var1+var2+var3+var4)
+        f0dict[5].append(var1+var2+var3+var4+var5)
+        var1 = (100*(fp.partialsdev(tuple(extinputs)))/fp.mean)**2
+        var2 = (100*(fp.partialsdev(tuple(qmislist)))/fp.mean)**2
+        var3 = (100*(fp.partialsdev(tuple(data)))/fp.mean)**2
+        var4 = (100*(fp.partialsdev(tuple(heavylist)))/fp.mean)**2
+        var5 = (100*(fp.partialsdev(tuple(disclist)))/fp.mean)**2
+        fpdict[1].append(var1)
+        fpdict[2].append(var1+var2)
+        fpdict[3].append(var1+var2+var3)
+        fpdict[4].append(var1+var2+var3+var4)
+        fpdict[5].append(var1+var2+var3+var4+var5)
+    return(f0dict,fpdict)
