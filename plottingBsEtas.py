@@ -30,18 +30,20 @@ from collections import defaultdict
 # ans and pole masses
 # dict of different lattice spacings #done 
 ################### global variables ##########################################
+factor = 1.0 #multiplies everything to make smaller for big plots etc usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
+
 nopts = 200 #number of points on plot
-ms = 20 #markersize
+ms = 20*factor #markersize
 alpha = 0.4
-fontsizeleg = 25 #legend
-fontsizelab = 35 #legend
+fontsizeleg = 25*factor #legend
+fontsizelab = 35*factor #legend
 cols = ['b','r','g','c'] #for each mass
 symbs = ['o','^','*']    # for each conf
 lines = ['-','--','-.'] # for each conf
-major = 15
-minor = 8 
+major = 15*factor
+minor = 8*factor 
 
 
 ####################################################################################################
