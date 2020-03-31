@@ -23,6 +23,7 @@ MBsphys = gv.gvar('5.36688(17)') # PDG
 MDsphys = gv.gvar('1.968340(70)')  #PDG
 MBphys = gv.gvar('5.27933(13)') # PDG
 MDphys = gv.gvar('1.86965(5)')  #PDG
+Mpiphys = gv.gvar('0.1349770(5)')  #PDG
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
 tensornorm = gv.gvar('1.09024(56)') # from Dan
 w0 = gv.gvar('0.1715(9)')  #fm
