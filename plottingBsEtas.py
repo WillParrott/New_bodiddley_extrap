@@ -44,7 +44,7 @@ symbs = ['o','^','*']    # for each conf
 lines = ['-','--','-.'] # for each conf
 major = 15*factor
 minor = 8*factor 
-
+capsize = 10*factor
 
 ####################################################################################################
 
@@ -507,11 +507,11 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     ############ add data ############
-    plt.errorbar(MBsphys.mean,0.323, yerr=0.063,fmt='k*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279')
-    plt.errorbar(MBphys.mean,0.20, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839')
-    plt.errorbar(MBphys.mean,0.319, yerr=0.066,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384')
-    plt.errorbar(MDphys.mean,0.612, yerr=0.035,fmt='ro',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017')
-    plt.errorbar(MDphys.mean,0.765, yerr=0.031,fmt='bo',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017')
+    plt.errorbar(MBsphys.mean,0.323, yerr=0.063,fmt='k*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279')#,capsize=capsize)
+    plt.errorbar(MBphys.mean-0.01,0.20, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839')#,capsize=capsize)
+    plt.errorbar(MBphys.mean+0.01,0.319, yerr=0.066,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384')#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.612, yerr=0.035,fmt='ro',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017')#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.765, yerr=0.031,fmt='bo',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017')#,capsize=capsize)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper left')
@@ -565,7 +565,17 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.text(3.5,-0.1,r'$\delta$',fontsize=fontsizelab)
     plt.text(2.7,0.7,r'$\beta^{-1}$',fontsize=fontsizelab)
     plt.text(4.3,0.4,r'$\alpha$',fontsize=fontsizelab)
-    plt.axes().set_ylim([-0.5,1.0])
+    plt.axes().set_ylim([-0.5,1.32])
+    ############ add data ############
+    plt.errorbar(MBphys.mean+0.01,0.80,yerr=[[0.2],[0.5]],fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{B\to\pi}(\beta^{-1}=0.833)$')#,capsize=capsize)
+    plt.errorbar(MBphys.mean-0.01,0.60, yerr=[[0.7],[0.3]],fmt='r*',ms=ms,mfc='none',label = r'$\delta^{B\to\pi}(\beta^{-1}=0.833)$')#,capsize=capsize)
+    plt.errorbar(MDphys.mean+0.01,1+1/1.6-1.1,yerr=[[0.2],[0.6]],fmt='r^',ms=ms,mfc='none',label = r'$\delta^{D\to\pi}(\beta^{-1}=0.625)$')#,capsize=capsize)
+    plt.errorbar(MDphys.mean-0.01,1+1/1.8-0.91, yerr=[[0.05],[0.12]],fmt='ro',ms=ms,mfc='none',label = r'$\delta^{D\to{}K}(\beta^{-1}=0.556)$')#,capsize=capsize)
+    
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper center',ncol=2)
+    ##################################
     plt.tight_layout()
     plt.savefig('Plots/betadeltainmh.pdf')
     plt.close()
@@ -620,7 +630,9 @@ def Hill_ratios_in_E(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     ratp = []
     Emax = (MDsphys**2 + Metasphys**2)/MDsphys
     Emin = Metasphys
-    theory = gv.gvar('{0}({1})'.format(gv.sqrt(MBsphys/MDsphys).mean,gv.sqrt(MBsphys/MDsphys).mean*0.2))
+    thmean = gv.sqrt(MBsphys/MDsphys)
+    therr = thmean*LQCD**2*(1/MDsphys**2 - 1/MBsphys**2)
+    theory = gv.gvar('{0}({1})'.format(thmean.mean,therr.mean))
     for E in np.linspace(Emin.mean,Emax.mean,nopts): #q2 now in GeV
         pD = make_p_Mh_BsEtas(pfit,Fits,Del,MDsphys.mean)
         pB = make_p_physical_point_BsEtas(pfit,Fits,Del)
@@ -671,7 +683,7 @@ def Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     ratp = []
     Emax = Metasphys
     Emin = Mpiphys
-    theory = gv.gvar('{0}({1})'.format(gv.sqrt(MBsphys/MDsphys).mean,gv.sqrt(MBsphys/MDsphys).mean*0.2))
+    theory = gv.gvar('{0}({1})'.format(gv.sqrt(MBsphys/MDsphys).mean,((LQCD/MDsphys)**2).mean))
     for E in np.linspace(Mpiphys.mean,Emax.mean,nopts): #q2 now in GeV
         pD = make_p_Mh_BsEtas(pfit,Fits,Del,MDsphys.mean)
         pB = make_p_physical_point_BsEtas(pfit,Fits,Del)
@@ -706,9 +718,6 @@ def Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-    #plt.text(4.5,0.3,r'$\delta$',fontsize=fontsizelab)
-    #plt.text(2.7,0.7,r'$\beta^{-1}$',fontsize=fontsizelab)
-    #plt.axes().set_ylim([-0.5,1.0])
     plt.axes().set_xlim([Emin.mean,Emax.mean])
     plt.tight_layout()
     plt.savefig('Plots/HillratinlowE.pdf')
@@ -718,7 +727,9 @@ def Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
 ####################################################################################################
 
 def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
-    E = Metasphys.mean
+    Emax = (MDsphys**2 + Metasphys**2)/MDsphys
+    Emin = Metasphys.mean
+    E = Emax
     M_h = []
     rat0 = []
     ratp = []
@@ -737,7 +748,9 @@ def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
         fpB = make_fp_BsEtas(Nijk,Npow,addrho,pB,Fits[0],0,qsqB,zB,Fits[0]['masses'][0],fpf0same,0)
         ratp.append(fpB/fph)
         rat0.append(f0h/f0B)
-        theory.append(gv.gvar('{0}({1})'.format(gv.sqrt(MBsphys/Mh).mean,LQCD/Mh)))
+        thmean = gv.sqrt(MBsphys/Mh)
+        therr = thmean * LQCD**2 *(1/Mh**2-1/MBsphys**2)
+        theory.append(gv.gvar('{0:.7f}({1:.7f})'.format(thmean.mean,therr.mean)))
     rat0mean,rat0err = unmake_gvar_vec(rat0)
     ratpmean,ratperr = unmake_gvar_vec(ratp)
     theorymean,theoryerr = unmake_gvar_vec(theory)
@@ -750,15 +763,12 @@ def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.plot(M_h, ratpmean, color='r',label=r'$\frac{f_+^{B_s}(E)}{f_+^{H_s}(E)}$')
     plt.fill_between(M_h,ratplow, ratpupp, color='r',alpha=alpha)
     plt.plot(M_h,theorymean,color='k',label =r'$\sqrt{\frac{M_{B_s}}{M_{H_s}}}$')
-    plt.fill_between(M_h,theorylow,theoryupp,color='k',alpha=alpha/2)
+    plt.fill_between(M_h,theorylow,theoryupp,color='k',alpha=alpha)
     plt.xlabel('$M_{H_s}[\mathrm{GeV}]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    #handles, labels = plt.gca().get_legend_handles_labels()
-    #handles = [h[0] for h in handles]
-   # plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
     plt.legend(fontsize=fontsizeleg,frameon=False)
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
@@ -773,15 +783,17 @@ def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
 #####################################################################################################
 
 def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
-    E = Metasphys.mean
+    Emax = (MDsphys**2 + Metasphys**2)/MDsphys
+    Emin = Metasphys.mean
+    E = Emax
     M_h = []
     rat0 = []
     ratp = []
     theory = []
-    for Mh in np.linspace(MDsphys,MBsphys.mean,nopts): #q2 now in GeV
+    for Mh in np.linspace(MDsphys.mean,50,nopts*2): #q2 now in GeV
         ph = make_p_Mh_BsEtas(pfit,Fits,Del,Mh)
         pB = make_p_physical_point_BsEtas(pfit,Fits,Del)
-        M_h.append(Mh)
+        M_h.append(1/Mh)
         qsqh = Mh**2 + Metasphys**2 - 2*Mh*E
         qsqB =  MBsphys**2 + Metasphys**2 - 2*MBsphys*E
         zh = make_z(qsqh,t_0,Mh,Metasphys)
@@ -792,34 +804,38 @@ def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
         fpB = make_fp_BsEtas(Nijk,Npow,addrho,pB,Fits[0],0,qsqB,zB,Fits[0]['masses'][0],fpf0same,0)
         ratp.append(fpB/fph)
         rat0.append(f0h/f0B)
-        theory.append(gv.gvar('{0}({1})'.format(gv.sqrt(MBsphys/Mh).mean,LQCD/Mh)))
+        thmean = gv.sqrt(MBsphys/Mh)
+        therr = thmean * LQCD**2 * abs((1/MBsphys**2).mean -1/Mh**2)
+        theory.append(gv.gvar('{0:.7f}({1:.7f})'.format(thmean.mean,therr.mean)))
     rat0mean,rat0err = unmake_gvar_vec(rat0)
     ratpmean,ratperr = unmake_gvar_vec(ratp)
     theorymean,theoryerr = unmake_gvar_vec(theory)
     rat0upp,rat0low = make_upp_low(rat0)
     ratpupp,ratplow = make_upp_low(ratp)
     theoryupp,theorylow = make_upp_low(theory)
-    plt.figure(14,figsize=figsize)
+    plt.figure(15,figsize=figsize)
     plt.plot(M_h, rat0mean, color='b',label=r'$\frac{f_0^{H_s}(E)}{f_0^{B_s}(E)}$')
     plt.fill_between(M_h,rat0low,rat0upp, color='b',alpha=alpha)
     plt.plot(M_h, ratpmean, color='r',label=r'$\frac{f_+^{B_s}(E)}{f_+^{H_s}(E)}$')
     plt.fill_between(M_h,ratplow, ratpupp, color='r',alpha=alpha)
     plt.plot(M_h,theorymean,color='k',label =r'$\sqrt{\frac{M_{B_s}}{M_{H_s}}}$')
-    plt.fill_between(M_h,theorylow,theoryupp,color='k',alpha=alpha/2)
-    plt.xlabel('$M_{H_s}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.fill_between(M_h,theorylow,theoryupp,color='k',alpha=alpha)
+    plt.xlabel(r'$M_{H_s}^{-1}[\mathrm{GeV}^{-1}]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    #handles, labels = plt.gca().get_legend_handles_labels()
-    #handles = [h[0] for h in handles]
-   # plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
-    plt.legend(fontsize=fontsizeleg,frameon=False)
-    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
-    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.legend(fontsize=fontsizeleg,frameon=False,loc='lower right')
+    #plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=1)
+    #plt.text(MDsphys.mean+0.05,-0.45,'$M_{D_s}$',fontsize=fontsizelab)
+    plt.plot([1/MBsphys.mean,1/MBsphys.mean],[-10,10],'k--',lw=1)
+    plt.text(1/MBsphys.mean,0,r'$M_{B_s}^{-1}$',fontsize=fontsizelab,horizontalalignment='left')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.02))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.axes().set_xlim([MDsphys.mean,MBsphys.mean])
+    plt.axes().set_xlim([0,1/MDsphys.mean])
+    plt.axes().set_ylim([0,2.2])
     plt.tight_layout()
     plt.savefig('Plots/Hillratininvmh.pdf')
     plt.close()
@@ -843,7 +859,7 @@ def f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
             
-            plt.figure(15,figsize=figsize)
+            plt.figure(16,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
             
@@ -861,7 +877,7 @@ def f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
         y.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],convert_Gev(afm).mean,q2,zed.mean,Fits[0]['masses'][0],fpf0same,convert_Gev(afm).mean*mbphys)) #only need one fit
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
-    plt.figure(15,figsize=figsize)
+    plt.figure(16,figsize=figsize)
     plt.plot(z,ymean, color='b')
     plt.fill_between(z,ylow,yupp, color='b',alpha=alpha)
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -902,7 +918,7 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
             
-            plt.figure(16,figsize=figsize)
+            plt.figure(17,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
             
@@ -921,7 +937,7 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
        
-    plt.figure(16,figsize=figsize)
+    plt.figure(17,figsize=figsize)
     plt.plot(z,ymean, color='r')
     plt.fill_between(z,ylow,yupp, color='r',alpha=alpha)
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -948,7 +964,7 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     qsqs = np.linspace(0,qsqmaxphys.mean,nopts)
     f0,fp = output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same)
 
-    plt.figure(17,figsize=figsize)
+    plt.figure(18,figsize=figsize)
     ax1 = plt.subplot(211)
     ax1b = ax1.twinx()
     ax1.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
