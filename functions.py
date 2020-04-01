@@ -200,20 +200,24 @@ def make_prior_BsEtas(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cva
                 prior['qsq_{0}'.format(tag)] = qsq
                 f['f0_{0}'.format(tag)] = fs_data[fit]['f0_m{0}_tw{1}'.format(mass,twist)]   # y values go in f   
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
-                if adddata:
-                    f['f0_qsq{0}'.format(qsqmaxphys)] = dataf0maxBsEtas
-                    f['fp_qsq{0}'.format(qsqmaxphys)] = datafpmaxBsEtas
-                    f['f0_qsq{0}'.format(0)] = dataf00BsEtas
-                    prior['qsq_qsq{0}'.fornat(qsqmaxphys)] = qsqmaxphys
-                    prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphys,t_0,MBsphys,Metasphys)
-                    prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBsphys,Metasphys)
-                    prior['MBsphys'] = MBsphys
-                    prior['MBs0phys'] = MBsphys + Del
-                    prior['MBsstarphys'] = MBsstarphys
-                    prior['MDsphys'] = MDsphys
-                for key in f:
-                    if f[key] == None:
-                        del f[key]   #removes vector tw 0 etc
+    if adddata:
+        f['f0_qsq{0}'.format(qsqmaxphys)] = dataf0maxBsEtas
+        f['fp_qsq{0}'.format(qsqmaxphys)] = datafpmaxBsEtas
+        f['f0_qsq{0}'.format(0)] = dataf00BsEtas
+        prior['qsq_qsq{0}'.format(qsqmaxphys)] = qsqmaxphys
+        prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphys,t_0,MBsphys,Metasphys)
+        prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBsphys,Metasphys)
+        prior['MBsphys'] = MBsphys
+        prior['MBs0phys'] = MBsphys + Del
+        prior['MBsstarphys'] = MBsstarphys
+        prior['MDsphys'] = MDsphys
+    # remove unwanted keys from f
+    keys = []
+    for key in f:
+        if f[key] == None:
+            keys.append(key)   #removes vector tw 0 etc
+    for key in keys:
+        del f[key]
     if addrho:
         prior['0rho'] =gv.gvar(Npow*[rhopri])
         prior['prho'] =gv.gvar(Npow*[rhopri]) 
@@ -253,16 +257,16 @@ def make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass,amh,fpf0same,newdata=False)
                        tagsamed = '0'
                 if addrho:
                     if newdata:
-                        print('Added external data in a{0}'.format(n))
+                        #print('Added external data in a{0}'.format(n))
                         an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MBsphys']/p['MDsphys'])) *  p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MBsphys'])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
                     elif newdata == False:
-                    an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MHs_{0}_m{1}'.format(fit,mass)]/p['MDs_{0}'.format(fit)])) * (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MHs_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
+                        an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MHs_{0}_m{1}'.format(fit,mass)]/p['MDs_{0}'.format(fit)])) * (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MHs_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
                     else:
                         print('Error in make_an_BsEtas(): newdata = {0}'.format(newdata))
                         
                 else:
                     if newdata:
-                        print('Added external data in a{0}'.format(n))
+                        #print('Added external data in a{0}'.format(n))
                         an += p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MBsphys'])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
                     elif newdata == False:
                         an += (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MHs_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
@@ -309,11 +313,11 @@ def do_fit_BsEtas(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same):
     def fcn(p):
         models = gv.BufferDict()
         if 'f0_qsq{0}'.format(qsqmaxphys) in f:
-            models['f0_qsq{0}'.format(qsqmaxphys)] = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits['0']['masses'][0],fpf0same,0,newdata=True)
+            models['f0_qsq{0}'.format(qsqmaxphys)] = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         if 'fp_qsq{0}'.format(qsqmaxphys) in f:
-            models['fp_qsq{0}'.format(qsqmaxphys)] = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits['0']['masses'][0],fpf0same,0,newdata=True)
+            models['fp_qsq{0}'.format(qsqmaxphys)] = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         if 'f0_qsq{0}'.format(0) in f:
-            models['f0_qsq{0}'.format(0)] = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,0,p['z_qsq{0}'.format(0)],Fits['0']['masses'][0],fpf0same,0,newdata=True)
+            models['f0_qsq{0}'.format(0)] = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,0,p['z_qsq{0}'.format(0)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         for Fit in Fits:
             for mass in Fit['masses']:
                 for twist in Fit['twists']:
