@@ -84,7 +84,7 @@ def speed_of_light(Fits):
 
 #####################################################################################################
 
-def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     i = 0
     for Fit in Fits:
         j = 0
@@ -126,6 +126,10 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.figure(2,figsize=figsize)
     plt.plot(qsq, ymean, color='b')
     plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
+    if dataf0maxBsEtas != None and adddata:
+        plt.errorbar(qsqmaxphys.mean, dataf0maxBsEtas.mean, xerr=qsqmaxphys.sdev, yerr=dataf0maxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+    if dataf00BsEtas != None and adddata:
+        plt.errorbar(0, dataf00BsEtas.mean, yerr=dataf00BsEtas.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower right')
@@ -146,6 +150,10 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.figure(3,figsize=figsize)
     plt.plot(z,ymean, color='b')
     plt.fill_between(z,ylow,yupp, color='b',alpha=alpha)
+    if dataf0maxBsEtas != None and adddata:
+        plt.errorbar( make_z(qsqmaxphys,t_0,MBsphys,Metasphys).mean, dataf0maxBsEtas.mean, xerr=make_z(qsqmaxphys,t_0,MBsphys,Metasphys).sdev, yerr=dataf0maxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+    if dataf00BsEtas != None and adddata:
+        plt.errorbar(make_z(0,t_0,MBsphys,Metasphys).mean, dataf00BsEtas.mean,xerr = make_z(0,t_0,MBsphys,Metasphys).sdev ,yerr=dataf00BsEtas.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower left')
@@ -166,7 +174,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
 
 ################################################################################################
 
-def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     i = 0
     for Fit in Fits:
         j = 0
@@ -209,6 +217,8 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.figure(4,figsize=figsize)
     plt.plot(qsq, ymean, color='r')
     plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
+    if datafpmaxBsEtas != None and adddata:
+        plt.errorbar(qsqmaxphys.mean, datafpmaxBsEtas.mean, xerr=qsqmaxphys.sdev, yerr=datafpmaxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
@@ -229,6 +239,8 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.figure(5,figsize=figsize)
     plt.plot(z,ymean, color='r')
     plt.fill_between(z,ylow,yupp, color='r',alpha=alpha)
+    if datafpmaxBsEtas != None and adddata:
+        plt.errorbar( make_z(qsqmaxphys,t_0,MBsphys,Metasphys).mean, datafpmaxBsEtas.mean, xerr=make_z(qsqmaxphys,t_0,MBsphys,Metasphys).sdev, yerr=datafpmaxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
@@ -249,7 +261,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
 
 ################################################################################################
 
-def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     i = 0
     for Fit in Fits:
         j = 0
@@ -293,6 +305,14 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.figure(6,figsize=figsize)
     plt.plot(qsq, ymean, color='b')
     plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
+    if dataf0maxBsEtas != None and adddata:
+        pole = 1 - qsqmaxphys/(MBsphys+Del)**2
+        plt.errorbar(qsqmaxphys.mean, (pole*dataf0maxBsEtas).mean, xerr=qsqmaxphys.sdev, yerr=(pole*dataf0maxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+    if dataf00BsEtas != None and adddata:
+        plt.errorbar(0, dataf00BsEtas.mean, yerr=dataf00BsEtas.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower right')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
@@ -313,6 +333,11 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.figure(7,figsize=figsize)
     plt.plot(z,ymean, color='b')
     plt.fill_between(z,ylow,yupp, color='b',alpha=alpha)
+    if dataf0maxBsEtas != None and adddata:
+        pole = 1 - qsqmaxphys/(MBsphys+Del)**2
+        plt.errorbar( make_z(qsqmaxphys,t_0,MBsphys,Metasphys).mean, (pole*dataf0maxBsEtas).mean, xerr=make_z(qsqmaxphys,t_0,MBsphys,Metasphys).sdev, yerr=dataf0maxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+    if dataf00BsEtas != None and adddata:
+        plt.errorbar(make_z(0,t_0,MBsphys,Metasphys).mean, dataf00BsEtas.mean,xerr = make_z(0,t_0,MBsphys,Metasphys).sdev ,yerr=dataf00BsEtas.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
@@ -333,7 +358,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
 
 ################################################################################################
 
-def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     i = 0
     for Fit in Fits:
         j = 0
@@ -378,6 +403,9 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.figure(8,figsize=figsize)
     plt.plot(qsq, ymean, color='r')
     plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
+    if datafpmaxBsEtas != None and adddata:
+        pole = 1 - qsqmaxphys/MBsstarphys**2
+        plt.errorbar(qsqmaxphys.mean, (pole*datafpmaxBsEtas).mean, xerr=qsqmaxphys.sdev, yerr=(pole*datafpmaxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2)
@@ -398,6 +426,8 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.figure(9,figsize=figsize)
     plt.plot(z,ymean, color='r')
     plt.fill_between(z,ylow,yupp, color='r',alpha=alpha)
+    if datafpmaxBsEtas != None and adddata:
+        plt.errorbar( make_z(qsqmaxphys,t_0,MBsphys,Metasphys).mean, datafpmaxBsEtas.mean, xerr=make_z(qsqmaxphys,t_0,MBsphys,Metasphys).sdev, yerr=datafpmaxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')    
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper right')
