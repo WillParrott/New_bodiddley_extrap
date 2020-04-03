@@ -649,6 +649,20 @@ def make_p_Mh_BK(pfit,Fits,Del,MH):
 
 ######################################################################################################
 
+def ratio_fp_B_D_BsEtas(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
+    p = make_p_Mh_BsEtas(pfit,Fits,Del,MBsphys)
+    z = make_z(0,t_0,MBsphys,Metasphys)
+    fpBs = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,0,z.mean,Fits[0]['masses'][0],fpf0same,0)
+    p = make_p_Mh_BsEtas(pfit,Fits,Del,MDsphys)
+    z = make_z(0,t_0,MDsphys,Metasphys)
+    fpDs = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,0,z.mean,Fits[0]['masses'][0],fpf0same,0)
+    thmean = (MDsphys/MBsphys)**(3/2)
+    therror = 3*thmean * LQCD**2 * (1/MDsphys**2 - 1/MBsphys**2)
+    theory = gv.gvar('{0}({1})'.format(thmean.mean,therror.mean))
+    print('f_+^(Bs)(0)/f_+^(Ds)(0) = {0} (MDs/MBs)^3/2 = {1} ratio = {2}'.format(fpBs/fpDs,theory,fpBs/(fpDs*theory)))
+    return()
+
+######################################################################################################
 def fs_at_lims_BsEtas(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
     qsq = 0

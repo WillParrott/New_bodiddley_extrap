@@ -33,9 +33,9 @@ from collections import defaultdict
 factor = 1.0 #multiplies everything to make smaller for big plots etc usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
-
+lw =2*factor
 nopts = 200 #number of points on plot
-ms = 20*factor #markersize
+ms = 25*factor #markersize
 alpha = 0.4
 fontsizeleg = 25*factor #legend
 fontsizelab = 35*factor #legend
@@ -469,8 +469,8 @@ def f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.plot(qsq, ypmean, color='r')
     plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
     plt.errorbar(0,0.297, yerr=0.047,fmt='k*',ms=ms,mfc='none',label = 'arXiv:1406.2279')
-    plt.errorbar(qsqmaxphys.mean,0.816, yerr=0.035,fmt='k*',ms=ms,mfc='none')
-    plt.errorbar(qsqmaxphys.mean,2.293, yerr=0.091,fmt='k*',ms=ms,mfc='none')
+    plt.errorbar(qsqmaxphys.mean,0.816, yerr=0.035,fmt='k*',ms=ms,mfc='none',lw=lw)
+    plt.errorbar(qsqmaxphys.mean,2.293, yerr=0.091,fmt='k*',ms=ms,mfc='none',lw=lw)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper left')
@@ -525,10 +525,10 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=1)
-    plt.text(MDsphys.mean,-0.5,'$M_{D_s}$',fontsize=fontsizelab,horizontalalignment='center')
-    plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=1)
-    plt.text(MBsphys.mean,-0.5,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(MDsphys.mean,-0.30,'$M_{D_s}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(MBsphys.mean,-0.30,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='center')
     plt.text(4.0,2.5,'$f_+(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
     plt.text(2.5,0.3,'$f_{0,+}(0)$',fontsize=fontsizelab)
     plt.text(4.5,1.0,'$f_0(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
@@ -537,16 +537,26 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     ############ add data ############
-    plt.errorbar(MBsphys.mean,0.323, yerr=0.063,fmt='k*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279')#,capsize=capsize)
-    plt.errorbar(MBphys.mean-0.01,0.20, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839')#,capsize=capsize)
-    plt.errorbar(MBphys.mean+0.01,0.319, yerr=0.066,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384')#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.612, yerr=0.035,fmt='ro',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017')#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.765, yerr=0.031,fmt='bo',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017')#,capsize=capsize)
+    plt.errorbar(MBsphys.mean,0.323, yerr=0.063,fmt='k*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBsphys.mean,0.819, yerr=0.021,fmt='b*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBsphys.mean,3.27, yerr=0.15,fmt='r*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean-0.01,0.20, yerr=0.14,fmt='k^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean,1.024, yerr=0.025,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean-0.01,2.82, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean+0.01,0.319, yerr=0.066,fmt='ko',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean,0.861, yerr=0.048,fmt='bo',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean+0.01,2.63, yerr=0.13,fmt='ro',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.612, yerr=0.035,fmt='kd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.765, yerr=0.031,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,1.134, yerr=0.049,fmt='bd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,2.130, yerr=0.096,fmt='rd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.979, yerr=0.019,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,1.336, yerr=0.054,fmt='rs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper left')
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     ##################################
-    plt.axes().set_ylim([0,3.0])
+    plt.axes().set_ylim([0,3.45])
     plt.tight_layout()
     plt.savefig('Plots/f0f0fpinmh.pdf')
     plt.close()
@@ -584,9 +594,9 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=1)
+    plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
     plt.text(MDsphys.mean+0.05,-0.45,'$M_{D_s}$',fontsize=fontsizelab)
-    plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=1)
+    plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
     plt.text(MBsphys.mean-0.05,-0.45,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='right')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
@@ -597,10 +607,10 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.text(4.3,0.4,r'$\alpha$',fontsize=fontsizelab)
     plt.axes().set_ylim([-0.5,1.32])
     ############ add data ############
-    plt.errorbar(MBphys.mean+0.01,0.80,yerr=[[0.2],[0.5]],fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{B\to\pi}(\beta^{-1}=0.833)$')#,capsize=capsize)
-    plt.errorbar(MBphys.mean-0.01,0.60, yerr=[[0.7],[0.3]],fmt='r*',ms=ms,mfc='none',label = r'$\delta^{B\to\pi}(\beta^{-1}=0.833)$')#,capsize=capsize)
-    plt.errorbar(MDphys.mean+0.01,1+1/1.6-1.1,yerr=[[0.2],[0.6]],fmt='r^',ms=ms,mfc='none',label = r'$\delta^{D\to\pi}(\beta^{-1}=0.625)$')#,capsize=capsize)
-    plt.errorbar(MDphys.mean-0.01,1+1/1.8-0.91, yerr=[[0.05],[0.12]],fmt='ro',ms=ms,mfc='none',label = r'$\delta^{D\to{}K}(\beta^{-1}=0.556)$')#,capsize=capsize)
+    plt.errorbar(MBphys.mean+0.01,0.80,yerr=[[0.2],[0.5]],fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{B\to\pi}(\beta^{-1}=0.833)$',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean-0.01,0.60, yerr=[[0.7],[0.3]],fmt='r*',ms=ms,mfc='none',label = r'$\delta^{B\to\pi}(\beta^{-1}=0.833)$',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean+0.01,1+1/1.6-1.1,yerr=[[0.2],[0.6]],fmt='r^',ms=ms,mfc='none',label = r'$\delta^{D\to\pi}(\beta^{-1}=0.625)$',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean-0.01,1+1/1.8-0.91, yerr=[[0.05],[0.12]],fmt='ro',ms=ms,mfc='none',label = r'$\delta^{D\to{}K}(\beta^{-1}=0.556)$',lw=lw)#,capsize=capsize)
     
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
@@ -758,7 +768,7 @@ def Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
 
 def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     Emax = (MDsphys**2 + Metasphys**2)/MDsphys
-    Emin = Metasphys.mean
+    Emin = Metasphys
     E = Emax
     M_h = []
     rat0 = []
@@ -806,7 +816,7 @@ def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().set_xlim([MDsphys.mean,MBsphys.mean])
     plt.tight_layout()
-    plt.savefig('Plots/Hillratinmh.pdf')
+    plt.savefig('Plots/Hillratinmh_E{0}.pdf'.format(E))
     plt.close()
     return()
 
@@ -814,7 +824,7 @@ def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
 
 def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     Emax = (MDsphys**2 + Metasphys**2)/MDsphys
-    Emin = Metasphys.mean
+    Emin = Metasphys
     E = Emax
     M_h = []
     rat0 = []
@@ -867,7 +877,7 @@ def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().set_xlim([0,1/MDsphys.mean])
     plt.axes().set_ylim([0,2.2])
     plt.tight_layout()
-    plt.savefig('Plots/Hillratininvmh.pdf')
+    plt.savefig('Plots/Hillratininvmh_E{0}.pdf'.format(E))
     plt.close()
     return()
 
