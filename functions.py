@@ -22,7 +22,7 @@ Metacphys = gv.gvar('2.98390(50)')  # PDG says 2.9839(5) previously had '2.9863(
 Metas_F = gv.gvar('0.314015(89)') #from BsEtas fits
 Metas_SF = gv.gvar('0.207021(65)')#from new BsEtas fit
 Metas_UF = gv.gvar('0.154107(88)') #from new BsEast fit
-
+MKphys = gv.gvar('0.497611(13)') #PD K^0
 MBsphys = gv.gvar('5.36688(17)') # PDG
 MDsphys = gv.gvar('1.968340(70)')  #PDG
 MBphys = gv.gvar('5.27933(13)') # PDG
@@ -47,6 +47,10 @@ Del = 0.4 # in control too
 dataf0maxBsEtas = gv.gvar('0.811(17)')
 datafpmaxBsEtas = None
 dataf00BsEtas = None
+dataf0maxBK = None
+datafpmaxBK = None
+datafTmaxBK = None
+dataf00BK = None
 #####################################################################################################
 
 def unmake_gvar_vec(vec):
