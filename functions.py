@@ -105,10 +105,10 @@ def make_params_BsEtas(Fits,Masses,Twists):
 ####################################################################################################
 
 def make_params_BK(Fits,Masses,Twists):
-    Fit['momenta'] = []
-    daughters = []
     for Fit in Fits:
-        Fit['a'] = w0/(hbar*c*0.01)*Fit['w0/a']
+        Fit['momenta'] = []
+        daughters = []
+        Fit['a'] = w0/(hbar*clight*0.01*Fit['w0/a'])
         j = 0
         for i in range(len(Fit['masses'])):
             if i not in Masses[Fit['conf']]:
@@ -129,15 +129,18 @@ def make_params_BK(Fits,Masses,Twists):
 ####################################################################################################
 
 def get_results(Fit,thpts):
-    p = gv.gload(Fit['filename'],method='pickle')
+    p = gv.load(Fit['filename'],method='pickle')
     if 'Hsfilename' in Fit:
-        pHs = gv.gload(Fit['Hsfilename'],method='pickle')
+        pHs = gv.load(Fit['Hsfilename'],method='pickle')
     # We should only need goldstone masses and energies here
     Fit['M_parent_m{0}'.format(Fit['m_c'])] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],Fit['m_c']))][0]
     for mass in Fit['masses']:
         Fit['M_parent_m{0}'.format(mass)] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0]
         if 'Hsfilename' in Fit:
-            Fit['MHs_parent_m{0}'.format(mass)] = pHs['dE:{0}'.format(Fit['Hsparent-Tag'].format(Fit['m_s'],mass))][0]
+            mass2 = mass 
+            if mass == '0.45':
+                mass2 = '0.450'
+            Fit['MHs_parent_m{0}'.format(mass)] = pHs['dE:{0}'.format(Fit['Hsparent-Tag'].format(Fit['m_s'],mass2))][0]
     Fit['M_daughter'] = p['dE:{0}'.format(Fit['daughter-Tag'][0])][0]
     for t,twist in enumerate(Fit['twists']):
         #Fit is the actual measured value, theory is obtained from the momentum
@@ -264,7 +267,7 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cvalpri
         ml0 = Fit['m_lsea'] #becuase valuence and sea same, only use one
         ms0val = float(Fit['m_s']) # valence untuned s mass
         ml0val = float(Fit['m_l']) # valence untuned s mass
-        Metas = Fit['Metas_{0}'.format(fit)]/Fit['a'] # in GeV
+        Metas = globals()['Metas_{0}'.format(fit)]/Fit['a'] # in GeV
         prior['Metac_{0}'.format(fit)] = globals()['Metac{0}'.format(fit)]/Fit['a'] #in GeV
         prior['Metacphys'] = Metacphys
         prior['mstuned_{0}'.format(fit)] = ms0val*(Metasphys/Metas)**2
@@ -272,7 +275,7 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cvalpri
         prior['MD_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units
         prior['deltas_{0}'.format(fit)] = ms0-prior['mstuned_{0}'.format(Fit['conf'])]     
         prior['deltasval_{0}'.format(fit)] = ms0val-prior['mstuned_{0}'.format(Fit['conf'])]
-        prior['deltalval_{0}'.format(fit)] = ml0val-prior['mltuned_{0}'.format(Fit['conf'])]
+        prior['deltalval_{0}'.format(fit)] = ml0val-mltuned
         prior['deltal_{0}'.format(fit)] = ml0-mltuned
         for mass in Fit['masses']:
             prior['MH_{0}_m{1}'.format(fit,mass)] = Fit['M_parent_m{0}'.format(mass)]
@@ -289,9 +292,10 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cvalpri
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
                 f['fT_{0}'.format(tag)] = fs_data[fit]['fT_m{0}_tw{1}'.format(mass,twist)]
     if adddata: #not fot fT at the moment
-        f['f0_qsq{0}'.format(qsqmaxphys)] = dataf0maxBsEtas
-        f['fp_qsq{0}'.format(qsqmaxphys)] = datafpmaxBsEtas
-        f['f0_qsq{0}'.format(0)] = dataf00BsEtas
+        f['f0_qsq{0}'.format(qsqmaxphys)] = dataf0maxBK
+        f['fp_qsq{0}'.format(qsqmaxphys)] = datafpmaxBK
+        f['fT_qsq{0}'.format(qsqmaxphys)] = datafTmaxBK
+        f['f0_qsq{0}'.format(0)] = dataf00BK
         prior['qsq_qsq{0}'.format(qsqmaxphys)] = qsqmaxphys
         prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphys,t_0,MBsphys,Metasphys)
         prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBsphys,Metasphys)

@@ -67,8 +67,8 @@ def speed_of_light(Fits):
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(loc='lower left',handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
-    plt.xlabel('$|ap_{\K}|^2$',fontsize=fontsizelab)
-    plt.ylabel('$(E_{\K}^2-M_{\K}^2)/p_{\K}^2$',fontsize=fontsizelab)
+    plt.xlabel('$|ap_{K}|^2$',fontsize=fontsizelab)
+    plt.ylabel('$(E_{K}^2-M_{K}^2)/p_{K}^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)

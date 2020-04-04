@@ -18,8 +18,8 @@ warnings.filterwarnings("ignore")
 F = collections.OrderedDict()
 F['conf']='F'
 F['label'] = 'Set 1'
-F['filename'] = '../Fits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
-F['Hsfilename'] = 'F5_Q1.00_Nexp5_Stmin2_Vtmin1_svd0.00013_chi0.341'
+F['filename'] = 'Corrfits/FKBscalarvectortensor_398cfgs_negFalse0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720chained_Nexp3_sfac1.0_pfac1.0_Q1.00_chi0.422_Stmin2_Ttmin2_Vtmin2.pickle'
+F['Hsfilename'] = 'Corrfits/F5_Q1.00_Nexp5_Stmin2_Vtmin1_svd0.00013_chi0.341'
 F['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 F['masses'] = ['0.449','0.566','0.683','0.8']
 F['Zdisc'] = [0.99892,0.99826,0.99648,0.99377]
@@ -32,17 +32,18 @@ F['m_lsea'] = 0.0074
 #F['tp'] = 96
 F['L'] = 32
 F['w0/a'] = gv.gvar('1.9006(20)')
-F['parent-Tag'] = 'B_G5-G5_m{0}'
-F['daughter-Tag'] = ['K_G5-G5_tw{0}']*5 
+F['parent-Tag'] = 'B_G5-G5_m{1}'
+F['daughter-Tag'] = 'K_G5-G5_tw{0}' 
 
 ######################## SF PARAMETERS ####################################
 SF = collections.OrderedDict()
 SF['conf']='SF'
 SF['label'] = 'Set 2'
-SF['filename'] = '../Fits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0' # in stability plot
-SF['Hsfilename'] = 'SF5_Q1.00_Nexp4_Stmin2_Vtmin2_svd0.00002_chi0.722'
+SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530chained_Nexp2_sfac1.0_pfac1.0_Q1.00_chi0.772_Stmin2_Ttmin2_Vtmin2.pickle' # in stability plot
+#SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp2_sfac1.0_pfac1.0_Q1.00_chi0.549_Stmin2_Ttmin2_Vtmin2.pickle' 
+SF['Hsfilename'] = 'Corrfits/SF5_Q1.00_Nexp4_Stmin2_Vtmin2_svd0.00002_chi0.722'
 SF['Hsparent-Tag'] = 'meson.m{0}_m{1}'
-SF['masses'] = ['0.274','0.450','0.6','0.8']
+SF['masses'] = ['0.274','0.45','0.6','0.8']
 SF['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
 SF['twists'] = ['0','1.261','2.108','2.946','3.624']
 SF['m_l'] = '0.0048'
@@ -53,8 +54,8 @@ SF['m_lsea'] = 0.0048
 #SF['tp'] = 144
 SF['L'] = 48
 SF['w0/a'] = gv.gvar('2.896(6)')
-SF['parent-Tag'] = 'B_G5-G5_m{0}'
-SF['daughter-Tag'] = ['K_G5-G5_tw{0}']*5
+SF['parent-Tag'] = 'B_G5-G5_m{1}'
+SF['daughter-Tag'] = 'K_G5-G5_tw{0}'
 
 
 ######################## SF PARAMETERS ####################################
@@ -87,10 +88,10 @@ thpts = collections.OrderedDict()
 Fits = [F,SF]#,UF]                                         # Choose to fit F, SF or UF
 Masses['F'] = [0,1,2,3]                                     # Choose which masses to fit
 Twists['F'] = [0,1,2,3,4]
-thpts['F'] = ['S','V']
+thpts['F'] = ['S','V','T']
 Masses['SF'] = [0,1,2,3]
 Twists['SF'] = [0,1,2,3,4]
-thpts['SF'] = ['S','V']
+thpts['SF'] = ['S','V','T']
 Masses['UF'] = [0,1,2,3]
 Twists['UF'] = [0,1,2,3,4]
 thpts['UF'] = ['S','V','T']
@@ -111,13 +112,13 @@ Nijk = 3 #3
 SHOWPLOTS = False
 Del = 0.4 #0.4 change in functions too
 t_0 = 0 # for z conversion
-adddata = True #include data in continuum from other papers currently only for f0
+adddata = False #include data in continuum from other papers currently only for f0
 
 ############################################################################
 
 fs_data = collections.OrderedDict() #fs from data fs_data[Fit][]
 
-make_params_BsEtas(Fits,Masses,Twists) #change to BK in BK case
+make_params_BK(Fits,Masses,Twists) #change to BK in BK case
 
 for Fit in Fits:
     fs_data[Fit['conf']] = collections.OrderedDict()
@@ -131,7 +132,7 @@ pfit = do_fit_BK(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same)
 fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
-#speed_of_light(Fits)
+speed_of_light(Fits)
 f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
