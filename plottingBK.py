@@ -115,7 +115,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     z = []
     y = []
     p = make_p_physical_point_BK(pfit,Fits,Del)
-    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MBphys,MKphys) #all GeV dimensions
         z.append(zed.mean)
@@ -127,7 +127,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.plot(qsq, ymean, color='b')
     plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
     if dataf0maxBK != None and adddata:
-        plt.errorbar(qsqmaxphys.mean, dataf0maxBK.mean, xerr=qsqmaxphys.sdev, yerr=dataf0maxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
+        plt.errorbar(qsqmaxphysBK.mean, dataf0maxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=dataf0maxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
     if dataf00BK != None and adddata:
         plt.errorbar(0, dataf00BK.mean, yerr=dataf00BK.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -151,7 +151,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.plot(z,ymean, color='b')
     plt.fill_between(z,ylow,yupp, color='b',alpha=alpha)
     if dataf0maxBK != None and adddata:
-        plt.errorbar( make_z(qsqmaxphys,t_0,MBphys,MKphys).mean, dataf0maxBK.mean, xerr=make_z(qsqmaxphys,t_0,MBphys,MKphys).sdev, yerr=dataf0maxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
+        plt.errorbar( make_z(qsqmaxphysBK,t_0,MBphys,MKphys).mean, dataf0maxBK.mean, xerr=make_z(qsqmaxphysBK,t_0,MBphys,MKphys).sdev, yerr=dataf0maxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
     if dataf00BK != None and adddata:
         plt.errorbar(make_z(0,t_0,MBphys,MKphys).mean, dataf00BK.mean,xerr = make_z(0,t_0,MBphys,MKphys).sdev ,yerr=dataf00BK.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -206,7 +206,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     z = []
     y = []
     p = make_p_physical_point_BK(pfit,Fits,Del)
-    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MBphys,MKphys) #all GeV dimensions
         z.append(zed.mean)
@@ -218,7 +218,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.plot(qsq, ymean, color='r')
     plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
     if datafpmaxBK != None and adddata:
-        plt.errorbar(qsqmaxphys.mean, datafpmaxBK.mean, xerr=qsqmaxphys.sdev, yerr=datafpmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+        plt.errorbar(qsqmaxphysBK.mean, datafpmaxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=datafpmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
@@ -240,7 +240,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.plot(z,ymean, color='r')
     plt.fill_between(z,ylow,yupp, color='r',alpha=alpha)
     if datafpmaxBK != None and adddata:
-        plt.errorbar( make_z(qsqmaxphys,t_0,MBphys,MKphys).mean, datafpmaxBK.mean, xerr=make_z(qsqmaxphys,t_0,MBphys,MKphys).sdev, yerr=datafpmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+        plt.errorbar( make_z(qsqmaxphysBK,t_0,MBphys,MKphys).mean, datafpmaxBK.mean, xerr=make_z(qsqmaxphysBK,t_0,MBphys,MKphys).sdev, yerr=datafpmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
@@ -293,7 +293,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     z = []
     y = []
     p = make_p_physical_point_BK(pfit,Fits,Del)
-    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MBphys,MKphys) #all GeV dimensions
         z.append(zed.mean)
@@ -302,10 +302,10 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
     plt.figure(4,figsize=figsize)
-    plt.plot(qsq, ymean, color='r')
-    plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
+    plt.plot(qsq, ymean, color='g')
+    plt.fill_between(qsq,ylow,yupp, color='g',alpha=alpha)
     if datafTmaxBK != None and adddata:
-        plt.errorbar(qsqmaxphys.mean, datafTmaxBK.mean, xerr=qsqmaxphys.sdev, yerr=datafTmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+        plt.errorbar(qsqmaxphysBK.mean, datafTmaxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=datafTmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
@@ -324,10 +324,10 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.close()
     
     plt.figure(5,figsize=figsize)
-    plt.plot(z,ymean, color='r')
-    plt.fill_between(z,ylow,yupp, color='r',alpha=alpha)
+    plt.plot(z,ymean, color='g')
+    plt.fill_between(z,ylow,yupp, color='g',alpha=alpha)
     if datafTmaxBK != None and adddata:
-        plt.errorbar( make_z(qsqmaxphys,t_0,MBphys,MKphys).mean, datafTmaxBK.mean, xerr=make_z(qsqmaxphys,t_0,MBphys,MKphys).sdev, yerr=datafTmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+        plt.errorbar( make_z(qsqmaxphysBK,t_0,MBphys,MKphys).mean, datafTmaxBK.mean, xerr=make_z(qsqmaxphysBK,t_0,MBphys,MKphys).sdev, yerr=datafTmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
@@ -380,7 +380,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     z = []
     y = []
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         pole = 1 - q2/(MBsphys+Del)**2
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
@@ -393,8 +393,8 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     plt.plot(qsq, ymean, color='b')
     plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
     if dataf0maxBsEtas != None and adddata:
-        pole = 1 - qsqmaxphys/(MBsphys+Del)**2
-        plt.errorbar(qsqmaxphys.mean, (pole*dataf0maxBsEtas).mean, xerr=qsqmaxphys.sdev, yerr=(pole*dataf0maxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
+        pole = 1 - qsqmaxphysBK/(MBsphys+Del)**2
+        plt.errorbar(qsqmaxphysBK.mean, (pole*dataf0maxBsEtas).mean, xerr=qsqmaxphysBK.sdev, yerr=(pole*dataf0maxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
     if dataf00BsEtas != None and adddata:
         plt.errorbar(0, dataf00BsEtas.mean, yerr=dataf00BsEtas.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -421,8 +421,8 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     plt.plot(z,ymean, color='b')
     plt.fill_between(z,ylow,yupp, color='b',alpha=alpha)
     if dataf0maxBsEtas != None and adddata:
-        pole = 1 - qsqmaxphys/(MBsphys+Del)**2
-        plt.errorbar( make_z(qsqmaxphys,t_0,MBsphys,Metasphys).mean, (pole*dataf0maxBsEtas).mean, xerr=make_z(qsqmaxphys,t_0,MBsphys,Metasphys).sdev, yerr=(pole*dataf0maxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
+        pole = 1 - qsqmaxphysBK/(MBsphys+Del)**2
+        plt.errorbar( make_z(qsqmaxphysBK,t_0,MBsphys,Metasphys).mean, (pole*dataf0maxBsEtas).mean, xerr=make_z(qsqmaxphysBK,t_0,MBsphys,Metasphys).sdev, yerr=(pole*dataf0maxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
     if dataf00BsEtas != None and adddata:
         plt.errorbar(make_z(0,t_0,MBsphys,Metasphys).mean, dataf00BsEtas.mean,xerr = make_z(0,t_0,MBsphys,Metasphys).sdev ,yerr=dataf00BsEtas.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -478,7 +478,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     z = []
     y = []
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         pole = 1 - q2/MBsstarphys**2
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
@@ -491,8 +491,8 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     plt.plot(qsq, ymean, color='r')
     plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
     if datafpmaxBsEtas != None and adddata:
-        pole = 1 - qsqmaxphys/MBsstarphys**2
-        plt.errorbar(qsqmaxphys.mean, (pole*datafpmaxBsEtas).mean, xerr=qsqmaxphys.sdev, yerr=(pole*datafpmaxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+        pole = 1 - qsqmaxphysBK/MBsstarphys**2
+        plt.errorbar(qsqmaxphysBK.mean, (pole*datafpmaxBsEtas).mean, xerr=qsqmaxphysBK.sdev, yerr=(pole*datafpmaxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2)
@@ -514,7 +514,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     plt.plot(z,ymean, color='r')
     plt.fill_between(z,ylow,yupp, color='r',alpha=alpha)
     if datafpmaxBsEtas != None and adddata:
-        plt.errorbar( make_z(qsqmaxphys,t_0,MBsphys,Metasphys).mean, datafpmaxBsEtas.mean, xerr=make_z(qsqmaxphys,t_0,MBsphys,Metasphys).sdev, yerr=datafpmaxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')    
+        plt.errorbar( make_z(qsqmaxphysBK,t_0,MBsphys,Metasphys).mean, datafpmaxBsEtas.mean, xerr=make_z(qsqmaxphysBK,t_0,MBsphys,Metasphys).sdev, yerr=datafpmaxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')    
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper right')
@@ -535,32 +535,36 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
 
 ################################################################################################
 
-def f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     qsq = []
     y0 = []
     yp = []
-    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+    yT = []
+    p = make_p_physical_point_BK(pfit,Fits,Del)
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
-        zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
+        zed = make_z(q2,t_0,MBphys,MKphys) #all GeV dimensions
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
-        y0.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
-        yp.append(make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
+        y0.append(make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+        yp.append(make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
+        yT.append(make_fT_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
     y0mean,y0err = unmake_gvar_vec(y0)
     y0upp,y0low = make_upp_low(y0)
     ypmean,yperr = unmake_gvar_vec(yp)
     ypupp,yplow = make_upp_low(yp)
+    yTmean,yTerr = unmake_gvar_vec(yT)
+    yTupp,yTlow = make_upp_low(yT)
     plt.figure(10,figsize=figsize)
-    plt.plot(qsq, y0mean, color='b')
+    plt.plot(qsq, y0mean, color='b',label='$f_0(q^2)$')
     plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
-    plt.plot(qsq, ypmean, color='r')
+    plt.plot(qsq, ypmean, color='r',label='$f_+(q^2)$')
     plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
-    plt.errorbar(0,0.297, yerr=0.047,fmt='k*',ms=ms,mfc='none',label = 'arXiv:1406.2279')
-    plt.errorbar(qsqmaxphys.mean,0.816, yerr=0.035,fmt='k*',ms=ms,mfc='none',lw=lw)
-    plt.errorbar(qsqmaxphys.mean,2.293, yerr=0.091,fmt='k*',ms=ms,mfc='none',lw=lw)
-    handles, labels = plt.gca().get_legend_handles_labels()
-    handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper left')
+    plt.plot(qsq, yTmean, color='g',label='$f_T(q^2)$')
+    plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=alpha)
+    plt.errorbar(0,0.319, yerr=0.066,fmt='r*',ms=ms,mfc='none')#,label = r'arXiv:1306.2384',lw=lw)
+    plt.errorbar(qsqmaxphysBK.mean,0.861, yerr=0.048,fmt='b*',ms=ms,mfc='none',label = r'arXiv:1306.2384',lw=lw)
+    plt.errorbar(qsqmaxphysBK.mean,2.63, yerr=0.13,fmt='r*',ms=ms,mfc='none',label = r'arXiv:1306.2384',lw=lw)
+    plt.legend(fontsize=fontsizeleg,frameon=False,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -570,10 +574,10 @@ def f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
-    plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
+    #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
+    #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/f0fpinqsq.pdf')
+    plt.savefig('Plots/f0fpfTinqsq.pdf')
     plt.close()
     return()
 
@@ -732,8 +736,8 @@ def HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
     plt.fill_between([0,(MBsphys**2).mean],[theory.mean-theory.sdev,theory.mean-theory.sdev],[theory.mean+theory.sdev,theory.mean+theory.sdev],color='r',alpha=alpha)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$\frac{f_0(q^2)}{f_+(q^2)} \left(1-\frac{q^2}{M^2_{B^*_s}}\right)^{-1}$',fontsize=fontsizelab)
-    plt.plot([qsqmaxphys.mean,qsqmaxphys.mean],[-10,10],'k--',lw=1)
-    plt.text(qsqmaxphys.mean-0.02,2.4,'$q^2_{\mathrm{max}}$',fontsize=fontsizelab,horizontalalignment='right')
+    plt.plot([qsqmaxphysBK.mean,qsqmaxphysBK.mean],[-10,10],'k--',lw=1)
+    plt.text(qsqmaxphysBK.mean-0.02,2.4,'$q^2_{\mathrm{max}}$',fontsize=fontsizelab,horizontalalignment='right')
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
@@ -996,7 +1000,7 @@ def f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
     z = []
     y = []
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
         z.append(zed.mean)
@@ -1055,7 +1059,7 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
     z = []
     y = []
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
         z.append(zed.mean)
@@ -1088,7 +1092,7 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
 ###################################################################################################
 
 def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
-    qsqs = np.linspace(0,qsqmaxphys.mean,nopts)
+    qsqs = np.linspace(0,qsqmaxphysBK.mean,nopts)
     f0,fp = output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same)
 
     plt.figure(18,figsize=figsize)
@@ -1108,7 +1112,7 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     plt.setp(ax1.get_xticklabels(), visible=False)
     ax1.yaxis.set_major_locator(MultipleLocator(20))
     ax1.yaxis.set_minor_locator(MultipleLocator(5))
-    ax1.set_xlim([0,qsqmaxphys.mean])
+    ax1.set_xlim([0,qsqmaxphysBK.mean])
     ####################################### right hand y axis ###
     ax1b.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
     ax1b.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
@@ -1155,7 +1159,7 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     ax2.xaxis.set_minor_locator(MultipleLocator(1))
     ax2.yaxis.set_major_locator(MultipleLocator(20))
     ax2.yaxis.set_minor_locator(MultipleLocator(5))
-    ax2.set_xlim([0,qsqmaxphys.mean])
+    ax2.set_xlim([0,qsqmaxphysBK.mean])
     #plt.axes().set_ylim([-0.8,2.5])
     #plt.axes().set_xlim([lower-0.22,upper+0.22])
     ######## right hand axis ##

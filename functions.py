@@ -41,6 +41,7 @@ x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
+qsqmaxphysBK = (MBphys-MKphys)**2
 Del = 0.4 # in control too
 #####################################################################################################
 ############################### Other data #########################################################
@@ -292,14 +293,14 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cvalpri
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
                 f['fT_{0}'.format(tag)] = fs_data[fit]['fT_m{0}_tw{1}'.format(mass,twist)]
     if adddata: #not fot fT at the moment
-        f['f0_qsq{0}'.format(qsqmaxphys)] = dataf0maxBK
-        f['fp_qsq{0}'.format(qsqmaxphys)] = datafpmaxBK
-        f['fT_qsq{0}'.format(qsqmaxphys)] = datafTmaxBK
+        f['f0_qsq{0}'.format(qsqmaxphysBK)] = dataf0maxBK
+        f['fp_qsq{0}'.format(qsqmaxphysBK)] = datafpmaxBK
+        f['fT_qsq{0}'.format(qsqmaxphysBK)] = datafTmaxBK
         f['f0_qsq{0}'.format(0)] = dataf00BK
-        prior['qsq_qsq{0}'.format(qsqmaxphys)] = qsqmaxphys
-        prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphys,t_0,MBsphys,Metasphys)
-        prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBsphys,Metasphys)
-        prior['MBsphys'] = MBsphys
+        prior['qsq_qsq{0}'.format(qsqmaxphysBK)] = qsqmaxphysBK
+        prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphysBK,t_0,MBphys,MKphys)
+        prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBphys,MKphys)
+        prior['MBsphys'] = MBsphys        # might need changing?
         prior['MBs0phys'] = MBsphys + Del
         prior['MBsstarphys'] = MBsstarphys
         prior['MDsphys'] = MDsphys
@@ -529,10 +530,10 @@ def do_fit_BK(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same):
     ###############################
     def fcn(p):
         models = gv.BufferDict()
-        if 'f0_qsq{0}'.format(qsqmaxphys) in f:
-            models['f0_qsq{0}'.format(qsqmaxphys)] = make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
-        if 'fp_qsq{0}'.format(qsqmaxphys) in f:
-            models['fp_qsq{0}'.format(qsqmaxphys)] = make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
+        if 'f0_qsq{0}'.format(qsqmaxphysBK) in f:
+            models['f0_qsq{0}'.format(qsqmaxphysBK)] = make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphysBK)],p['z_qsq{0}'.format(qsqmaxphysBK)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
+        if 'fp_qsq{0}'.format(qsqmaxphysBK) in f:
+            models['fp_qsq{0}'.format(qsqmaxphysBK)] = make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphysBK)],p['z_qsq{0}'.format(qsqmaxphysBK)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         if 'f0_qsq{0}'.format(0) in f:
             models['f0_qsq{0}'.format(0)] = make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,0,p['z_qsq{0}'.format(0)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         for Fit in Fits:
@@ -702,7 +703,7 @@ def fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
     #     make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
     fp0 = make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     fT0 = make_fT_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
-    qsq = qsqmaxphys.mean
+    qsq = qsqmaxphysBK.mean
     z = make_z(qsq,t_0,MBsphys,Metasphys)
     z = z.mean
     f0max = make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)

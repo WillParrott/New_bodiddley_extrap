@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore")
 F = collections.OrderedDict()
 F['conf']='F'
 F['label'] = 'Set 1'
-F['filename'] = 'Corrfits/FKBscalarvectortensor_398cfgs_negFalse0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720chained_Nexp3_sfac1.0_pfac1.0_Q1.00_chi0.422_Stmin2_Ttmin2_Vtmin2.pickle'
+F['filename'] = 'Corrfits/FKBscalarvectortensor_398cfgs_negFalse0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.261_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 F['Hsfilename'] = 'Corrfits/F5_Q1.00_Nexp5_Stmin2_Vtmin1_svd0.00013_chi0.341'
 F['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 F['masses'] = ['0.449','0.566','0.683','0.8']
@@ -39,7 +39,7 @@ F['daughter-Tag'] = 'K_G5-G5_tw{0}'
 SF = collections.OrderedDict()
 SF['conf']='SF'
 SF['label'] = 'Set 2'
-SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530chained_Nexp2_sfac1.0_pfac1.0_Q1.00_chi0.772_Stmin2_Ttmin2_Vtmin2.pickle' # in stability plot
+SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.147_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 #SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp2_sfac1.0_pfac1.0_Q1.00_chi0.549_Stmin2_Ttmin2_Vtmin2.pickle' 
 SF['Hsfilename'] = 'Corrfits/SF5_Q1.00_Nexp4_Stmin2_Vtmin2_svd0.00002_chi0.722'
 SF['Hsparent-Tag'] = 'meson.m{0}_m{1}'
@@ -138,7 +138,7 @@ fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-#f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
+f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0)
