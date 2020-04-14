@@ -4,7 +4,7 @@ import lsqfit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
-from functions import *
+from functionsBK import *
 from plottingBK import *
 plt.rc("font",**{"size":18})
 import collections
@@ -109,6 +109,7 @@ rhopri ='0.0(1.0)'
 DoFit = True
 Npow = 3 #3
 Nijk = 3 #3
+Nm=3
 SHOWPLOTS = False
 Del = 0.4 #0.4 change in functions too
 t_0 = 0 # for z conversion
