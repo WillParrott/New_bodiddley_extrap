@@ -230,13 +230,11 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
     prior['0cs'] = gv.gvar(Npow*[cpri])
     prior['0cc'] = gv.gvar(Npow*[cpri])
     prior['0csval'] = gv.gvar(Npow*[cvalpri])
-    prior['0clval'] = gv.gvar(Npow*[cvalpri])
     prior['Td'] = gv.gvar(Nijk*[Nijk*[Nijk*[Npow*[dpri]]]])
     prior['Tcl'] = gv.gvar(Npow*[Nm*[cpri]])
     prior['Tcs'] = gv.gvar(Npow*[cpri])
     prior['Tcc'] = gv.gvar(Npow*[cpri])
     prior['Tcsval'] = gv.gvar(Npow*[cvalpri])
-    prior['Tclval'] = gv.gvar(Npow*[cvalpri])
     prior['pd'] = gv.gvar(Nijk*[Nijk*[Nijk*[Npow*[dpri]]]])
     for i in range(Nijk):
         if i != 0:
@@ -248,7 +246,6 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
     prior['pcs'] = gv.gvar(Npow*[cpri])
     prior['pcc'] = gv.gvar(Npow*[cpri])
     prior['pcsval'] = gv.gvar(Npow*[cvalpri])
-    prior['pclval'] = gv.gvar(Npow*[cvalpri])
     return(prior,f)
                 
 ########################################################################################################
@@ -297,15 +294,15 @@ def make_logs(p,Fit):
     return(logs)
 
 ########################################################################################################
-def make_f0_BK(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False):
+def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False):
     f0 = 0
     logs = make_logs(p,Fit)
     for n in range(Npow):
         if newdata:
-            an = make_an_BK(n,Nijk,addrho,p,'0',Fit,alat,mass,amh,fpf0same,newdata=newdata)
+            an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,alat,mass,amh,fpf0same,newdata=newdata)
             f0 += logs/(1-qsq/(p['MBs0phys']**2)) * an * z**n
         elif newdata == False:
-            an = make_an_BK(n,Nijk,addrho,p,'0',Fit,alat,mass,amh,fpf0same)
+            an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,alat,mass,amh,fpf0same)
             f0 += logs/(1-qsq/(p['MHs0_{0}_m{1}'.format(Fit['conf'],mass)]**2)) * an * z**n
         else:
             print('Error in make_f0_BK(): newdata = {0}'.format(newdata))
@@ -313,15 +310,15 @@ def make_f0_BK(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False
 
 ########################################################################################################
 
-def make_fp_BK(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False):
+def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False):
     fp = 0
     logs = make_logs(p,Fit)
     for n in range(Npow):
         if newdata:
-            an = make_an_BK(n,Nijk,addrho,p,'p',Fit,alat,mass,amh,fpf0same,newdata=newdata)
+            an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,alat,mass,amh,fpf0same,newdata=newdata)
             fp += logs/(1-qsq/(p['MBsstarphys']**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
         elif newdata == False:
-            an = make_an_BK(n,Nijk,addrho,p,'p',Fit,alat,mass,amh,fpf0same)
+            an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,alat,mass,amh,fpf0same)
             fp += logs/(1-qsq/(p['MHsstar_{0}_m{1}'.format(Fit['conf'],mass)]**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
         else:
             print('Error in make_fp_BK(): newdata = {0}'.format(newdata))
@@ -329,15 +326,15 @@ def make_fp_BK(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False
 
 #########################################################################################################
 
-def make_fT_BK(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False):
+def make_fT_BK(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False):
     fT = 0
     logs = make_logs(p,Fit)
     for n in range(Npow):
         if newdata:
-            an = make_an_BK(n,Nijk,addrho,p,'T',Fit,alat,mass,amh,fpf0same,newdata=newdata)
+            an = make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,alat,mass,amh,fpf0same,newdata=newdata)
             fT += logs/(1-qsq/(p['MBsstarphys']**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
         elif newdata == False:
-            an = make_an_BK(n,Nijk,addrho,p,'T',Fit,alat,mass,amh,fpf0same)
+            an = make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,alat,mass,amh,fpf0same)
             fT += logs/(1-qsq/(p['MHsstar_{0}_m{1}'.format(Fit['conf'],mass)]**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
         else:
             print('Error in make_fT_BK(): newdata = {0}'.format(newdata))
@@ -345,37 +342,37 @@ def make_fT_BK(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False
 
 #######################################################################################################
 
-def do_fit_BK(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same):
+def do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same):
     # have to define function in here so it only takes p as an argument (I think)
     ###############################
     def fcn(p):
         models = gv.BufferDict()
         if 'f0_qsq{0}'.format(qsqmaxphysBK) in f:
-            models['f0_qsq{0}'.format(qsqmaxphysBK)] = make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphysBK)],p['z_qsq{0}'.format(qsqmaxphysBK)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
+            models['f0_qsq{0}'.format(qsqmaxphysBK)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphysBK)],p['z_qsq{0}'.format(qsqmaxphysBK)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         if 'fp_qsq{0}'.format(qsqmaxphysBK) in f:
-            models['fp_qsq{0}'.format(qsqmaxphysBK)] = make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphysBK)],p['z_qsq{0}'.format(qsqmaxphysBK)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
+            models['fp_qsq{0}'.format(qsqmaxphysBK)] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphysBK)],p['z_qsq{0}'.format(qsqmaxphysBK)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         if 'f0_qsq{0}'.format(0) in f:
-            models['f0_qsq{0}'.format(0)] = make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,0,p['z_qsq{0}'.format(0)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
+            models['f0_qsq{0}'.format(0)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,0,p['z_qsq{0}'.format(0)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         for Fit in Fits:
             for mass in Fit['masses']:
                 for twist in Fit['twists']:
                     tag = '{0}_m{1}_tw{2}'.format(Fit['conf'],mass,twist)
                     if 'f0_{0}'.format(tag) in f:
-                        models['f0_{0}'.format(tag)] = make_f0_BK(Nijk,Npow,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass,fpf0same,float(mass)) #second mass is amh
+                        models['f0_{0}'.format(tag)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass,fpf0same,float(mass)) #second mass is amh
                     if 'fp_{0}'.format(tag) in f:
-                        models['fp_{0}'.format(tag)] = make_fp_BK(Nijk,Npow,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass,fpf0same,float(mass)) #second mass is amh
+                        models['fp_{0}'.format(tag)] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass,fpf0same,float(mass)) #second mass is amh
                     if 'fT_{0}'.format(tag) in f:
-                        models['fT_{0}'.format(tag)] = make_fT_BK(Nijk,Npow,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass,fpf0same,float(mass)) #second mass is amh
+                        models['fT_{0}'.format(tag)] = make_fT_BK(Nijk,Nm,Npow,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass,fpf0same,float(mass)) #second mass is amh
                     
                         
         return(models)
     #################################
     
     p0 = None
-    if os.path.isfile('Fits/pmeanBK{0}{1}{2}.pickle'.format(addrho,Npow,Nijk)):
-        p0 = gv.load('Fits/pmeanBK{0}{1}{2}.pickle'.format(addrho,Npow,Nijk))
+    if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
+        p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
-    gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}.pickle'.format(addrho,Npow,Nijk))
+    gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
     return(fit.p)
 
@@ -448,21 +445,21 @@ def ratio_fp_B_D_BsEtas(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
 
 ######################################################################################################
 
-def fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho):
+def fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho):
     p = make_p_physical_point_BK(pfit,Fits,Del)
     qsq = 0
     z = make_z(qsq,t_0,MBphys,MKphys)
     z = z.mean
-    f00 = make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     #     make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
-    fp0 = make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
-    fT0 = make_fT_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    fT0 = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     qsq = qsqmaxphysBK.mean
     z = make_z(qsq,t_0,MBsphys,Metasphys)
     z = z.mean
-    f0max = make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
-    fpmax = make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
-    fTmax = make_fT_BK(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    f0max = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    fpmax = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    fTmax = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     print('f_+(0)/f_0(0) = {0}'.format(fp0/f00))
     print('f_0(0) = {0}  error: {1:.2%}'.format(f00,f00.sdev/f00.mean))
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))

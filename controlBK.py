@@ -39,7 +39,7 @@ F['daughter-Tag'] = 'K_G5-G5_tw{0}'
 SF = collections.OrderedDict()
 SF['conf']='SF'
 SF['label'] = 'Set 2'
-SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.147_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530chained_Nexp3_sfac1.0_pfac1.0_Q1.00_chi0.124_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 #SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp2_sfac1.0_pfac1.0_Q1.00_chi0.549_Stmin2_Ttmin2_Vtmin2.pickle' 
 SF['Hsfilename'] = 'Corrfits/SF5_Q1.00_Nexp4_Stmin2_Vtmin2_svd0.00002_chi0.722'
 SF['Hsparent-Tag'] = 'meson.m{0}_m{1}'
@@ -126,20 +126,20 @@ for Fit in Fits:
     get_results(Fit,thpts)
     make_fs(Fit,fs_data[Fit['conf']],thpts)
     results_tables(fs_data[Fit['conf']],Fit)
-prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata)
+prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata)
 
-pfit = do_fit_BK(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same)
+pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same)
 #print values
-fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,addrho)
+fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
+f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
+f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
 #f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0)

@@ -84,7 +84,7 @@ def speed_of_light(Fits):
 
 #####################################################################################################
 
-def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
+def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     i = 0
     for Fit in Fits:
         j = 0
@@ -120,7 +120,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
         zed = make_z(q2,t_0,MBphys,MKphys) #all GeV dimensions
         z.append(zed.mean)
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0sameamh)
-        y.append(make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+        y.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
     plt.figure(2,figsize=figsize)
@@ -174,7 +174,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
 
 ################################################################################################
 
-def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
+def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     i = 0
     for Fit in Fits:
         j = 0
@@ -211,7 +211,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
         zed = make_z(q2,t_0,MBphys,MKphys) #all GeV dimensions
         z.append(zed.mean)
         #        make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
-        y.append(make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+        y.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
     plt.figure(4,figsize=figsize)
@@ -261,7 +261,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
 
 ################################################################################################
 
-def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
+def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     i = 0
     for Fit in Fits:
         j = 0
@@ -298,7 +298,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
         zed = make_z(q2,t_0,MBphys,MKphys) #all GeV dimensions
         z.append(zed.mean)
         #        make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
-        y.append(make_fT_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+        y.append(make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
     plt.figure(4,figsize=figsize)
@@ -535,7 +535,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
 
 ################################################################################################
 
-def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same):
     qsq = []
     y0 = []
     yp = []
@@ -545,9 +545,9 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
         qsq.append(q2)
         zed = make_z(q2,t_0,MBphys,MKphys) #all GeV dimensions
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
-        y0.append(make_f0_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
-        yp.append(make_fp_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
-        yT.append(make_fT_BK(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
+        y0.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+        yp.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
+        yT.append(make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
     y0mean,y0err = unmake_gvar_vec(y0)
     y0upp,y0low = make_upp_low(y0)
     ypmean,yperr = unmake_gvar_vec(yp)
