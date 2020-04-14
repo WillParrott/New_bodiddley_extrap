@@ -1,4 +1,4 @@
-from functions import *
+from functionsBsEtas import *
 import numpy as np
 import gvar as gv
 import lsqfit
