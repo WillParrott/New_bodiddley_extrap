@@ -22,6 +22,9 @@ Metacphys = gv.gvar('2.98390(50)')  # PDG says 2.9839(5) previously had '2.9863(
 Metas_F = gv.gvar('0.314015(89)') #from BsEtas fits
 Metas_SF = gv.gvar('0.207021(65)')#from new BsEtas fit
 Metas_UF = gv.gvar('0.154107(88)') #from new BsEast fit
+Metas_Fs = gv.gvar('0.314015(89)') #from BsEtas fits
+Metas_SFs = gv.gvar('0.207021(65)')#from new BsEtas fit
+Metas_UFs = gv.gvar('0.154107(88)') #from new BsEast fit
 MKphys = gv.gvar('0.497611(13)') #PD K^0
 MBsphys = gv.gvar('5.36688(17)') # PDG
 MDsphys = gv.gvar('1.968340(70)')  #PDG
@@ -37,9 +40,16 @@ slratio = gv.gvar('27.18(10)')
 MetacF = gv.gvar('1.367014(40)')        #lattice units
 MetacSF = gv.gvar('0.896806(48)')       #where are these from? 
 MetacUF = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
-deltaFVF = gv.gvar('0.02080141880812089(1)')
-deltaFVSF = gv.gvar('0.02080141880812089(1)')
-deltaFVUF = gv.gvar('0.027538707753275(1)') #from code Chris sent
+deltaFVF = gv.gvar('0.020801418(21)')#80812089(1)')
+deltaFVSF = gv.gvar('0.020801418(21)')#80812089(1)')
+deltaFVUF = gv.gvar('0.027538707(37)')#753275(1)') #from code Chris sent
+MetacFs = gv.gvar('1.367014(40)')        #lattice units
+MetacSFs = gv.gvar('0.896806(48)')       #where are these from? 
+MetacUFs = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
+deltaFVFs = gv.gvar('0.020801418(21)')#80812089(1)')
+deltaFVSFs = gv.gvar('0.020801418(21)')#80812089(1)')
+deltaFVUFs = gv.gvar('0.027538707(37)')#753275(1)') #from code Chris sent
+
 x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2 
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
@@ -97,11 +107,12 @@ def make_params_BK(Fits,Masses,Twists):
         j = 0
         for i in range(len(Fit['twists'])):
             if i not in Twists[Fit['conf']]:
+                del Fit['daughter-Tag'][i-j]
                 del Fit['twists'][i-j]
                 j += 1
-        for twist in Fit['twists']:
+        for i,twist in enumerate(Fit['twists']):
             Fit['momenta'].append(np.sqrt(3)*np.pi*float(twist)/Fit['L'])
-            daughters.append(Fit['daughter-Tag'].format(twist))
+            daughters.append(Fit['daughter-Tag'][i].format(twist))
         Fit['daughter-Tag'] = daughters
     return()    
 
@@ -117,7 +128,7 @@ def get_results(Fit,thpts):
         Fit['M_parent_m{0}'.format(mass)] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0]
         if 'Hsfilename' in Fit:
             mass2 = mass 
-            if mass == '0.45':
+            if mass == '0.45' and Fit['conf'] != 'UFs' :
                 mass2 = '0.450'
             Fit['MHs_parent_m{0}'.format(mass)] = pHs['dE:{0}'.format(Fit['Hsparent-Tag'].format(Fit['m_s'],mass2))][0]
     Fit['M_daughter'] = p['dE:{0}'.format(Fit['daughter-Tag'][0])][0]
@@ -173,7 +184,7 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
         prior['g'] = gv.gvar('0.51(20)')  #used in 1406.2279
         prior['LQCD_{0}'.format(fit)] = LQCD*Fit['a']#have to convert this now so can evaluate in GeV later
         ms0 = Fit['m_ssea']
-        #ml0 = Fit['m_lsea'] #becuase valuence and sea same, only use one
+        ml0 = Fit['m_lsea'] #becuase valuence and sea same, only use one
         ms0val = float(Fit['m_s']) # valence untuned s mass
         ml0val = float(Fit['m_l']) # valence untuned s mass
         Metas = globals()['Metas_{0}'.format(fit)]/Fit['a'] # in GeV
@@ -182,12 +193,12 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
         prior['Metacphys'] = Metacphys
         prior['mstuned_{0}'.format(fit)] = ms0val*(Metasphys/Metas)**2
         prior['ml10ms_{0}'.format(fit)] = ml0val/(10*prior['mstuned_{0}'.format(fit)])
-        #mltuned = prior['mstuned_{0}'.format(Fit['conf'])]/slratio 
+        mltuned = prior['mstuned_{0}'.format(Fit['conf'])]/slratio 
         prior['MD_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units
         prior['deltas_{0}'.format(fit)] = ms0-prior['mstuned_{0}'.format(Fit['conf'])]     
         prior['deltasval_{0}'.format(fit)] = ms0val-prior['mstuned_{0}'.format(Fit['conf'])]
         #prior['deltalval_{0}'.format(fit)] = ml0val-mltuned
-        #prior['deltal_{0}'.format(fit)] = ml0-mltuned
+        prior['deltal_{0}'.format(fit)] = ml0-mltuned
         for mass in Fit['masses']:
             prior['MH_{0}_m{1}'.format(fit,mass)] = Fit['M_parent_m{0}'.format(mass)]
             prior['MHs_{0}_m{1}'.format(fit,mass)] = Fit['MHs_parent_m{0}'.format(mass)]
@@ -226,13 +237,15 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
         prior['prho'] =gv.gvar(Npow*[rhopri])
         prior['Trho'] =gv.gvar(Npow*[rhopri])
     prior['0d'] = gv.gvar(Nijk*[Nijk*[Nijk*[Npow*[dpri]]]])
-    prior['0cl'] = gv.gvar(Npow*[Nm*[cpri]])
+    prior['0clval'] = gv.gvar(Npow*[Nm*[cpri]])
     prior['0cs'] = gv.gvar(Npow*[cpri])
+    prior['0cl'] = gv.gvar(Npow*[cpri])
     prior['0cc'] = gv.gvar(Npow*[cpri])
     prior['0csval'] = gv.gvar(Npow*[cvalpri])
     prior['Td'] = gv.gvar(Nijk*[Nijk*[Nijk*[Npow*[dpri]]]])
-    prior['Tcl'] = gv.gvar(Npow*[Nm*[cpri]])
+    prior['Tclval'] = gv.gvar(Npow*[Nm*[cpri]])
     prior['Tcs'] = gv.gvar(Npow*[cpri])
+    prior['Tcl'] = gv.gvar(Npow*[cpri])
     prior['Tcc'] = gv.gvar(Npow*[cpri])
     prior['Tcsval'] = gv.gvar(Npow*[cvalpri])
     prior['pd'] = gv.gvar(Nijk*[Nijk*[Nijk*[Npow*[dpri]]]])
@@ -242,8 +255,9 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
             for n in range(Npow):
                 prior['0d'][i][1][0][n] = gv.gvar(di10npri)
                 prior['pd'][i][1][0][n] = gv.gvar(di10npri)
-    prior['pcl'] = gv.gvar(Npow*[Nm*[cpri]])
+    prior['pclval'] = gv.gvar(Npow*[Nm*[cpri]])
     prior['pcs'] = gv.gvar(Npow*[cpri])
+    prior['pcl'] = gv.gvar(Npow*[cpri])
     prior['pcc'] = gv.gvar(Npow*[cpri])
     prior['pcsval'] = gv.gvar(Npow*[cvalpri])
     return(prior,f)
@@ -266,13 +280,13 @@ def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,alat,mass,amh,fpf0same,newdata=False):
                         tagsamed = '0'
                 mlpows = 0
                 for m in range(1,Nm):
-                    mlpows += p['{0}cl'.format(tagsamerho)][n][m] * (p['ml10ms_{0}'.format(fit)])**m
+                    mlpows += p['{0}clval'.format(tagsamerho)][n][m] * (p['ml10ms_{0}'.format(fit)])**m
                 if addrho:
                     if newdata:
                         print('Added external data in a{0}'.format(n), 'need to edit this to work properly')
                         an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MBphys']/p['MDphys'])) *  p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MBphys'])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
                     elif newdata == False:
-                        an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MH_{0}_m{1}'.format(fit,mass)]/p['MD_{0}'.format(fit)])) * (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + mlpows  + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
+                        an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MH_{0}_m{1}'.format(fit,mass)]/p['MD_{0}'.format(fit)])) * (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + mlpows  + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
                     else:
                         print('Error in make_an_BsEtas(): newdata = {0}'.format(newdata))
                         
@@ -281,7 +295,7 @@ def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,alat,mass,amh,fpf0same,newdata=False):
                         print('Added external data in a{0}'.format(n),'need to edit this to work properly')
                         an += p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MBphys'])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
                     elif newdata == False:
-                        an += (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + mlpows + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
+                        an += (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)]+2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + mlpows + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k)
                     else:
                         print('Error in make_an_BK(): newdata = {0}'.format(newdata))
                     
@@ -386,10 +400,11 @@ def make_p_physical_point_BK(pfit,Fits,Del):
         fit = Fit['conf']
         p['LQCD_{0}'.format(fit)] = LQCD
         p['Metac_{0}'.format(fit)] = Metacphys
-        p['deltas_{0}'.format(fit)] = 0     
+        p['deltas_{0}'.format(fit)] = 0
+        p['deltal_{0}'.format(fit)] = 0
         p['deltasval_{0}'.format(fit)] = 0
         p['ml10ms_{0}'.format(fit)] = 1/(10*slratio)
-        p['dletaFV_{0}'.format(fit)] = 0
+        p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
             p['MH_{0}_m{1}'.format(fit,mass)] = MBphys
             p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
@@ -412,10 +427,11 @@ def make_p_Mh_BK(pfit,Fits,Del,MH):
         fit = Fit['conf']
         p['LQCD_{0}'.format(fit)] = LQCD
         p['Metac_{0}'.format(fit)] = Metacphys
-        p['deltas_{0}'.format(fit)] = 0     
+        p['deltas_{0}'.format(fit)] = 0
+        p['deltal_{0}'.format(fit)] = 0
         p['deltasval_{0}'.format(fit)] = 0
         p['ml10ms_{0}'.format(fit)] = 1/(10*slratio)
-        p['dletaFV_{0}'.format(fit)] = 0
+        p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
             p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
             p['MH_{0}_m{1}'.format(fit,mass)] = MH

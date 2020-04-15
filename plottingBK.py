@@ -52,7 +52,11 @@ def speed_of_light(Fits):
     plt.figure(1,figsize=figsize)
     points = ['ko','r^','b*']
     i=0
+    plotfits = []
     for Fit in Fits:
+        if Fit['conf'] not in ['Fs','SFs','UFs']:
+            plotfits.append(Fit)
+    for Fit in plotfits:
         x = []
         y = []
         for tw,twist in enumerate(Fit['twists']):
@@ -86,7 +90,11 @@ def speed_of_light(Fits):
 
 def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     i = 0
+    plotfits = []
     for Fit in Fits:
+        if Fit['conf'] not in ['Fs','SFs','UFs']:
+            plotfits.append(Fit)
+    for Fit in plotfits:
         j = 0
         for mass in Fit['masses']:
             qsq = []
@@ -176,7 +184,11 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
 
 def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     i = 0
+    plotfits = []
     for Fit in Fits:
+        if Fit['conf'] not in ['Fs','SFs','UFs']:
+            plotfits.append(Fit)
+    for Fit in plotfits:
         j = 0
         for mass in Fit['masses']:
             qsq = []
@@ -263,7 +275,11 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
 
 def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     i = 0
+    plotfits = []
     for Fit in Fits:
+        if Fit['conf'] not in ['Fs','SFs','UFs']:
+            plotfits.append(Fit)
+    for Fit in plotfits:
         j = 0
         for mass in Fit['masses']:
             qsq = []
