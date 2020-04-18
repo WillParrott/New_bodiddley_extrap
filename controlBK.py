@@ -187,7 +187,10 @@ SHOWPLOTS = False
 Del = 0.4 #0.4 change in functions too
 t_0 = 0 # for z conversion
 adddata = False #include data in continuum from other papers currently only for f0
-
+############################################################################
+if t_0 != 0:
+    print('t_0 != 0, so fpf0same set to false')
+    fpf0same = False         
 ############################################################################
 
 fs_data = collections.OrderedDict() #fs from data fs_data[Fit][]

@@ -204,11 +204,11 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
             prior['MHs_{0}_m{1}'.format(fit,mass)] = Fit['MHs_parent_m{0}'.format(mass)]
             prior['MHs0_{0}_m{1}'.format(fit,mass)] = prior['MHs_{0}_m{1}'.format(fit,mass)] + Fit['a']*Del
             
-            prior['MHsstar_{0}_m{1}'.format(fit,mass)] = prior['MH_{0}_m{1}'.format(fit,mass)] + x*Fit['a']**2/prior['MHs_{0}_m{1}'.format(fit,mass)] #x in GeV^2*a^2/mass in lat units
+            prior['MHsstar_{0}_m{1}'.format(fit,mass)] = prior['MHs_{0}_m{1}'.format(fit,mass)] + x*Fit['a']**2/prior['MHs_{0}_m{1}'.format(fit,mass)] #x in GeV^2*a^2/mass in lat units
             for twist in Fit['twists']:
                 tag = '{0}_m{1}_tw{2}'.format(fit,mass,twist)
                 qsq = fs_data[fit]['qsq_m{0}_tw{1}'.format(mass,twist)]
-                prior['z_{0}'.format(tag)] = make_z(qsq,t_0,prior['MHs_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])    # x values go in prior
+                prior['z_{0}'.format(tag)] = make_z(qsq,t_0,prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])    # x values go in prior
                 prior['qsq_{0}'.format(tag)] = qsq
                 f['f0_{0}'.format(tag)] = fs_data[fit]['f0_m{0}_tw{1}'.format(mass,twist)]   # y values go in f   
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
@@ -419,9 +419,10 @@ def make_p_physical_point_BK(pfit,Fits,Del):
 ######################################################################################################
 
 def make_p_Mh_BK(pfit,Fits,Del,MH):
+    print('WARNING, ARE POLE POSITIONS CORRECT?')
     #only need to evaluate at one Fit one mass but change all anyway
     # everything should now be in GeV
-    #Need to think about pole positions here should be at MHsstar 
+    #Need to think about pole positions here should be at MHsstar ?  ? 
     p = gv.BufferDict()
     for Fit in Fits:
         fit = Fit['conf']

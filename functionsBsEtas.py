@@ -145,10 +145,12 @@ def make_fs(Fit,fs,thpts):
             fs['fp_m{0}_tw{1}'.format(mass,twist)] = fp
             fs['fT_m{0}_tw{1}'.format(mass,twist)] = fT
     return()
-#######################################################################################################    
+#######################################################################################################  #we actually want B and K here, so we take the different MBs-MB and MK-Metas and subtract it. We work out what a to use from the daughter mass   
 
 def make_z(qsq,t_0,M_parent,M_daughter):
-    t_plus = (M_parent + M_daughter)**2
+    diffphys  = MBsphys - MBphys + Metasphys - MKphys
+    a = M_daughter/Metasphys
+    t_plus = (M_parent + M_daughter - diffphys*a)**2
     z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))
     return(z)
 
@@ -235,7 +237,7 @@ def make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass,amh,fpf0same,newdata=False)
                 tagsamerho = tag
                 if tag == '0' or fpf0same == False:
                     pass
-                elif n == 0:
+                elif n == 0:     # this means only works for t_0 = 0
                     tagsamerho = '0'
                     if j == 0 and k == 0 :
                        tagsamed = '0'
