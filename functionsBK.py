@@ -32,7 +32,7 @@ MBphys = gv.gvar('5.27933(13)') # PDG
 MDphys = gv.gvar('1.86965(5)')  #PDG
 Mpiphys = gv.gvar('0.1349770(5)')  #PDG
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
-tensornorm = gv.gvar('1.09024(56)') # from Dan
+#tensornorm = gv.gvar('1.09024(56)') # from Dan
 w0 = gv.gvar('0.1715(9)')  #fm
 hbar = gv.gvar('6.58211928(15)') # x 10^-25 GeV s
 clight = 2.99792458 #*10^23 fm/s
@@ -92,6 +92,17 @@ def convert_Gev(a):
     return(aGev)
 
 ####################################################################################################
+def make_Z_T():
+    mean = gv.gvar(['1.0111(39)','1.0428(39)','1.0596(39)'])
+    corr = [[1.0,0.99945,0.98752],[0.99945,1.0,0.98725],[0.98752,0.98725,1.0]]
+    x = gv.correlate(mean,corr)
+    Z_T = gv.BufferDict()
+    Z_T['F'] = x[0] # all from Dan
+    Z_T['SF'] = x[1]
+    Z_T['UF'] = x[2]
+    return(Z_T)
+    
+####################################################################################################
 
 def make_params_BK(Fits,Masses,Twists):
     for Fit in Fits:
@@ -145,7 +156,7 @@ def get_results(Fit,thpts):
     
 ####################################################################################################
 
-def make_fs(Fit,fs,thpts):
+def make_fs(Fit,fs,thpts,Z_T):
     for m,mass in enumerate(Fit['masses']):
         Z_v = (float(mass) - float(Fit['m_s']))*Fit['S_m{0}_tw0'.format(mass)]/((Fit['M_parent_m{0}'.format(mass)] - Fit['M_daughter']) * Fit ['V_m{0}_tw0'.format(mass)])
         fs['Z_v_m{0}'.format(mass)] = Z_v
@@ -161,7 +172,7 @@ def make_fs(Fit,fs,thpts):
             if twist != '0':
                 fp = (1/(A-B))*(Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0)
                 if 'T' in thpts[Fit['conf']]:
-                    fT =  tensornorm*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*Fit['momenta'][t])
+                    fT =  Z_T[Fit['conf']]*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*Fit['momenta'][t])
             fs['qsq_m{0}_tw{1}'.format(mass,twist)] = qsq
             fs['f0_m{0}_tw{1}'.format(mass,twist)] = f0
             fs['fp_m{0}_tw{1}'.format(mass,twist)] = fp
