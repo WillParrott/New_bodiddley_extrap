@@ -172,7 +172,7 @@ def make_fs(Fit,fs,thpts,Z_T):
             if twist != '0':
                 fp = (1/(A-B))*(Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0)
                 if 'T' in thpts[Fit['conf']]:
-                    fT =  Z_T[Fit['conf']]*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*Fit['momenta'][t])
+                    fT = np.sqrt(3)*Z_T[Fit['conf']]*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*Fit['momenta'][t])
             fs['qsq_m{0}_tw{1}'.format(mass,twist)] = qsq
             fs['f0_m{0}_tw{1}'.format(mass,twist)] = f0
             fs['fp_m{0}_tw{1}'.format(mass,twist)] = fp
