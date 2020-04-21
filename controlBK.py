@@ -190,7 +190,7 @@ Nm=3
 SHOWPLOTS = False
 Del = 0.4 #0.4 change in functions too
 t_0 = 0 # for z conversion
-adddata = False #include data in continuum from other papers currently only for f0
+adddata = True #include data in continuum from other papers currently only for f0 Bsetas max
 ############################################################################
 if t_0 != 0:
     print('t_0 != 0, so fpf0same set to false')
@@ -206,6 +206,7 @@ for Fit in Fits:
     get_results(Fit,thpts)
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
     results_tables(fs_data[Fit['conf']],Fit)
+check_poles(Fits) 
 prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata)
 
 pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same)
