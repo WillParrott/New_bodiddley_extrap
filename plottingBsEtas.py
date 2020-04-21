@@ -30,7 +30,7 @@ from collections import defaultdict
 # ans and pole masses
 # dict of different lattice spacings #done 
 ################### global variables ##########################################
-factor = 0.5 #multiplies everything to make smaller for big plots etc usually 1
+factor = 1.0 #multiplies everything to make smaller for big plots etc usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor
@@ -769,7 +769,7 @@ def Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
 def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     Emax = (MDsphys**2 + Metasphys**2)/MDsphys
     Emin = Metasphys
-    E = Emax
+    E = Emin
     M_h = []
     rat0 = []
     ratp = []
@@ -825,7 +825,7 @@ def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
 def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     Emax = (MDsphys**2 + Metasphys**2)/MDsphys
     Emin = Metasphys
-    E = Emin
+    E = Emax
     M_h = []
     rat0 = []
     ratp = []
