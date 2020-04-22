@@ -63,7 +63,10 @@ dataf0maxBK = None
 datafpmaxBK = None
 datafTmaxBK = None
 dataf00BK = None
-dataf0maxBsEtas = gv.gvar('0.811(17)') #This is the only on the works for now, whole thing set for this
+dataf0max1BsEtas = gv.gvar('0.811(17)') # only BsEtas works for now 1510.07446 
+dataf0max2BsEtas =  gv.gvar('0.816(35)') #chris 1406.2279
+datafpmaxBsEtas =  gv.gvar('2.293(91)') #chris 1406.2279
+dataf00BsEtas =  gv.gvar('0.297(47)') #chris 1406.2279
 #####################################################################################################
 
 def unmake_gvar_vec(vec):
@@ -159,6 +162,7 @@ def get_results(Fit,thpts):
 ###################################################################################################
 
 def make_MHsstar(MH_s,a=1.0): # need one of these for lattice units and GeV set a=1.0 to give GeV
+    # Take MH_s and MH so we can use either. May be better to use MH throughout but then have BsEtas problem until we have UF data. However, this will solve problems with finephysical etc. 
     DeltaDs = MDsstarphys - MDsphys
     DeltaBs = MBsstarphys - MBsphys
     MHsstar = MH_s + a**2*MDsphys*DeltaDs/MH_s + a*MBsphys/MH_s * ( (MH_s-a*MDsphys)/(MBsphys-MDsphys) * (DeltaBs - MDsphys/MBsphys * DeltaDs) )
