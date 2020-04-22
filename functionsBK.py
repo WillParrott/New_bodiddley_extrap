@@ -59,7 +59,7 @@ qsqmaxphysBK = (MBphys-MKphys)**2
 Del = 0.4 # in control too
 #####################################################################################################
 ############################### Other data #########################################################
-dataf0maxBK = None
+dataf0maxBK = None  #only works for BsEtas for now
 datafpmaxBK = None
 datafTmaxBK = None
 dataf00BK = None
@@ -271,10 +271,10 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
                 f['fT_{0}'.format(tag)] = fs_data[fit]['fT_m{0}_tw{1}'.format(mass,twist)]
     if adddata: #not fot fT at the moment
-        f['f0_qsq{0}'.format(qsqmaxphys)] = dataf0maxBsEtas # onlyone which works
-        f['fp_qsq{0}'.format(qsqmaxphysBK)] = datafpmaxBK
-        f['fT_qsq{0}'.format(qsqmaxphysBK)] = datafTmaxBK
-        f['f0_qsq{0}'.format(0)] = dataf00BK
+        f['f0_qsq{0}1'.format(qsqmaxphys)] = dataf0max1BsEtas # onlyone BsEtas works
+        f['f0_qsq{0}2'.format(qsqmaxphys)] = dataf0max2BsEtas # onlyone BsEtas works
+        f['fp_qsq{0}'.format(qsqmaxphys)] = datafpmaxBsEtas
+        f['f0_qsq{0}'.format(0)] = dataf00BsEtas
         prior['qsq_qsq{0}'.format(qsqmaxphys)] = qsqmaxphys
         prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphys,t_0,MBphys,MKphys)
         prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBphys,MKphys)
@@ -387,11 +387,12 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=Fa
 def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False):
     fp = 0
     logs = make_logs(p,Fit)
+    logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
     for n in range(Npow):
         if newdata:
-            print('Error,trying to input new data fp')
+            #print('Error,trying to input new data fp')
             an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,alat,mass,amh,fpf0same,newdata=newdata)
-            fp += logs/(1-qsq/(p['MBsstarphys']**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
+            fp += logsBsEtas/(1-qsq/(p['MBsstarphys']**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
         elif newdata == False:
             an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,alat,mass,amh,fpf0same)
             fp += logs/(1-qsq/(p['MHsstar_{0}_m{1}'.format(Fit['conf'],mass)]**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
@@ -423,10 +424,12 @@ def do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same):
     ###############################
     def fcn(p):
         models = gv.BufferDict()
-        if 'f0_qsq{0}'.format(qsqmaxphys) in f:
-            models['f0_qsq{0}'.format(qsqmaxphys)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
-        if 'fp_qsq{0}'.format(qsqmaxphysBK) in f:
-            models['fp_qsq{0}'.format(qsqmaxphysBK)] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphysBK)],p['z_qsq{0}'.format(qsqmaxphysBK)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
+        if 'f0_qsq{0}1'.format(qsqmaxphys) in f:
+            models['f0_qsq{0}1'.format(qsqmaxphys)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
+        if 'f0_qsq{0}2'.format(qsqmaxphys) in f:
+            models['f0_qsq{0}2'.format(qsqmaxphys)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
+        if 'fp_qsq{0}'.format(qsqmaxphys) in f:
+            models['fp_qsq{0}'.format(qsqmaxphys)] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,p['qsq_qsq{0}'.format(qsqmaxphys)],p['z_qsq{0}'.format(qsqmaxphys)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         if 'f0_qsq{0}'.format(0) in f:
             models['f0_qsq{0}'.format(0)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,0,p['z_qsq{0}'.format(0)],Fits[0]['masses'][0],fpf0same,0,newdata=True)
         for Fit in Fits:
