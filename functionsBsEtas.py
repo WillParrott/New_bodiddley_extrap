@@ -117,7 +117,7 @@ def get_results(Fit,thpts):
         Fit['E_daughter_tw{0}_theory'.format(twist)] = gv.sqrt(Fit['M_daughter']**2+Fit['momenta'][t]**2)
         for m, mass in enumerate(Fit['masses']):
             for thpt in thpts[Fit['conf']]:
-                if twist != '0' or thpt != 'T':
+                if twist != '0' or thpt != 'T':   #This second 2 is should be in the data remember for BK
                     Fit['{0}_m{1}_tw{2}'.format(thpt,mass,twist)] = 2 * 2 * Fit['Zdisc'][m] * gv.sqrt(Fit['M_parent_m{0}'.format(mass)]*Fit['E_daughter_tw{0}_theory'.format(twist)]) * p['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)][0][0]
                     #check zdisc is correctly implemented here
     return()

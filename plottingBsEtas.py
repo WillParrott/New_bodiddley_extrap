@@ -30,7 +30,7 @@ from collections import defaultdict
 # ans and pole masses
 # dict of different lattice spacings #done 
 ################### global variables ##########################################
-factor = 1.0 #multiplies everything to make smaller for big plots etc usually 1
+factor = 0.5 #multiplies everything to make smaller for big plots etc usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor
@@ -549,10 +549,10 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.errorbar(MDphys.mean,0.612, yerr=0.035,fmt='kd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,1.134, yerr=0.049,fmt='bd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,2.130, yerr=0.096,fmt='rd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.765, yerr=0.031,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean+0.01,0.765, yerr=0.031,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,0.979, yerr=0.019,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,1.336, yerr=0.054,fmt='rs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.745, yerr=0.011,fmt='bD',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean-0.01,0.745, yerr=0.011,fmt='kD',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)#,capsize=capsize)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
