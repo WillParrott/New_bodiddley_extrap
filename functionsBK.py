@@ -174,6 +174,7 @@ def make_fs(Fit,fs,thpts,Z_T):
     for m,mass in enumerate(Fit['masses']):
         Z_v = (float(mass) - float(Fit['m_s']))*Fit['S_m{0}_tw0'.format(mass)]/((Fit['M_parent_m{0}'.format(mass)] - Fit['M_daughter']) * Fit ['V_m{0}_tw0'.format(mass)])
         fs['Z_v_m{0}'.format(mass)] = Z_v
+        print(Fit['conf'],mass,Z_v)
         for t,twist in enumerate(Fit['twists']):
             delta = (float(mass) - float(Fit['m_s']))*(Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(twist)])
             qsq = (Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(twist)])**2 - Fit['momenta'][t]**2
