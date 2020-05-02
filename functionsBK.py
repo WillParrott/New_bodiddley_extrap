@@ -155,6 +155,8 @@ def get_results(Fit,thpts):
         for m, mass in enumerate(Fit['masses']):
             for thpt in thpts[Fit['conf']]:
                 if twist != '0' or thpt != 'T':
+                    fir i in range(100):
+                        print('deal with factor of 2 in 3pt')
                     Fit['{0}_m{1}_tw{2}'.format(thpt,mass,twist)] = 2 * 2 * Fit['Zdisc'][m] * gv.sqrt(Fit['M_parent_m{0}'.format(mass)]*Fit['E_daughter_tw{0}_theory'.format(twist)]) * p['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)][0][0]
                     #check zdisc is correctly implemented here
     return()
