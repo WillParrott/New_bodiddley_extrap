@@ -54,7 +54,7 @@ def speed_of_light(Fits):
     i=0
     plotfits = []
     for Fit in Fits:
-        if Fit['conf'] not in ['Fs','SFs','UFs']:
+        if Fit['conf'] in ['F','SF','UF']:
             plotfits.append(Fit)
     for Fit in plotfits:
         x = []
@@ -67,7 +67,7 @@ def speed_of_light(Fits):
         plt.errorbar(x,y,yerr=yerr,fmt=points[i],label=Fit['label'],ms=ms,mfc='none')
         i += 1
     plt.plot([0,0.5],[1,1],'k--',lw=3)
-    plt.xlim((0,0.22))
+    #plt.xlim((0,0.22))
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(loc='lower left',handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
