@@ -67,7 +67,7 @@ def speed_of_light(Fits):
         plt.errorbar(x,y,yerr=yerr,fmt=points[i],label=Fit['label'],ms=ms,mfc='none')
         i += 1
     plt.plot([0,0.5],[1,1],'k--',lw=3)
-    #plt.xlim((0,0.22))
+    plt.xlim((0,0.22))
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(loc='lower left',handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
@@ -81,9 +81,11 @@ def speed_of_light(Fits):
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    #plt.xlim([0,0.2])
+    #plt.ylim([0.9,1.2])
     plt.tight_layout()
     plt.savefig('Plots/speedoflight.pdf')
-    plt.show()
+    #plt.show()
     return()
 
 #####################################################################################################
