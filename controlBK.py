@@ -87,7 +87,7 @@ UFs['daughter-Tag'] = ['etas_G5-G5_tw0','etas_G5-G5_tw0.706','etas_G5-G5_tw1.529
 F = collections.OrderedDict()
 F['conf']='F'
 F['label'] = 'Set 1'
-F['filename'] = 'Corrfits/FKBscalarvectortensor_398cfgs_negFalse0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.261_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+F['filename'] = 'Corrfits2/FKBscalarvectortensor_398cfgs_negFalse0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.261_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 F['Hsfilename'] = Fs['Hsfilename'] 
 F['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 F['masses'] = ['0.449','0.566','0.683','0.8']
@@ -109,7 +109,7 @@ SF = collections.OrderedDict()
 SF['conf']='SF'
 SF['label'] = 'Set 2'
 #SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530chained_Nexp3_sfac1.0_pfac1.0_Q1.00_chi0.124_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
-SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_415cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.169_smTrue_Stmin2_Ttmin2_Vtmin2.pickle' 
+SF['filename'] = 'Corrfits2/SFnohimem-KBscalarvectortensor_415cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.169_smTrue_Stmin2_Ttmin2_Vtmin2.pickle' 
 SF['Hsfilename'] = SFs['Hsfilename']
 SF['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 SF['masses'] = ['0.274','0.45','0.6','0.8']
@@ -153,7 +153,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [F,SF,Fs,SFs,UFs]#,UF]                                         # Choose to fit F, SF or UF
+Fits = [F,SF]#,Fs,SFs,UFs]#,UF]                                         # Choose to fit F, SF or UF
 Masses['F'] = [0,1,2,3]                                     # Choose which masses to fit
 Twists['F'] = [0,1,2,3,4]
 thpts['F'] = ['S','V','T']
@@ -214,13 +214,13 @@ pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same)
 fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
-speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+#speed_of_light(Fits)
+#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
+#f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
 #f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0)
