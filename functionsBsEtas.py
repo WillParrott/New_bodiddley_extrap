@@ -166,6 +166,8 @@ def make_t_plus(M_parent,M_daughter):
 def make_z(qsq,t_0,M_parent,M_daughter):
     t_plus = make_t_plus(M_parent,M_daughter)
     z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))
+    if z.mean ==0 and z.sdev ==0:
+        z = gv.gvar(0,1e-16)
     return(z)
 
 ######################################################################################################
