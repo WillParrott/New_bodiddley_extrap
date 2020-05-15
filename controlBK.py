@@ -18,11 +18,11 @@ warnings.filterwarnings("ignore")
 ################################## F PARAMETERS ##########################
 Fs = collections.OrderedDict()
 Fs['conf']='Fs'
-Fs['label'] = 'Set 4'
+Fs['label'] = 'Set 5'
 Fs['filename'] = '../../H_sToEta_s/Analysis/Fits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
-Fs['Hsfilename'] = Fs['filename'] 
+#Fs['Hsfilename'] = Fs['filename']  
 #Fs['Hsfilename'] = 'Corrfits2/F5_Q1.00_Nexp5_Stmin2_Vtmin1_svd0.00013_chi0.341'
-Fs['Hsparent-Tag'] = 'meson.m{0}_m{1}'
+#Fs['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 Fs['masses'] = ['0.449','0.566','0.683','0.8']
 Fs['Zdisc'] = [0.99892,0.99826,0.99648,0.99377]
 Fs['twists'] = ['0','0.4281','1.282','2.141','2.570']
@@ -40,11 +40,11 @@ Fs['daughter-Tag'] = ['etas','etas_p0.0728','etas_p0.218','etas_p0.364','etas_p0
 ######################## SFs PARAMETERS ####################################
 SFs = collections.OrderedDict()
 SFs['conf']='SFs'
-SFs['label'] = 'Set 5'
+SFs['label'] = 'Set 6'
 SFs['filename'] = '../../H_sToEta_s/Analysis/Fits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
-SFs['Hsfilename'] = SFs['filename']
+#SFs['Hsfilename'] = SFs['filename']
 #SFs['Hsfilename'] = 'Corrfits2/SF5_Q1.00_Nexp4_Stmin2_Vtmin2_svd0.00002_chi0.722'
-SFs['Hsparent-Tag'] = 'meson.m{0}_m{1}'
+#SFs['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 SFs['masses'] = ['0.274','0.450','0.6','0.8']
 SFs['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
 SFs['twists'] = ['0','1.261','2.108','2.946','3.624']
@@ -63,11 +63,11 @@ SFs['daughter-Tag'] = ['etas_p0','etas_p0.143','eta_s_tw2.108_m0.0234','etas_p0.
 ######################## UFs PARAMETERS ####################################
 UFs = collections.OrderedDict()
 UFs['conf']='UFs'
-UFs['label'] = 'Set 6'
+UFs['label'] = 'Set 7'
 UFs['filename'] = '../../H_sToEta_s/Analysis/Fits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
-UFs['Hsfilename'] = UFs['filename']
+#UFs['Hsfilename'] = UFs['filename']
 #UFs['Hsfilename'] = 'Corrfits/UF5_Q1.00_Nexp9_Stmin2_Vtmin2_svd0.01647_chi0.073'
-UFs['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
+#UFs['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
 UFs['masses'] = ['0.194','0.45','0.6','0.8']
 UFs['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UFs['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -83,13 +83,47 @@ UFs['parent-Tag'] = 'Bs_G5-G5_m{1}'
 UFs['daughter-Tag'] = ['etas_G5-G5_tw0','etas_G5-G5_tw0.706','etas_G5-G5_tw1.529','etas_G5-G5_tw2.235','etas_G5-G5_tw4.705']
 
 ########################### B to K ######################################################
+VCp = collections.OrderedDict()
+VCp['conf']='VCp'
+VCp['label'] = 'Set 0'
+VCp['filename'] = 'Corrfits/VCrelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.731_smTrue_Stmin1_Vtmin1.pickle'
+VCp['masses'] = ['0.8605']# note m eta_c for slightly wrong ensemble 0.863 = 
+VCp['Zdisc'] = [0.99197] 
+VCp['twists'] = ['0','2.013','3.05','3.969']
+VCp['m_l'] = '0.00235' #ampi = 0.101720(40)
+VCp['m_s'] = '0.0678'# note m eta_s for slightly wrong ensemble  
+VCp['m_c'] = '0.8605' 
+VCp['m_ssea'] = 0.0647
+VCp['m_lsea'] = 0.00235
+VCp['L'] = 32
+VCp['w0/a'] = gv.gvar('1.1367(5)')
+VCp['parent-Tag'] = '2pt_D_Gold_vc.ll'
+VCp['daughter-Tag'] = 5*['2pt_K_vc_tw{0}.ll']
+#########################################################################################
+Cp = collections.OrderedDict()
+Cp['conf']='Cp'
+Cp['label'] = 'Set 1'
+Cp['filename'] = 'Corrfits/Crelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.528_smTrue_Stmin1_Vtmin1.pickle'
+Cp['masses'] = ['0.643']# note m eta_c is not corect for this
+Cp['Zdisc'] = [0.99718]
+Cp['twists'] = ['0','2.405','3.641','4.735']
+Cp['m_l'] = '0.00184'
+Cp['m_s'] = '0.0527'
+Cp['m_c'] = '0.643'
+Cp['m_ssea'] = 0.0507
+Cp['m_lsea'] = 0.00184
+Cp['L'] = 48
+Cp['w0/a'] = gv.gvar('1.4149(6)')
+Cp['parent-Tag'] = '2pt_D_Gold_coarse.ll'
+Cp['daughter-Tag'] = 5*['2pt_K_coarse_tw{0}.ll'] 
+
 ################################## F PARAMETERS ##########################
 F = collections.OrderedDict()
 F['conf']='F'
-F['label'] = 'Set 1'
+F['label'] = 'Set 2'
 F['filename'] = 'Corrfits/FKBscalarvectortensor_398cfgs_negFalse0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.261_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
-F['Hsfilename'] = Fs['Hsfilename'] 
-F['Hsparent-Tag'] = 'meson.m{0}_m{1}'
+#F['Hsfilename'] = Fs['Hsfilename'] 
+#F['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 F['masses'] = ['0.449','0.566','0.683','0.8']
 F['Zdisc'] = [0.99892,0.99826,0.99648,0.99377]
 F['twists'] = ['0','0.4281','1.282','2.141','2.570']
@@ -107,11 +141,11 @@ F['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 ######################## SF PARAMETERS ####################################
 SF = collections.OrderedDict()
 SF['conf']='SF'
-SF['label'] = 'Set 2'
+SF['label'] = 'Set 3'
 #SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_158cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530chained_Nexp3_sfac1.0_pfac1.0_Q1.00_chi0.124_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_415cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.169_smTrue_Stmin2_Ttmin2_Vtmin2.pickle' 
-SF['Hsfilename'] = SFs['Hsfilename']
-SF['Hsparent-Tag'] = 'meson.m{0}_m{1}'
+#SF['Hsfilename'] = SFs['Hsfilename']
+#SF['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 SF['masses'] = ['0.274','0.45','0.6','0.8']
 SF['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
 SF['twists'] = ['0','1.261','2.108','2.946','3.624']
@@ -130,10 +164,10 @@ SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 ######################## UF PARAMETERS ####################################
 UF = collections.OrderedDict()
 UF['conf']='UF'
-UF['label'] = 'Set 3'
+UF['label'] = 'Set 4'
 UF['filename'] = '../Fits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
-UF['Hsfilename'] = UFs['Hsfilename']
-UF['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
+#UF['Hsfilename'] = UFs['Hsfilename']
+#UF['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
 UF['masses'] = ['0.194','0.45','0.6','0.8']
 UF['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UF['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -153,7 +187,13 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [F,SF,Fs,SFs,UFs]#,UF]                                         # Choose to fit F, SF or UF
+Fits = [VCp,Cp,F,SF,Fs,SFs,UFs]#,UF] # choose what to fit
+Masses['VCp'] = [0]                                     # Choose which masses to fit
+Twists['VCp'] = [0,1,2,3]
+thpts['VCp'] = ['S','V']
+Masses['Cp'] = [0]                                     # Choose which masses to fit
+Twists['Cp'] = [0,1,2,3]
+thpts['Cp'] = ['S','V']
 Masses['F'] = [0,1,2,3]                                     # Choose which masses to fit
 Twists['F'] = [0,1,2,3,4]
 thpts['F'] = ['S','V','T']
@@ -188,7 +228,7 @@ Npow = 3 #3
 Nijk = 3 #3
 Nm=3
 SHOWPLOTS = False
-Del = 0.4 #0.4 change in functions too
+Del = 0.5 #0.5 change in functions too
 t_0 = 0 # for z conversion
 adddata = True #include data in continuum from other papers currently only for f0 Bsetas max
 ############################################################################
@@ -206,7 +246,8 @@ for Fit in Fits:
     get_results(Fit,thpts)
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
     results_tables(fs_data[Fit['conf']],Fit)
-check_poles(Fits) 
+check_poles(Fits)
+Z_V_plots(Fits,fs_data)
 prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata)
 
 pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same)
@@ -214,10 +255,11 @@ pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same)
 fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
-#speed_of_light(Fits)
-#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+
+speed_of_light(Fits)
+f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)

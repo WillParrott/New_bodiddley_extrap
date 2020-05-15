@@ -40,8 +40,8 @@ alpha = 0.4
 fontsizeleg = 25*factor #legend
 fontsizelab = 35*factor #legend
 cols = ['b','r','g','c'] #for each mass
-symbs = ['o','^','*']    # for each conf
-lines = ['-','--','-.'] # for each conf
+symbs = ['o','^','*','D','d','s','p']    # for each conf
+lines = ['-','--','-.','-'] # for each conf
 major = 15*factor
 minor = 8*factor 
 capsize = 10*factor
@@ -50,11 +50,11 @@ capsize = 10*factor
 
 def speed_of_light(Fits):
     plt.figure(1,figsize=figsize)
-    points = ['ko','r^','b*']
+    points = ['ko','r^','b*','gd']
     i=0
     plotfits = []
     for Fit in Fits:
-        if Fit['conf'] in ['F','SF','UF']:
+        if Fit['conf'] not in ['Fs','SFs','UFs']:
             plotfits.append(Fit)
     for Fit in plotfits:
         x = []
@@ -66,8 +66,8 @@ def speed_of_light(Fits):
         y,yerr = unmake_gvar_vec(y)
         plt.errorbar(x,y,yerr=yerr,fmt=points[i],label=Fit['label'],ms=ms,mfc='none')
         i += 1
-    plt.plot([0,0.5],[1,1],'k--',lw=3)
-    plt.xlim((0,0.22))
+    plt.plot([0,0.6],[1,1],'k--',lw=3)
+    plt.xlim((0,0.5))
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(loc='lower left',handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
@@ -86,6 +86,45 @@ def speed_of_light(Fits):
     plt.tight_layout()
     plt.savefig('Plots/speedoflight.pdf')
     #plt.show()
+    return()
+
+#####################################################################################################
+
+def Z_V_plots(Fits,fs_data):
+    plt.figure(19,figsize=figsize)
+    i = 0
+    for Fit in Fits:
+        x = []
+        y = []
+        for mass in Fit['masses']:
+            x.append(float(mass)**2)
+            Z_V = fs_data[Fit['conf']]['Z_v_m{0}'.format(mass)]
+            y.append(Z_V)
+        y,yerr = unmake_gvar_vec(y)
+        if Fit['conf'][-1] == 's':
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['label'],ms=ms,mfc='none')
+        elif Fit['conf'][-1] == 'p':
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['label'],ms=ms,mfc='none')
+        else:
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['label'],ms=ms,mfc='none')
+        i+=1
+    plt.plot([-0.1,0.9],[1,1],'k--')
+    plt.xlim([0,0.8])
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.xlabel('$(am_h)^2$',fontsize=fontsizelab)
+    plt.ylabel('$Z_V$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.tight_layout()
+    plt.savefig('Plots/Z_Vinamhsq.pdf')            
     return()
 
 #####################################################################################################
@@ -279,7 +318,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     i = 0
     plotfits = []
     for Fit in Fits:
-        if Fit['conf'] not in ['Fs','SFs','UFs']:
+        if Fit['conf'] not in ['VCp','Cp','Fs','SFs','UFs']:
             plotfits.append(Fit)
     for Fit in plotfits:
         j = 0

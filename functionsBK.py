@@ -19,6 +19,8 @@ from collections import defaultdict
 
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.98390(50)')  # PDG says 2.9839(5) previously had '2.9863(27)' not sure where from
+Metas_VCp = gv.gvar('0.52680(8)')
+Metas_Cp = gv.gvar('0.42310(3)')#from 1408.4169 for am_s =0.0527 correct mass 
 Metas_F = gv.gvar('0.314015(89)') #from BsEtas fits
 Metas_SF = gv.gvar('0.207021(65)')#from new BsEtas fit
 Metas_UF = gv.gvar('0.154107(88)') #from new BsEast fit
@@ -37,26 +39,30 @@ MBsstarphys = gv.gvar('5.4158(15)') #PDG
 w0 = gv.gvar('0.1715(9)')  #fm
 hbar = gv.gvar('6.58211928(15)') # x 10^-25 GeV s
 clight = 2.99792458 #*10^23 fm/s
-slratio = gv.gvar('27.18(10)')   
+slratio = gv.gvar('27.18(10)')
+MetacVCp = gv.gvar('2.28770(4)')# for mass 0.863    2.28770(4) not correct 1408.4169
+MetacCp = gv.gvar('1.82225(5)')# from 1408.4169 for am_h =0.637 not correct
 MetacF = gv.gvar('1.367014(40)')        #lattice units
 MetacSF = gv.gvar('0.896806(48)')       #where are these from? 
 MetacUF = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
-deltaFVF = gv.gvar('0.020801418(21)')#80812089(1)')
-deltaFVSF = gv.gvar('0.020801418(21)')#80812089(1)')
-deltaFVUF = gv.gvar('0.027538707(37)')#753275(1)') #from code Chris sent
+deltaFVVCp =gv.gvar('0.12907825(82)')
+deltaFVCp =gv.gvar('0.04894993(12)')
+deltaFVF = gv.gvar('0.020801419(21)')#80812089(1)')
+deltaFVSF = gv.gvar('0.020801419(21)')#80812089(1)')
+deltaFVUF = gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
 MetacFs = gv.gvar('1.367014(40)')        #lattice units
 MetacSFs = gv.gvar('0.896806(48)')       #where are these from? 
 MetacUFs = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
-deltaFVFs = gv.gvar('0.020801418(21)')#80812089(1)')
-deltaFVSFs = gv.gvar('0.020801418(21)')#80812089(1)')
-deltaFVUFs = gv.gvar('0.027538707(37)')#753275(1)') #from code Chris sent
+deltaFVFs = gv.gvar('0.020801419(21)')#80812089(1)')
+deltaFVSFs = gv.gvar('0.020801419(21)')#80812089(1)')
+deltaFVUFs = gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
 
 #x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2 
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
 qsqmaxphysBK = (MBphys-MKphys)**2
-Del = 0.4 # in control too
+Del = 0.5 # in control too
 #####################################################################################################
 ############################### Other data #########################################################
 dataf0maxBK = None  #only works for BsEtas for now
@@ -136,17 +142,17 @@ def make_params_BK(Fits,Masses,Twists):
 
 def get_results(Fit,thpts):
     p = gv.load(Fit['filename'],method='pickle')
-    if 'Hsfilename' in Fit:
-        pHs = gv.load(Fit['Hsfilename'],method='pickle')
+    #if 'Hsfilename' in Fit:
+    #    pHs = gv.load(Fit['Hsfilename'],method='pickle')
     # We should only need goldstone masses and energies here
     Fit['M_parent_m{0}'.format(Fit['m_c'])] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],Fit['m_c']))][0]
     for mass in Fit['masses']:
         Fit['M_parent_m{0}'.format(mass)] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0]
-        if 'Hsfilename' in Fit:
-            mass2 = mass 
-            if mass == '0.45' and Fit['conf'] != 'UFs' :
-                mass2 = '0.450'
-            Fit['MHs_parent_m{0}'.format(mass)] = pHs['dE:{0}'.format(Fit['Hsparent-Tag'].format(Fit['m_s'],mass2))][0]
+    #    if 'Hsfilename' in Fit:
+    #        mass2 = mass 
+    #        if mass == '0.45' and Fit['conf'] != 'UFs' :
+    #            mass2 = '0.450'
+    #        Fit['MHs_parent_m{0}'.format(mass)] = pHs['dE:{0}'.format(Fit['Hsparent-Tag'].format(Fit['m_s'],mass2))][0]
     Fit['M_daughter'] = p['dE:{0}'.format(Fit['daughter-Tag'][0])][0]
     for t,twist in enumerate(Fit['twists']):
         #Fit is the actual measured value, theory is obtained from the momentum
@@ -164,12 +170,20 @@ def get_results(Fit,thpts):
 
 ###################################################################################################
 
-def make_MHsstar(MH_s,a=1.0): # need one of these for lattice units and GeV set a=1.0 to give GeV
+#def make_MHsstar(MH_s,a=1.0): # need one of these for lattice units and GeV set a=1.0 to give GeV
     # Take MH_s and MH so we can use either. May be better to use MH throughout but then have BsEtas problem until we have UF data. However, this will solve problems with finephysical etc. 
-    DeltaDs = MDsstarphys - MDsphys
-    DeltaBs = MBsstarphys - MBsphys
-    MHsstar = MH_s + a**2*MDsphys*DeltaDs/MH_s + a*MBsphys/MH_s * ( (MH_s-a*MDsphys)/(MBsphys-MDsphys) * (DeltaBs - MDsphys/MBsphys * DeltaDs) )
-    return(MHsstar) 
+#    DeltaDs = MDsstarphys - MDsphys
+#    DeltaBs = MBsstarphys - MBsphys
+#    MHsstar = MH_s + a**2*MDsphys*DeltaDs/MH_s + a*MBsphys/MH_s * ( (MH_s-a*MDsphys)/(MBsphys-MDsphys) * (DeltaBs - MDsphys/MBsphys * DeltaDs) )
+#    return(MHsstar)
+
+####### MH version
+def make_MHsstar(MH,a=1.0): # need one of these for lattice units and GeV set a=1.0 to give GeV
+    # Take MH_s and MH so we can use either. May be better to use MH throughout but then have BsEtas problem until we have UF data. However, this will solve problems with finephysical etc. 
+    DeltaD = MDsstarphys - MDphys
+    DeltaB = MBsstarphys - MBphys
+    MHsstar = MH + a**2*MDphys*DeltaD/MH + a*MBphys/MH * ( (MH-a*MDphys)/(MBphys-MDphys) * (DeltaB - MDphys/MBphys * DeltaD) )
+    return(MHsstar)
     
 ####################################################################################################
 
@@ -213,13 +227,13 @@ def make_z(qsq,t_0,M_parent,M_daughter):
 ######################################################################################################
 
 def check_poles(Fits):
-    plt.figure()
+    #plt.figure()
     for Fit in Fits:
         for mass in Fit['masses']:
             qsqmax = ((Fit['M_parent_m{0}'.format(mass)]-Fit['M_daughter'])**2).mean
             t_plus = (make_t_plus(Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter'])).mean
-            f0pole2 = ((Fit['MHs_parent_m{0}'.format(mass)] + Fit['a']*Del)**2).mean
-            fppole2 = ((make_MHsstar(Fit['MHs_parent_m{0}'.format(mass)],Fit['a']))**2).mean
+            f0pole2 = ((Fit['M_parent_m{0}'.format(mass)] + Fit['a']*Del)**2).mean
+            fppole2 = ((make_MHsstar(Fit['M_parent_m{0}'.format(mass)],Fit['a']))**2).mean
             if f0pole2 < qsqmax:
                 print('f0 pole below qsqmax Fit {0} mass {1}'.format(Fit['conf'],mass))
             if fppole2 < qsqmax:
@@ -228,12 +242,12 @@ def check_poles(Fits):
                 print('f0 pole above t_plus Fit {0} mass {1}'.format(Fit['conf'],mass))
             if fppole2 > t_plus:
                 print('fp pole above t_plus Fit {0} mass {1}'.format(Fit['conf'],mass))
-            if Fit['conf'] in ['F','SF','UF']:
+            #if Fit['conf'] in ['F','SF','UF']:
                  #print(Fit['conf'],mass,Fit['MHs_parent_m{0}'.format(mass)]-Fit['M_parent_m{0}'.format(mass)])
-                 plt.errorbar(Fit['M_parent_m{0}'.format(mass)].mean,(Fit['MHs_parent_m{0}'.format(mass)]-Fit['M_parent_m{0}'.format(mass)]).mean,xerr =Fit['M_parent_m{0}'.format(mass)].sdev,yerr=(Fit['MHs_parent_m{0}'.format(mass)]-Fit['M_parent_m{0}'.format(mass)]).sdev)
-                 plt.xlabel('$aM_H$')
-                 plt.ylabel('$aM_{H_s}-aM_H$')
-    plt.savefig('Plots/HsvsH.pdf')
+                 #plt.errorbar(Fit['M_parent_m{0}'.format(mass)].mean,(Fit['M_parent_m{0}'.format(mass)]-Fit['M_parent_m{0}'.format(mass)]).mean,xerr =Fit['M_parent_m{0}'.format(mass)].sdev,yerr=(Fit['MHs_parent_m{0}'.format(mass)]-Fit['M_parent_m{0}'.format(mass)]).sdev)
+                 #plt.xlabel('$aM_H$')
+                 #plt.ylabel('$aM_{H_s}-aM_H$')
+    #plt.savefig('Plots/HsvsH.pdf')
     return()                                                                                         
               
 
@@ -264,10 +278,10 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
         prior['deltal_{0}'.format(fit)] = ml0-mltuned
         for mass in Fit['masses']:
             prior['MH_{0}_m{1}'.format(fit,mass)] = Fit['M_parent_m{0}'.format(mass)]
-            prior['MHs_{0}_m{1}'.format(fit,mass)] = Fit['MHs_parent_m{0}'.format(mass)]
-            prior['MHs0_{0}_m{1}'.format(fit,mass)] = prior['MHs_{0}_m{1}'.format(fit,mass)] + Fit['a']*Del
+            #prior['MHs_{0}_m{1}'.format(fit,mass)] = Fit['MHs_parent_m{0}'.format(mass)]
+            prior['MHs0_{0}_m{1}'.format(fit,mass)] = prior['MH_{0}_m{1}'.format(fit,mass)] + Fit['a']*Del
             
-            prior['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(prior['MHs_{0}_m{1}'.format(fit,mass)],Fit['a'])
+            prior['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(prior['MH_{0}_m{1}'.format(fit,mass)],Fit['a'])
             for twist in Fit['twists']:
                 tag = '{0}_m{1}_tw{2}'.format(fit,mass,twist)
                 qsq = fs_data[fit]['qsq_m{0}_tw{1}'.format(mass,twist)]
@@ -478,10 +492,10 @@ def make_p_physical_point_BK(pfit,Fits,Del):
         p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
             p['MH_{0}_m{1}'.format(fit,mass)] = MBphys
-            p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
+            #p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
             p['MD_{0}'.format(fit)] = MDphys
-            p['MHs0_{0}_m{1}'.format(fit,mass)] = p['MHs_{0}_m{1}'.format(fit,mass)] + Del
-            p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(MBsphys)
+            p['MHs0_{0}_m{1}'.format(fit,mass)] = p['MH_{0}_m{1}'.format(fit,mass)] + Del
+            p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(MBphys)
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]
@@ -505,11 +519,11 @@ def make_p_Mh_BK(pfit,Fits,Del,MH):
         p['ml10ms_{0}'.format(fit)] = 1/(10*slratio)
         p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
-            p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
+            #p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
             p['MH_{0}_m{1}'.format(fit,mass)] = MH
             p['MD_{0}'.format(fit)] = MDphys
-            p['MHs0_{0}_m{1}'.format(fit,mass)] = MBsphys + Del
-            p['MHsstar_{0}_m{1}'.format(fit,mass)] = MBsphys + x/MBsphys
+            p['MHs0_{0}_m{1}'.format(fit,mass)] = MH + Del
+            p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(MH)
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]
