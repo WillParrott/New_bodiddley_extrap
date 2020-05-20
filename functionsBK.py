@@ -20,7 +20,8 @@ from collections import defaultdict
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.98390(50)')  # PDG says 2.9839(5) previously had '2.9863(27)' not sure where from
 Metas_VCp = gv.gvar('0.52680(8)')
-Metas_Cp = gv.gvar('0.42310(3)')#from 1408.4169 for am_s =0.0527 correct mass 
+Metas_Cp = gv.gvar('0.42310(3)')#from 1408.4169 for am_s =0.0527 correct mass
+Metas_Fp = gv.gvar('0.30480(4)')#from 1408.4169 for am_s =0.036 correct 
 Metas_F = gv.gvar('0.314015(89)') #from BsEtas fits
 Metas_SF = gv.gvar('0.207021(65)')#from new BsEtas fit
 Metas_UF = gv.gvar('0.154107(88)') #from new BsEast fit
@@ -42,11 +43,13 @@ clight = 2.99792458 #*10^23 fm/s
 slratio = gv.gvar('27.18(10)')
 MetacVCp = gv.gvar('2.28770(4)')# for mass 0.863    2.28770(4) not correct 1408.4169
 MetacCp = gv.gvar('1.82225(5)')# from 1408.4169 for am_h =0.637 not correct
+MetacFp = gv.gvar('1.32929(3)')# from 1408.4169 for am_h =0.433 not correct
 MetacF = gv.gvar('1.367014(40)')        #lattice units
 MetacSF = gv.gvar('0.896806(48)')       #where are these from? 
 MetacUF = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
-deltaFVVCp =gv.gvar('0.12907825(82)')
-deltaFVCp =gv.gvar('0.04894993(12)')
+deltaFVVCp = gv.gvar('0.12907825(82)')
+deltaFVCp = gv.gvar('0.04894993(12)')
+deltaFVFp = gv.gvar('0.06985291(24)')
 deltaFVF = gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVSF = gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVUF = gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
@@ -109,6 +112,7 @@ def make_Z_T():
     x = gv.correlate(mean,corr)
     Z_T = gv.BufferDict()
     Z_T['F'] = x[0] # all from Dan
+    Z_T['Fp'] = x[0] # these are sea mass independent
     Z_T['SF'] = x[1]
     Z_T['UF'] = x[2]
     return(Z_T)
@@ -161,7 +165,7 @@ def get_results(Fit,thpts):
         for m, mass in enumerate(Fit['masses']):
             for thpt in thpts[Fit['conf']]:
                 if twist != '0' or thpt != 'T':
-                    if Fit['conf'] in  ['F','Fs','SFs','UFs']: # were not extracted with 2 in them
+                    if Fit['conf'] in  ['Fs','SFs','UFs']: # were not extracted with 2 in them
                         Fit['{0}_m{1}_tw{2}'.format(thpt,mass,twist)] = 2 * 2 * Fit['Zdisc'][m] * gv.sqrt(Fit['M_parent_m{0}'.format(mass)]*Fit['E_daughter_tw{0}_theory'.format(twist)]) * p['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)][0][0]
                     else:
                         Fit['{0}_m{1}_tw{2}'.format(thpt,mass,twist)] =  2 * Fit['Zdisc'][m] * gv.sqrt(Fit['M_parent_m{0}'.format(mass)]*Fit['E_daughter_tw{0}_theory'.format(twist)]) * p['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)][0][0]

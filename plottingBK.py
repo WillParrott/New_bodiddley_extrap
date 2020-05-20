@@ -40,8 +40,8 @@ alpha = 0.4
 fontsizeleg = 25*factor #legend
 fontsizelab = 35*factor #legend
 cols = ['b','r','g','c'] #for each mass
-symbs = ['o','^','*','D','d','s','p']    # for each conf
-lines = ['-','--','-.','-'] # for each conf
+symbs = ['o','^','*','D','d','s','p','+']    # for each conf
+lines = ['-','--','-.','-',':'] # for each conf
 major = 15*factor
 minor = 8*factor 
 capsize = 10*factor
@@ -50,7 +50,7 @@ capsize = 10*factor
 
 def speed_of_light(Fits):
     plt.figure(1,figsize=figsize)
-    points = ['ko','r^','b*','gd']
+    points = ['ko','k^','k*','ro','r^','r*']
     i=0
     plotfits = []
     for Fit in Fits:
@@ -318,7 +318,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     i = 0
     plotfits = []
     for Fit in Fits:
-        if Fit['conf'] not in ['VCp','Cp','Fs','SFs','UFs']:
+        if Fit['conf'] not in ['Fp','VCp','Cp','Fs','SFs','UFs']:
             plotfits.append(Fit)
     for Fit in plotfits:
         j = 0

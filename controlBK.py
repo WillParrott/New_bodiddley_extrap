@@ -86,12 +86,12 @@ UFs['daughter-Tag'] = ['etas_G5-G5_tw0','etas_G5-G5_tw0.706','etas_G5-G5_tw1.529
 VCp = collections.OrderedDict()
 VCp['conf']='VCp'
 VCp['label'] = 'Set 0'
-VCp['filename'] = 'Corrfits/VCrelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.731_smTrue_Stmin1_Vtmin1.pickle'
+VCp['filename'] = 'Corrfits/VCprelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.502_smTrue_Stmin0_Vtmin0.pickle'
 VCp['masses'] = ['0.8605']# note m eta_c for slightly wrong ensemble 0.863 = 
 VCp['Zdisc'] = [0.99197] 
 VCp['twists'] = ['0','2.013','3.05','3.969']
 VCp['m_l'] = '0.00235' #ampi = 0.101720(40)
-VCp['m_s'] = '0.0678'# note m eta_s for slightly wrong ensemble  
+VCp['m_s'] = '0.0678'  
 VCp['m_c'] = '0.8605' 
 VCp['m_ssea'] = 0.0647
 VCp['m_lsea'] = 0.00235
@@ -103,7 +103,7 @@ VCp['daughter-Tag'] = 5*['2pt_K_vc_tw{0}.ll']
 Cp = collections.OrderedDict()
 Cp['conf']='Cp'
 Cp['label'] = 'Set 1'
-Cp['filename'] = 'Corrfits/Crelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.528_smTrue_Stmin1_Vtmin1.pickle'
+Cp['filename'] = 'Corrfits/Cprelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.372_smTrue_Stmin0_Vtmin0.pickle'
 Cp['masses'] = ['0.643']# note m eta_c is not corect for this
 Cp['Zdisc'] = [0.99718]
 Cp['twists'] = ['0','2.405','3.641','4.735']
@@ -117,11 +117,31 @@ Cp['w0/a'] = gv.gvar('1.4149(6)')
 Cp['parent-Tag'] = '2pt_D_Gold_coarse.ll'
 Cp['daughter-Tag'] = 5*['2pt_K_coarse_tw{0}.ll'] 
 
+#########################################################################
+Fp = collections.OrderedDict()
+Fp['conf']='Fp'
+Fp['label'] = 'Set -1'
+Fp['filename'] = 'Corrfits/Fprelabelled_binned_584_confs_G5G5_freshfullwall0.43202.3153.5074.563BGBNGKGSV16192225unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.206_smTrue_Stmin0_Vtmin0.pickle'
+#F['Hsfilename'] = Fs['Hsfilename'] 
+#F['Hsparent-Tag'] = 'meson.m{0}_m{1}'
+Fp['masses'] = ['0.432']
+Fp['Zdisc'] = [0.99938]
+Fp['twists'] = ['0','2.315','3.507','4.563']
+Fp['m_l'] = '0.0012'
+Fp['m_s'] = '0.036'
+Fp['m_c'] = '0.432'
+Fp['m_ssea'] = 0.0363
+Fp['m_lsea'] = 0.0012
+#F['tp'] = 96
+Fp['L'] = 64
+Fp['w0/a'] = gv.gvar('1.9518(7)')
+Fp['parent-Tag'] = 'D_G5-G5_m0.432'
+Fp['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 ################################## F PARAMETERS ##########################
 F = collections.OrderedDict()
 F['conf']='F'
 F['label'] = 'Set 2'
-F['filename'] = 'Corrfits/FKBscalarvectortensor_398cfgs_negFalse0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.261_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+F['filename'] = 'Corrfits/Ftest-KBscalarvectortensor_499cfgs_neg0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.343_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 #F['Hsfilename'] = Fs['Hsfilename'] 
 #F['Hsparent-Tag'] = 'meson.m{0}_m{1}'
 F['masses'] = ['0.449','0.566','0.683','0.8']
@@ -187,13 +207,16 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [VCp,Cp,F,SF,Fs,SFs,UFs]#,UF] # choose what to fit
+Fits = [Fp,VCp,Cp,F,SF,Fs,SFs,UFs]#,UF] # choose what to fit
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
 Masses['Cp'] = [0]                                     # Choose which masses to fit
 Twists['Cp'] = [0,1,2,3]
 thpts['Cp'] = ['S','V']
+Masses['Fp'] = [0]                                     # Choose which masses to fit
+Twists['Fp'] = [0,1,2,3]
+thpts['Fp'] = ['S','V']
 Masses['F'] = [0,1,2,3]                                     # Choose which masses to fit
 Twists['F'] = [0,1,2,3,4]
 thpts['F'] = ['S','V','T']
