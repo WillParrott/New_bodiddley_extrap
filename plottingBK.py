@@ -93,7 +93,11 @@ def speed_of_light(Fits):
 def Z_V_plots(Fits,fs_data):
     plt.figure(19,figsize=figsize)
     i = 0
+    plotfits =[]
     for Fit in Fits:
+        if Fit['conf'] not in ['UFs']:
+            plotfits.append(Fit)
+    for Fit in plotfits:
         x = []
         y = []
         for mass in Fit['masses']:
