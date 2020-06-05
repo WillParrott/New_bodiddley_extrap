@@ -18,7 +18,7 @@ from collections import defaultdict
 ####################################################################################################
 
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
-Metacphys = gv.gvar('2.98390(50)')  # PDG says 2.9839(5) previously had '2.9863(27)' not sure where from
+Metacphys = gv.gvar('2.9766(12)')#gv.gvar('2.98390(50)')  # From Christine because not same as PDG
 MKphys = gv.gvar('0.497611(13)') #PD K^0
 MBsphys = gv.gvar('5.36688(17)') # PDG
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
