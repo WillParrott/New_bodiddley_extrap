@@ -42,7 +42,7 @@ hbar = gv.gvar('6.58211928(15)') # x 10^-25 GeV s
 clight = 2.99792458 #*10^23 fm/s
 slratio = gv.gvar('27.18(10)')
 MetacVCp = gv.gvar('2.28770(4)')# for mass 0.863    2.28770(4) not correct 1408.4169
-MetacCp = gv.gvar('1.833950(18)')# 2005.01845   
+MetacCp = gv.gvar('1.833950(18)')# 2005.01845 
 MetacFp = gv.gvar('1.32929(3)')# from 1408.4169 for am_h =0.433 not correct
 MetacF = gv.gvar('1.367014(40)')        #lattice units
 MetacSF = gv.gvar('0.896806(48)')       #where are these from? 
@@ -65,6 +65,7 @@ LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
 qsqmaxphysBK = (MBphys-MKphys)**2
+qsqmaxphysDK = (MDphys-MKphys)**2
 Del = 0.4 # in control too
 #####################################################################################################
 ############################### Other data #########################################################
@@ -483,7 +484,7 @@ def do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same):
 
 ######################################################################################################
 
-def make_p_physical_point_BK(pfit,Fits,Del):
+def make_p_physical_point_DK(pfit,Fits,Del): #### This now is for DK
     #only need to evaluate at one Fit one mass but change all anyway
     # everything should now be in GeV
     p = gv.BufferDict()
@@ -497,11 +498,11 @@ def make_p_physical_point_BK(pfit,Fits,Del):
         p['ml10ms_{0}'.format(fit)] = 1/(10*slratio)
         p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
-            p['MH_{0}_m{1}'.format(fit,mass)] = MBphys
+            p['MH_{0}_m{1}'.format(fit,mass)] = MDphys
             #p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
             p['MD_{0}'.format(fit)] = MDphys
             p['MHs0_{0}_m{1}'.format(fit,mass)] = p['MH_{0}_m{1}'.format(fit,mass)] + Del
-            p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(MBphys)
+            p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(MDphys)
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]
@@ -553,28 +554,28 @@ def ratio_fp_B_D_BsEtas(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
 
 ######################################################################################################
 
-def fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho):
-    p = make_p_physical_point_BK(pfit,Fits,Del)
+def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho):
+    p = make_p_physical_point_DK(pfit,Fits,Del)
     qsq = 0
-    z = make_z(qsq,t_0,MBphys,MKphys)
+    z = make_z(qsq,t_0,MDphys,MKphys)
     z = z.mean
     f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     #     make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
     fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
-    fT0 = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
-    qsq = qsqmaxphysBK.mean
-    z = make_z(qsq,t_0,MBphys,MKphys)
+    #fT0 = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    qsq = qsqmaxphysDK.mean
+    z = make_z(qsq,t_0,MDphys,MKphys)
     z = z.mean
     f0max = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     fpmax = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
-    fTmax = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+    #fTmax = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     print('f_+(0)/f_0(0) = {0}'.format(fp0/f00))
     print('f_0(0) = {0}  error: {1:.2%}'.format(f00,f00.sdev/f00.mean))
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
-    print('f_T(0) = {0}  error: {1:.2%}'.format(fT0,fT0.sdev/fT0.mean))
+    #print('f_T(0) = {0}  error: {1:.2%}'.format(fT0,fT0.sdev/fT0.mean))
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
-    print('f_T(max) = {0}  error: {1:.2%}'.format(fTmax,fTmax.sdev/fTmax.mean))
+    #print('f_T(max) = {0}  error: {1:.2%}'.format(fTmax,fTmax.sdev/fTmax.mean))
     return()
 
 ######################################################################################################

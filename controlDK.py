@@ -4,8 +4,8 @@ import lsqfit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
-from functionsBK import *
-from plottingBK import *
+from functionsDK import *
+from plottingDK import *
 plt.rc("font",**{"size":18})
 import collections
 import copy
@@ -200,7 +200,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [Fp,VCp,Cp,F,SF,Fs,SFs,UFs]#,UF] # choose what to fit
+Fits = [Fp,VCp,Cp]#,F,SF]#,Fs,SFs,UFs]#,UF] # choose what to fit
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
@@ -210,25 +210,25 @@ thpts['Cp'] = ['S','V']
 Masses['Fp'] = [0]                                     # Choose which masses to fit
 Twists['Fp'] = [0,1,2,3]
 thpts['Fp'] = ['S','V']
-Masses['F'] = [0,1,2,3]                                     # Choose which masses to fit
+Masses['F'] = [0]                                     # Choose which masses to fit
 Twists['F'] = [0,1,2,3,4]
-thpts['F'] = ['S','V','T']
-Masses['SF'] = [0,1,2,3]
+thpts['F'] = ['S','V']
+Masses['SF'] = [0]
 Twists['SF'] = [0,1,2,3,4]
-thpts['SF'] = ['S','V','T']
-Masses['UF'] = [0,1,2,3]
+thpts['SF'] = ['S','V']
+Masses['UF'] = [0]
 Twists['UF'] = [0,1,2,3,4]
-thpts['UF'] = ['S','V','T']
-Masses['Fs'] = [0,1,2,3]                                     # Choose which masses to fit
+thpts['UF'] = ['S']
+Masses['Fs'] = [0]                                     # Choose which masses to fit
 Twists['Fs'] = [0,1,2,3,4]
 thpts['Fs'] = ['S','V']
-Masses['SFs'] = [0,1,2,3]
+Masses['SFs'] = [0]
 Twists['SFs'] = [0,1,2,3,4]
 thpts['SFs'] = ['S','V']
-Masses['UFs'] = [0,1,2,3]
+Masses['UFs'] = [0]
 Twists['UFs'] = [0,1,2,3,4]
 thpts['UFs'] = ['S','V']
-addrho = True
+addrho = False #now false because not in DK expension
 fpf0same = True
 svdnoise = False
 priornoise = False
@@ -246,7 +246,7 @@ Nm=3
 SHOWPLOTS = False
 Del = 0.4 #0.4 change in functions too
 t_0 = 0 # for z conversion
-adddata = True #include data in continuum from other papers currently only for f0 Bsetas max
+adddata = False #include data in continuum from other papers currently only for f0 Bsetas max
 ############################################################################
 if t_0 != 0:
     print('t_0 != 0, so fpf0same set to false')
@@ -268,17 +268,17 @@ prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpr
 
 pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same)
 #print values
-fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho)
+fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
 speed_of_light(Fits)
 f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
 fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
+#f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
 #f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0)
