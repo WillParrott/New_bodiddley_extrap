@@ -65,7 +65,7 @@ LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
 qsqmaxphysBK = (MBphys-MKphys)**2
-Del = 0.4 # in control too
+Del = 0.5 # 0.4 +0.1 in control too
 #####################################################################################################
 ############################### Other data #########################################################
 dataf0maxBK = None  #only works for BsEtas for now
@@ -148,17 +148,17 @@ def make_params_BK(Fits,Masses,Twists):
 
 def get_results(Fit,thpts):
     p = gv.load(Fit['filename'],method='pickle')
-    #if 'Hsfilename' in Fit:
-    #    pHs = gv.load(Fit['Hsfilename'],method='pickle')
+    if Fit['conf'] in ['Fs','SFs','UFs']:
+        pl = gv.load(Fit['Hlfilename'],method='pickle')
     # We should only need goldstone masses and energies here
     Fit['M_parent_m{0}'.format(Fit['m_c'])] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],Fit['m_c']))][0]
     for mass in Fit['masses']:
         Fit['M_parent_m{0}'.format(mass)] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0]
-    #    if 'Hsfilename' in Fit:
-    #        mass2 = mass 
-    #        if mass == '0.45' and Fit['conf'] != 'UFs' :
-    #            mass2 = '0.450'
-    #        Fit['MHs_parent_m{0}'.format(mass)] = pHs['dE:{0}'.format(Fit['Hsparent-Tag'].format(Fit['m_s'],mass2))][0]
+        if Fit['conf'] in ['Fs','SFs','UFs']:
+            mass2 = '{0}'.format(float(mass))
+            Fit['Ml_m{0}'.format(mass)] = pl['dE:{0}'.format(Fit['Hltag'].format(Fit['m_s'],mass2))][0]
+    if Fit['conf'] in ['Fs','SFs','UFs']:
+        Fit['M_Kaon'] = pl['dE:{0}'.format(Fit['ldaughtertag'][0].format('0'))][0]
     Fit['M_daughter'] = p['dE:{0}'.format(Fit['daughter-Tag'][0])][0]
     for t,twist in enumerate(Fit['twists']):
         #Fit is the actual measured value, theory is obtained from the momentum
@@ -184,8 +184,7 @@ def get_results(Fit,thpts):
 #    return(MHsstar)
 
 ####### MH version
-def make_MHsstar(MH,a=1.0): # need one of these for lattice units and GeV set a=1.0 to give GeV
-    # Take MH_s and MH so we can use either. May be better to use MH throughout but then have BsEtas problem until we have UF data. However, this will solve problems with finephysical etc. 
+def make_MHsstar(MH,a=1.0): # need one of these for lattice units and GeV set a=1.0 to give GeV 
     DeltaD = MDsstarphys - MDphys
     DeltaB = MBsstarphys - MBphys
     MHsstar = MH + a**2*MDphys*DeltaD/MH + a*MBphys/MH * ( (MH-a*MDphys)/(MBphys-MDphys) * (DeltaB - MDphys/MBphys * DeltaD) )
@@ -217,14 +216,14 @@ def make_fs(Fit,fs,thpts,Z_T):
             fs['fT_m{0}_tw{1}'.format(mass,twist)] = fT
     return()
 #######################################################################################################
-def make_t_plus(M_parent,M_daughter):
-    t_plus = (M_parent + M_daughter)**2
+def make_t_plus(M_H,M_K): # This should ALWAYS be M_H,M_K because it is sea mass based
+    t_plus = (M_H + M_K)**2
     return(t_plus)
 
 ######################################################################################################
 
-def make_z(qsq,t_0,M_parent,M_daughter):
-    t_plus = make_t_plus(M_parent,M_daughter)
+def make_z(qsq,t_0,M_H,M_K): # this is give M_H and M_K in each case
+    t_plus = make_t_plus(M_H,M_K)
     z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))
     if z.mean == 0 and z.sdev == 0:
         z = gv.gvar(0,1e-16) # ensures not 0(0)
@@ -237,9 +236,14 @@ def check_poles(Fits):
     for Fit in Fits:
         for mass in Fit['masses']:
             qsqmax = ((Fit['M_parent_m{0}'.format(mass)]-Fit['M_daughter'])**2).mean
-            t_plus = (make_t_plus(Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter'])).mean
-            f0pole2 = ((Fit['M_parent_m{0}'.format(mass)] + Fit['a']*Del)**2).mean
-            fppole2 = ((make_MHsstar(Fit['M_parent_m{0}'.format(mass)],Fit['a']))**2).mean
+            if Fit['conf'] in ['Fs','SFs','UFs']:
+                t_plus = (make_t_plus(Fit['Ml_m{0}'.format(mass)],Fit['M_Kaon'])).mean
+                f0pole2 = ((Fit['Ml_m{0}'.format(mass)] + Fit['a']*Del)**2).mean
+                fppole2 = ((make_MHsstar(Fit['Ml_m{0}'.format(mass)],Fit['a']))**2).mean
+            else:
+                t_plus = (make_t_plus(Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter'])).mean
+                f0pole2 = ((Fit['M_parent_m{0}'.format(mass)] + Fit['a']*Del)**2).mean
+                fppole2 = ((make_MHsstar(Fit['M_parent_m{0}'.format(mass)],Fit['a']))**2).mean
             if f0pole2 < qsqmax:
                 print('f0 pole below qsqmax Fit {0} mass {1}'.format(Fit['conf'],mass))
             if fppole2 < qsqmax:
@@ -248,12 +252,7 @@ def check_poles(Fits):
                 print('f0 pole above t_plus Fit {0} mass {1}'.format(Fit['conf'],mass))
             if fppole2 > t_plus:
                 print('fp pole above t_plus Fit {0} mass {1}'.format(Fit['conf'],mass))
-            #if Fit['conf'] in ['F','SF','UF']:
-                 #print(Fit['conf'],mass,Fit['MHs_parent_m{0}'.format(mass)]-Fit['M_parent_m{0}'.format(mass)])
-                 #plt.errorbar(Fit['M_parent_m{0}'.format(mass)].mean,(Fit['M_parent_m{0}'.format(mass)]-Fit['M_parent_m{0}'.format(mass)]).mean,xerr =Fit['M_parent_m{0}'.format(mass)].sdev,yerr=(Fit['MHs_parent_m{0}'.format(mass)]-Fit['M_parent_m{0}'.format(mass)]).sdev)
-                 #plt.xlabel('$aM_H$')
-                 #plt.ylabel('$aM_{H_s}-aM_H$')
-    #plt.savefig('Plots/HsvsH.pdf')
+            
     return()                                                                                         
               
 
@@ -285,13 +284,19 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
         for mass in Fit['masses']:
             prior['MH_{0}_m{1}'.format(fit,mass)] = Fit['M_parent_m{0}'.format(mass)]
             #prior['MHs_{0}_m{1}'.format(fit,mass)] = Fit['MHs_parent_m{0}'.format(mass)]
-            prior['MHs0_{0}_m{1}'.format(fit,mass)] = prior['MH_{0}_m{1}'.format(fit,mass)] + Fit['a']*Del
-            
-            prior['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(prior['MH_{0}_m{1}'.format(fit,mass)],Fit['a'])
+            if Fit['conf'] in ['Fs','SFs','UFs']:
+                prior['MHs0_{0}_m{1}'.format(fit,mass)] = Fit['Ml_m{0}'.format(mass)] + Fit['a']*Del
+                prior['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(Fit['Ml_m{0}'.format(mass)],Fit['a'])
+            else:
+                prior['MHs0_{0}_m{1}'.format(fit,mass)] = prior['MH_{0}_m{1}'.format(fit,mass)] + Fit['a']*Del 
+                prior['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(prior['MH_{0}_m{1}'.format(fit,mass)],Fit['a'])
             for twist in Fit['twists']:
                 tag = '{0}_m{1}_tw{2}'.format(fit,mass,twist)
                 qsq = fs_data[fit]['qsq_m{0}_tw{1}'.format(mass,twist)]
-                prior['z_{0}'.format(tag)] = make_z(qsq,t_0,prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])    # x values go in prior
+                if Fit['conf'] in ['Fs','SFs','UFs']:
+                    prior['z_{0}'.format(tag)] = make_z(qsq,t_0,Fit['Ml_m{0}'.format(mass)],Fit['M_Kaon'])
+                else:
+                    prior['z_{0}'.format(tag)] = make_z(qsq,t_0,prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])    # x values go in prior
                 prior['qsq_{0}'.format(tag)] = qsq
                 f['f0_{0}'.format(tag)] = fs_data[fit]['f0_m{0}_tw{1}'.format(mass,twist)]   # y values go in f   
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
@@ -304,10 +309,10 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
         prior['qsq_qsq{0}'.format(qsqmaxphys)] = qsqmaxphys
         prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphys,t_0,MBphys,MKphys)
         prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBphys,MKphys)
-        prior['MBsphys'] = MBsphys        # might need changing?
+        prior['MBsphys'] = MBsphys        
         prior['MBs0phys'] = MBsphys + Del
         prior['MBsstarphys'] = MBsstarphys
-        prior['MDsphys'] = MDsphys
+        prior['MDsphys'] = MDsphys 
     # remove unwanted keys from f
     keys = []
     for key in f:
