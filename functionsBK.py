@@ -219,11 +219,29 @@ def make_fs(Fit,fs,thpts,Z_T):
 def make_t_plus(M_H,M_K): # This should ALWAYS be M_H,M_K because it is sea mass based
     t_plus = (M_H + M_K)**2
     return(t_plus)
-
+#####################################################################################################
+def make_t_0(t0,M_H,M_K,M_parent,M_daughter):
+    #note that t_- is qsqmax
+    t_plus = (M_H+M_K)**2
+    t_minus = (M_parent-M_daughter)**2 #i.e. qsqmax  
+    if t0 == '0':
+        t_0 = 0
+    elif t0 == 'rev':
+        t_0 = t_minus
+    elif t0 == 'min': #not sure what this should be
+        t_0 = t_plus * (1- (1 - (t_minus/t_plus))**(0.5))
+    else:
+        print("t_0 needs to be '0', 'rev' or 'min'")
+    return(t_0)
 ######################################################################################################
 
-def make_z(qsq,t_0,M_H,M_K): # this is give M_H and M_K in each case
+def make_z(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None): # this is give M_H and M_K in each case, then M_parent and M_daughter are given if different
+    if M_parent == None:
+        M_parent = M_H
+    if M_daughter == None:
+        M_daughter = M_K    
     t_plus = make_t_plus(M_H,M_K)
+    t_0 = make_t_0(t0,M_H,M_K,M_parent,M_daughter)
     z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))
     if z.mean == 0 and z.sdev == 0:
         z = gv.gvar(0,1e-16) # ensures not 0(0)
@@ -294,21 +312,21 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
                 tag = '{0}_m{1}_tw{2}'.format(fit,mass,twist)
                 qsq = fs_data[fit]['qsq_m{0}_tw{1}'.format(mass,twist)]
                 if Fit['conf'] in ['Fs','SFs','UFs']:
-                    prior['z_{0}'.format(tag)] = make_z(qsq,t_0,Fit['Ml_m{0}'.format(mass)],Fit['M_Kaon'])
+                    prior['z_{0}'.format(tag)] = make_z(qsq,t_0,Fit['Ml_m{0}'.format(mass)],Fit['M_Kaon'],prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])
                 else:
                     prior['z_{0}'.format(tag)] = make_z(qsq,t_0,prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])    # x values go in prior
                 prior['qsq_{0}'.format(tag)] = qsq
                 f['f0_{0}'.format(tag)] = fs_data[fit]['f0_m{0}_tw{1}'.format(mass,twist)]   # y values go in f   
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
                 f['fT_{0}'.format(tag)] = fs_data[fit]['fT_m{0}_tw{1}'.format(mass,twist)]
-    if adddata: #not fot fT at the moment
+    if adddata: #not fot fT at the moment Have a big think about if this works
         f['f0_qsq{0}1'.format(qsqmaxphys)] = dataf0max1BsEtas # onlyone BsEtas works
         f['f0_qsq{0}2'.format(qsqmaxphys)] = dataf0max2BsEtas # onlyone BsEtas works
         f['fp_qsq{0}'.format(qsqmaxphys)] = datafpmaxBsEtas
         f['f0_qsq{0}'.format(0)] = dataf00BsEtas
         prior['qsq_qsq{0}'.format(qsqmaxphys)] = qsqmaxphys
-        prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphys,t_0,MBphys,MKphys)
-        prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBphys,MKphys)
+        prior['z_qsq{0}'.format(qsqmaxphys)] = make_z(qsqmaxphys,t_0,MBphys,MKphys,MBsphys,Metasphys)
+        prior['z_qsq{0}'.format(0)] = make_z(0,t_0,MBphys,MKphys,MBsphys,Metasphys)
         prior['MBsphys'] = MBsphys        
         prior['MBs0phys'] = MBsphys + Del
         prior['MBsstarphys'] = MBsstarphys
@@ -481,6 +499,7 @@ def do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same):
     p0 = None
     if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
         p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
+    p0 = None    
     fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
@@ -540,7 +559,7 @@ def make_p_Mh_BK(pfit,Fits,Del,MH):
             p[key] = pfit[key]
     return(p)
 ######################################################################################################
-###########################Do stuff below here #######################################################
+###########################Do stuff below here check stuff is for BK and t_0*a etc etc#######################################################
 ######################################################################################################
 
 def ratio_fp_B_D_BsEtas(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
@@ -595,7 +614,8 @@ def make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,Del,MH_s):
     fpHsstar = make_an_BsEtas(0,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same) 
     f00 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,0,0,z0,mass,fpf0same,0)
     t_plus = (MH_s + Metasphys)**2
-    zprime = (-1) / (2* (t_plus + gv.sqrt( t_plus * (t_plus - t_0) ) ) )
+    t_nought = make_t_0(t_0,MH_s,MKphys)
+    zprime = (-1) / (2* (t_plus + gv.sqrt( t_plus * (t_plus - t_nought) ) ) )
     f0prime = (f00/p['MHs0_{0}_m{1}'.format(fit,mass)]**2)
     fpprime = (fp0/p['MHsstar_{0}_m{1}'.format(fit,mass)]**2)
     for n in range(1,Npow):

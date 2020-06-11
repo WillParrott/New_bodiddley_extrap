@@ -245,11 +245,11 @@ Nijk = 3 #3
 Nm=3
 SHOWPLOTS = False
 Del = 0.5 #0.4 + 0.1  change in functions too
-t_0 = 0 # for z conversion
+t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
 adddata = True #include data in continuum from other papers currently only for f0 Bsetas max
 ############################################################################
-if t_0 != 0:
-    print('t_0 != 0, so fpf0same set to false')
+if t_0 != '0':
+    print('t_0 != 0, so fpf0same set to False')
     fpf0same = False
 ############################################################################
 
