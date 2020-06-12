@@ -229,7 +229,8 @@ Masses['UFs'] = [0,1,2,3]
 Twists['UFs'] = [0,1,2,3,4]
 thpts['UFs'] = ['S','V']
 addrho = True
-fpf0same = True
+fpf0same = False
+constraint = True #add constraint the f0(0)=fp(0)
 svdnoise = False
 priornoise = False
 FitNegQsq = True
@@ -264,7 +265,7 @@ for Fit in Fits:
     results_tables(fs_data[Fit['conf']],Fit)
 check_poles(Fits)
 Z_V_plots(Fits,fs_data)
-prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata)
+prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata,constraint)
 
 pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same)
 #print values
