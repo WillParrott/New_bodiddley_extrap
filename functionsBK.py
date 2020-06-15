@@ -324,7 +324,7 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
         prior['MBphys'] = MBphys
         prior['MDphys'] = MDphys
         prior['slratio'] = slratio
-        f['constraint'] = gv.gvar(0,1e-8)
+        f['constraint'] = gv.gvar(0,1e-6)
         prior['z_const'] = make_z(0,t_0,MBphys,MKphys) # here I make a choice about how z is defined
         #prior['z_const2'] = make_z(0,t_0,MDphys,MKphys)
     if adddata: #not fot fT at the moment Have a big think about if this works

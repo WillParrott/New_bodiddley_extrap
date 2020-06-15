@@ -19,7 +19,9 @@ from collections import defaultdict
 
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.9766(12)')# gv.gvar('2.98390(50)')  # From Christine not PDG
+Metas_Cp = gv.gvar('0.432881(80)')#fitted from Judd's data 
 Metas_VCp = gv.gvar('0.52680(8)')
+Metas_VC = gv.gvar('0.54024(15)')
 Metas_Cp = gv.gvar('0.42310(3)')#from 1408.4169 for am_s =0.0527 correct mass
 Metas_Fp = gv.gvar('0.30480(4)')#from 1408.4169 for am_s =0.036 correct 
 Metas_F = gv.gvar('0.314015(89)') #from BsEtas fits
@@ -41,21 +43,25 @@ w0 = gv.gvar('0.1715(9)')  #fm
 hbar = gv.gvar('6.58211928(15)') # x 10^-25 GeV s
 clight = 2.99792458 #*10^23 fm/s
 slratio = gv.gvar('27.18(10)')
+MetacC = gv.gvar('1.876536(48)') #2005.01845
+MetacVC = gv.gvar('2.33188(9)') # correct mass
 MetacVCp = gv.gvar('2.28770(4)')# for mass 0.863    2.28770(4) not correct 1408.4169
 MetacCp = gv.gvar('1.833950(18)')# 2005.01845   
 MetacFp = gv.gvar('1.32929(3)')# from 1408.4169 for am_h =0.433 not correct
 MetacF = gv.gvar('1.367014(40)')        #lattice units
 MetacSF = gv.gvar('0.896806(48)')       #where are these from? 
 MetacUF = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
+MetacFs = MetacF#gv.gvar('1.367014(40)')        #lattice units
+MetacSFs = MetacSF#gv.gvar('0.896806(48)')       #where are these from? 
+MetacUFs = MetacUF#gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
+deltaFVC = gv.gvar('0.018106911(16)')
+deltaFVVC = gv.gvar('0.05841163(17)')
 deltaFVVCp = gv.gvar('0.12907825(82)')
 deltaFVCp = gv.gvar('0.04894993(12)')
 deltaFVFp = gv.gvar('0.06985291(24)')
 deltaFVF = gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVSF = gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVUF = gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
-MetacFs = MetacF#gv.gvar('1.367014(40)')        #lattice units
-MetacSFs = MetacSF#gv.gvar('0.896806(48)')       #where are these from? 
-MetacUFs = MetacUF#gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
 deltaFVFs = deltaFVF#gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVSFs = deltaFVSF#gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVUFs = deltaFVUF#gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent

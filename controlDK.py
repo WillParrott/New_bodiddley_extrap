@@ -17,8 +17,8 @@ warnings.filterwarnings("ignore")
 ########################### B to K ######################################################
 VCp = collections.OrderedDict()
 VCp['conf']='VCp'
-VCp['label'] = 'Set 0'
-VCp['filename'] = 'Corrfits/VCprelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.833_smTrue_Stmin0_Vtmin0.pickle'
+VCp['label'] = 'Set 1'
+VCp['filename'] = 'Corrfits/VCprelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.797_smTrue_Stmin0_Vtmin0.pickle'
 VCp['masses'] = ['0.8605']# note m eta_c for slightly wrong ensemble 0.863 = 
 VCp['Zdisc'] = [0.99197] 
 VCp['twists'] = ['0','2.013','3.05','3.969']
@@ -34,8 +34,8 @@ VCp['daughter-Tag'] = 5*['2pt_K_vc_tw{0}.ll']
 #########################################################################################
 Cp = collections.OrderedDict()
 Cp['conf']='Cp'
-Cp['label'] = 'Set 1'
-Cp['filename'] = 'Corrfits/Cprelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.358_smTrue_Stmin0_Vtmin0.pickle'
+Cp['label'] = 'Set 2'
+Cp['filename'] = 'Corrfits/Cprelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.361_smTrue_Stmin0_Vtmin0.pickle'
 Cp['masses'] = ['0.643']# note m eta_c is not corect for this
 Cp['Zdisc'] = [0.99718]
 Cp['twists'] = ['0','2.405','3.641','4.735']
@@ -52,8 +52,8 @@ Cp['daughter-Tag'] = 5*['2pt_K_coarse_tw{0}.ll']
 #########################################################################
 Fp = collections.OrderedDict()
 Fp['conf']='Fp'
-Fp['label'] = 'Set -1'
-Fp['filename'] = 'Corrfits/Fprelabelled_binned_584_confs_G5G5_freshfullwall0.43202.3153.5074.563BGBNGKGSV16192225unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.201_smTrue_Stmin0_Vtmin0.pickle'
+Fp['label'] = 'Set 3'
+Fp['filename'] = 'Corrfits/Fprelabelled_binned_584_confs_G5G5_freshfullwall0.43202.3153.5074.563BGBNGKGSV16192225unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.202_smTrue_Stmin0_Vtmin0.pickle'
 Fp['masses'] = ['0.432']
 Fp['Zdisc'] = [0.99938]
 Fp['twists'] = ['0','2.315','3.507','4.563']
@@ -67,11 +67,46 @@ Fp['L'] = 64
 Fp['w0/a'] = gv.gvar('1.9518(7)')
 Fp['parent-Tag'] = 'D_G5-G5_m0.432'
 Fp['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
+#######################################VC PARAMETERS ####################
+VC = collections.OrderedDict()
+VC['conf']='VC'
+VC['label'] = 'Set 4'
+VC['filename'] = 'Corrfits/VCtest-KDscalarvectortensor_1020cfgs_neg0.88800.36651.0971.828BGBNGKGKNGSTV9121518unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.399_smTrue_Stmin1_Ttmin1_Vtmin1.pickle'
+VC['masses'] = ['0.888']# note m eta_c for slightly wrong ensemble 0.863 = 
+VC['Zdisc'] = [0.99105]  
+VC['twists'] = ['0','0.3665','1.097','1.828']
+VC['m_l'] = '0.013' #ampi = 0.101720(40)
+VC['m_s'] = '0.0705' #these are valence  
+VC['m_c'] = '0.888' 
+VC['m_ssea'] = 0.065
+VC['m_lsea'] = 0.013
+VC['L'] = 16
+VC['w0/a'] = gv.gvar('1.1119(10)')
+VC['parent-Tag'] = 'D_G5-G5_m{1}'
+VC['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
+
+#################################### C PARAMETERS #####################
+C = collections.OrderedDict()
+C['conf']='C'
+C['label'] = 'Set 5'
+C['filename'] = 'Corrfits/'
+C['masses'] = ['0.664']# note m eta_c is not corect for this
+C['Zdisc'] = [0.99683]
+C['twists'] = ['0','0.441','1.323','2.205','2.646']
+C['m_l'] = '0.0102'
+C['m_s'] = '0.0545'
+C['m_c'] = '0.664'
+C['m_ssea'] = 0.0509
+C['m_lsea'] = 0.0102
+C['L'] = 24
+C['w0/a'] = gv.gvar('1.3826(11)')
+C['parent-Tag'] = 'D_G5-G5_m{1}'
+C['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 ################################## F PARAMETERS ##########################
 F = collections.OrderedDict()
 F['conf']='F'
-F['label'] = 'Set 2'
-F['filename'] = 'Corrfits/Ftest-KBscalarvectortensor_499cfgs_neg0.4490.5660.6830.800.42811.2822.1412.570BGBNGKGKNGSTV141720unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.206_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+F['label'] = 'Set 6'
+F['filename'] = 'Corrfits/Ftest-KBscalarvectortensor_499cfgs_neg0.44900.42811.2822.1412.570BGBNGKGSV141720unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.286_smTrue_Stmin2_Vtmin2.pickle'
 F['masses'] = ['0.449','0.566','0.683','0.8']
 F['Zdisc'] = [0.99892,0.99826,0.99648,0.99377]
 F['twists'] = ['0','0.4281','1.282','2.141','2.570']
@@ -89,8 +124,8 @@ F['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 ######################## SF PARAMETERS ####################################
 SF = collections.OrderedDict()
 SF['conf']='SF'
-SF['label'] = 'Set 3'
-SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_415cfgs_negscalarvector0.2740.450.60.801.2612.1082.9463.624BGBNGKGKNGSTV202530unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.136_smTrue_Stmin2_Ttmin2_Vtmin2.pickle' 
+SF['label'] = 'Set 7'
+SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_415cfgs_negscalarvector0.27401.2612.1082.9463.624BGBNGKGSV202530unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.180_smTrue_Stmin2_Vtmin2.pickle' 
 SF['masses'] = ['0.274','0.45','0.6','0.8']
 SF['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
 SF['twists'] = ['0','1.261','2.108','2.946','3.624']
@@ -109,7 +144,7 @@ SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 ######################## UF PARAMETERS ####################################
 UF = collections.OrderedDict()
 UF['conf']='UF'
-UF['label'] = 'Set 4'
+UF['label'] = 'Set 8'
 UF['filename'] = '../Fits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
 #UF['Hsfilename'] = UFs['Hsfilename']
 #UF['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
@@ -129,7 +164,7 @@ UF['daughter-Tag'] = ['etas_G5-G5_tw0','etas_G5-G5_tw0.706','etas_G5-G5_tw1.529'
 ################################## F PARAMETERS ##########################
 Fs = collections.OrderedDict()
 Fs['conf']='Fs'
-Fs['label'] = 'Set 5'
+Fs['label'] = 'Set 9'
 Fs['filename'] = '../../H_sToEta_s/Analysis/Fits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
 Fs['Hlfilename'] = F['filename']  # this is to get the H mass for t_plus etc
 Fs['Hltag'] = F['parent-Tag']
@@ -151,7 +186,7 @@ Fs['daughter-Tag'] = ['etas','etas_p0.0728','etas_p0.218','etas_p0.364','etas_p0
 ######################## SFs PARAMETERS ####################################
 SFs = collections.OrderedDict()
 SFs['conf']='SFs'
-SFs['label'] = 'Set 6'
+SFs['label'] = 'Set 10'
 SFs['filename'] = '../../H_sToEta_s/Analysis/Fits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
 SFs['Hlfilename'] = SF['filename']
 SFs['Hltag'] = SF['parent-Tag']
@@ -174,7 +209,7 @@ SFs['daughter-Tag'] = ['etas_p0','etas_p0.143','eta_s_tw2.108_m0.0234','etas_p0.
 ######################## UFs PARAMETERS ####################################
 UFs = collections.OrderedDict()
 UFs['conf']='UFs'
-UFs['label'] = 'Set 7'
+UFs['label'] = 'Set 11'
 UFs['filename'] = '../../H_sToEta_s/Analysis/Fits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
 UFs['Hlfilename'] = UF['filename']
 UFs['Hltag'] = UF['parent-Tag']
@@ -200,16 +235,22 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [Fp,VCp,Cp,F,SF,Fs,SFs]#,UFs]#,UF] # choose what to fit
+Fits = [Fp,VCp,Cp,VC,F,SF]#,Fs,SFs]#,UFs]#,UF] # choose what to fit
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
 Masses['Cp'] = [0]                                     # Choose which masses to fit
-Twists['Cp'] = [0,1,2,3]
+Twists['Cp'] = [0,1,2,3] 
 thpts['Cp'] = ['S','V']
 Masses['Fp'] = [0]                                     # Choose which masses to fit
 Twists['Fp'] = [0,1,2,3]
 thpts['Fp'] = ['S','V']
+Masses['VC'] = [0]                                     # Choose which masses to fit
+Twists['VC'] = [0,1,2,3]
+thpts['VC'] = ['S','V']
+Masses['C'] = [0]                                     # Choose which masses to fit
+Twists['C'] = [0,1,2,3,4] 
+thpts['C'] = ['S','V']
 Masses['F'] = [0]                                     # Choose which masses to fit
 Twists['F'] = [0,1,2,3,4]
 thpts['F'] = ['S','V']
