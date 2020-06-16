@@ -19,6 +19,8 @@ from collections import defaultdict
 
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.9766(12)')# gv.gvar('2.98390(50)')  # From Christine not PDG
+Metas_C = gv.gvar('0.432881(80)')#fitted from Judd's data
+Metas_VC = gv.gvar('0.54024(15)') # 1408.4169
 Metas_VCp = gv.gvar('0.52680(8)')
 Metas_Cp = gv.gvar('0.42310(3)')#from 1408.4169 for am_s =0.0527 correct mass
 Metas_Fp = gv.gvar('0.30480(4)')#from 1408.4169 for am_s =0.036 correct 
@@ -44,9 +46,13 @@ slratio = gv.gvar('27.18(10)')
 MetacVCp = gv.gvar('2.28770(4)')# for mass 0.863    2.28770(4) not correct 1408.4169
 MetacCp = gv.gvar('1.833950(18)')# 2005.01845   
 MetacFp = gv.gvar('1.32929(3)')# from 1408.4169 for am_h =0.433 not correct
+MetacC = gv.gvar('1.876536(48)') #2005.01845
+MetacVC = gv.gvar('2.33188(9)') # correct mass  
 MetacF = gv.gvar('1.367014(40)')        #lattice units
 MetacSF = gv.gvar('0.896806(48)')       #where are these from? 
 MetacUF = gv.gvar('0.666754(39)')       #All from Mclean 1906.00701
+deltaFVC = gv.gvar('0.018106911(16)')
+deltaFVVC = gv.gvar('0.05841163(17)')
 deltaFVVCp = gv.gvar('0.12907825(82)')
 deltaFVCp = gv.gvar('0.04894993(12)')
 deltaFVFp = gv.gvar('0.06985291(24)')

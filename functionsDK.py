@@ -19,9 +19,9 @@ from collections import defaultdict
 
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.9766(12)')# gv.gvar('2.98390(50)')  # From Christine not PDG
-Metas_Cp = gv.gvar('0.432881(80)')#fitted from Judd's data 
+Metas_C = gv.gvar('0.432881(80)')#fitted from Judd's data 
 Metas_VCp = gv.gvar('0.52680(8)')
-Metas_VC = gv.gvar('0.54024(15)')
+Metas_VC = gv.gvar('0.54024(15)') # 1408.4169
 Metas_Cp = gv.gvar('0.42310(3)')#from 1408.4169 for am_s =0.0527 correct mass
 Metas_Fp = gv.gvar('0.30480(4)')#from 1408.4169 for am_s =0.036 correct 
 Metas_F = gv.gvar('0.314015(89)') #from BsEtas fits
