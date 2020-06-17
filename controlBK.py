@@ -235,7 +235,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [Fp,VCp,Cp,VC,F,SF]#,Fs,SFs]#,C,UFs]#,UF] # choose what to fit
+Fits = [Fp,VCp,Cp,VC,F,SF,Fs,SFs]#,C,UFs]#,UF] # choose what to fit
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
