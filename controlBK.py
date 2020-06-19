@@ -270,8 +270,9 @@ Masses['UFs'] = [0,1,2,3]
 Twists['UFs'] = [0,1,2,3,4]
 thpts['UFs'] = ['S','V']
 addrho = True
-fpf0same = True
+fpf0same = False
 constraint = False #add constraint the f0(0)=fp(0)
+constraint2 =True
 svdnoise = False
 priornoise = False
 FitNegQsq = True
@@ -288,7 +289,7 @@ Nm=3
 SHOWPLOTS = False
 Del = 0.5 #0.4 + 0.1  change in functions too
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
-adddata = True #include data in continuum from other papers currently only for f0 Bsetas max
+adddata = False #include data in continuum from other papers currently only for f0 Bsetas max
 ############################################################################
 if t_0 != '0':
     print('t_0 != 0, so fpf0same set to False')
@@ -308,9 +309,9 @@ check_poles(Fits)
 Z_V_plots(Fits,fs_data)
 prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata,constraint)
 
-pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same)
+pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same,constraint2)
 #print values
-fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho)
+fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho,constraint2)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
