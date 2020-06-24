@@ -89,7 +89,7 @@ VC['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 C = collections.OrderedDict()
 C['conf']='C'
 C['label'] = 'Set 5'
-C['filename'] = 'Corrfits/'
+C['filename'] = 'Corrfits/Cthreemass-KDscalarvectortensor_1053cfgs_neg0.66400.4411.3232.2052.646BGBNGKGSV12151821unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.303_smTrue_Stmin1_Vtmin1.pickle'
 C['masses'] = ['0.664','0.8','0.9']# note m eta_c is not corect for this
 C['Zdisc'] = [0.99683,0.99377,0.99063]
 C['twists'] = ['0','0.441','1.323','2.205','2.646']
@@ -235,7 +235,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [Fp,VCp,Cp,VC,F,SF]#,Fs,SFs]#,UFs]#,UF] # choose what to fit
+Fits = [VCp,Cp,Fp,VC,C,F,SF]#,Fs,SFs]#,UFs]#,UF] # choose what to fit
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
@@ -287,7 +287,7 @@ Npow = 3 #3
 Nijk = 3 #3
 Nm=3
 SHOWPLOTS = False
-Del = 0.5 #0.4 + 0.1  change in functions too
+Del = 0.45 #0.4 + 0.1  change in functions too
 t_0 = 'min' # for z conversion can be '0','rev','min' rev gives t_-
 adddata = False #include data in continuum from other papers currently only for f0 Bsetas max
 ############################################################################
@@ -315,9 +315,11 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho,constraint2)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
-speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata,constraint2)
+comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+#plot_poles(t_0)
+#speed_of_light(Fits)
+#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata,constraint2)
 #fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)

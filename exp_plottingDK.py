@@ -1,4 +1,4 @@
-from functionsDK import *
+from exp_functionsDK import *
 import numpy as np
 import gvar as gv
 import lsqfit
@@ -39,7 +39,7 @@ ms = 25*factor #markersize
 alpha = 0.4
 fontsizeleg = 25*factor #legend
 fontsizelab = 35*factor #legend
-cols = ['g','r','b','c'] #for each mass
+cols = ['b','r','g','c'] #for each mass
 symbs = ['o','^','*','D','d','s','p','+']    # for each conf
 lines = ['-','--','-.','-',':','-','--'] # for each conf
 major = 15*factor
@@ -48,9 +48,70 @@ capsize = 10*factor
 
 ####################################################################################################
 
+def plot_poles(t_0):
+    orig_pole = []
+    outer_func_fp = []
+    outer_func_f0 = []
+    new_pole = []
+    pole_rat = []
+    qsq = []
+    for q2 in np.linspace(0,(MDsstarphys**2).mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        orig_pole.append((1-q2/(MDsstarphys**2)))
+        outer_func_fp.append(make_phi_fp(q2,t_0,MDphys,MKphys))
+        outer_func_f0.append(make_phi_f0(q2,t_0,MDphys,MKphys))
+        new_pole.append(30*(make_z(q2,MDsstarphys**2,MDphys,MKphys) * make_phi_fp(q2,t_0,MDphys,MKphys)))
+    #print(orig_pole)
+    #print(new_pole)
+    #print(outer_func)
+    plt.figure(100,figsize=figsize)
+    ymean,yerr = unmake_gvar_vec(orig_pole)
+    yupp,ylow = make_upp_low(orig_pole)
+    plt.plot(qsq, ymean, color='b',label='1/original pole')
+    plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
+    ymean,yerr = unmake_gvar_vec(new_pole)
+    yupp,ylow = make_upp_low(new_pole)
+    plt.plot(qsq, ymean, color='r',label='1/new pole')
+    
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend()#handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('DKPlots/poles.pdf')
+
+    
+    plt.figure(101,figsize=figsize)
+    ymean,yerr = unmake_gvar_vec(outer_func_f0)
+    yupp,ylow = make_upp_low(outer_func_f0)
+    plt.plot(qsq, ymean, color='k',label ='outer function $f_0$')
+    plt.fill_between(qsq,ylow,yupp, color='k',alpha=alpha)
+    ymean,yerr = unmake_gvar_vec(outer_func_fp)
+    yupp,ylow = make_upp_low(outer_func_fp)
+    plt.plot(qsq, ymean, color='r',label ='outer function $f_p$')
+    plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend()#handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
+    
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('DKPlots/outer_func.pdf')
+    return()
+
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
 def speed_of_light(Fits):
     plt.figure(1,figsize=figsize)
-    points = ['ko','k^','k*','ro','r^','r*','rD']
+    points = ['ko','k^','k*','ro','r^','r*']
     i=0
     plotfits = []
     for Fit in Fits:
@@ -70,7 +131,7 @@ def speed_of_light(Fits):
     plt.xlim((0,0.5))
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(loc='upper right',handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
+    plt.legend(loc='lower left',handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
     plt.xlabel('$|ap_{K}|^2$',fontsize=fontsizelab)
     plt.ylabel('$(E_{K}^2-M_{K}^2)/p_{K}^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -79,8 +140,8 @@ def speed_of_light(Fits):
     plt.axes().yaxis.set_ticks_position('both')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.01))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
     #plt.xlim([0,0.2])
     #plt.ylim([0.9,1.2])
     plt.tight_layout()
@@ -106,14 +167,14 @@ def Z_V_plots(Fits,fs_data):
             y.append(Z_V)
         y,yerr = unmake_gvar_vec(y)
         if Fit['conf'][-1] == 's':
-            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['label'],ms=ms,mfc='none')
-        elif Fit['conf'][-1] == 'p':
-            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['label'],ms=ms,mfc='none')
-        else:
             plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['label'],ms=ms,mfc='none')
+        elif Fit['conf'][-1] == 'p':
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['label'],ms=ms,mfc='none')
+        else:
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['label'],ms=ms,mfc='none')
         i+=1
     plt.plot([-0.1,0.9],[1,1],'k--')
-    plt.xlim([0,0.85])
+    plt.xlim([0,0.8])
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
@@ -125,8 +186,8 @@ def Z_V_plots(Fits,fs_data):
     plt.axes().yaxis.set_ticks_position('both')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.05))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.01))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
     plt.tight_layout()
     plt.savefig('DKPlots/Z_Vinamhsq.pdf')            
     return()
@@ -167,7 +228,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     qsq = []
     z = []
     y = []
-    p = make_p_physical_point_DK(pfit,Fits,Del,t_0)
+    p = make_p_physical_point_DK(pfit,Fits,Del)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MDphys,MKphys) #all GeV dimensions
@@ -187,7 +248,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower right')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$f_0(q^2)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -264,14 +325,14 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata,c
     qsq = []
     z = []
     y = []
-    p = make_p_physical_point_DK(pfit,Fits,Del,t_0)
+    p = make_p_physical_point_DK(pfit,Fits,Del)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MDphys,MKphys) #all GeV dimensions
-        #zed0 = make_z(0,t_0,MDphys,MKphys)
+        zed0 = make_z(0,t_0,MDphys,MKphys)
         z.append(zed.mean)
         #        make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
-        y.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0,const2=const2)) #only need one fit
+        y.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,q2,zed.mean,zed0.mean,Fits[0]['masses'][0],fpf0same,0,const2=const2)) #only need one fit
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
     plt.figure(4,figsize=figsize)
@@ -284,7 +345,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata,c
     plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2)
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$f_+(q^2)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -359,7 +420,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     qsq = []
     z = []
     y = []
-    p = make_p_physical_point_DK(pfit,Fits,Del,t_0)
+    p = make_p_physical_point_DK(pfit,Fits,Del)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,MDphys,MKphys) #all GeV dimensions
