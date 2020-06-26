@@ -33,6 +33,7 @@ Metas_UFs = Metas_UF#gv.gvar('0.154107(88)') #from new BsEast fit
 MKphys = gv.gvar('0.497611(13)') #PD K^0
 MBsphys = gv.gvar('5.36688(17)') # PDG
 MDsphys = gv.gvar('1.968340(70)')  #PDG
+MDs0phys = gv.gvar('2.3180(7)')
 MDsstarphys = gv.gvar('2.1122(4)')  #PDG 
 MBphys = gv.gvar('5.27933(13)') # PDG
 MDphys = gv.gvar('1.86965(5)')  #PDG
@@ -72,7 +73,7 @@ mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
 qsqmaxphysBK = (MBphys-MKphys)**2
 qsqmaxphysDK = (MDphys-MKphys)**2
-Del = 0.45 # 0.4 +0.1 in control too
+Del = (MDs0phys-MDphys) # 0.4 +0.1 in control too
 #####################################################################################################
 ############################### Other data #########################################################
 dataf0maxBK = None  #only works for BsEtas for now
@@ -230,7 +231,7 @@ def make_t_plus(M_H,M_K): # This should ALWAYS be M_H,M_K because it is sea mass
 def make_t_0(t0,M_H,M_K,M_parent,M_daughter):
     #note that t_- is qsqmax
     t_plus = (M_H+M_K)**2
-    t_minus = (M_parent-M_daughter)**2 #i.e. qsqmax  
+    t_minus = (M_parent-M_daughter)**2 #i.e. qsqmax
     if t0 == '0':
         t_0 = 0
     elif t0 == 'rev':
@@ -256,20 +257,20 @@ def make_z(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None): # this is give M_H and
     return(z)
 ######################################################################################################
 
-def make_phi(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None,m_c=None):
+#def make_phi(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None,m_c=None):
     #we require all 3 values of t_0 here
-    if t0 != 'min':
-        print('Warning: Tring to use phi without t_0 = min')
-    if m_c == None: #means we are evaluating in GeV
-        m_c = 1.25 # GeV from PDG needs to be the lattice value otherwise
-    t_plus = (M_H+M_K)**2
-    t_minus = (M_parent-M_daughter)**2
-    t_0 = make_t_0('min',M_H,M_K,M_parent,M_daughter)
-    z_0 = make_z(qsq,'0',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
-    z_t_0 = make_z(qsq,'min',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
-    z_t_minus = make_z(qsq,'rev',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
-    phi = np.sqrt(np.pi*m_c**2/3) * (z_0/(-qsq))**(5/2) * (z_t_0/(t_0-qsq))**(-1/2) * (z_t_minus/t_minus-qsq)**(-3/4) * (t_plus-qsq)/((t_plus-t_0)**(1/4))
-    return(phi)
+#    if t0 != 'min':
+#        print('Warning: Tring to use phi without t_0 = min')
+#    if m_c == None: #means we are evaluating in GeV
+#        m_c = 1.25 # GeV from PDG needs to be the lattice value otherwise
+#    t_plus = (M_H+M_K)**2
+#    t_minus = (M_parent-M_daughter)**2
+#    t_0 = make_t_0('min',M_H,M_K,M_parent,M_daughter)
+#    z_0 = make_z(qsq,'0',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
+#    z_t_0 = make_z(qsq,'min',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
+#    z_t_minus = make_z(qsq,'rev',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
+#    phi = np.sqrt(np.pi*m_c**2/3) * (z_0/(-qsq))**(5/2) * (z_t_0/(t_0-qsq))**(-1/2) * (z_t_minus/t_minus-qsq)**(-3/4) * (t_plus-qsq)/((t_plus-t_0)**(1/4))
+#    return(phi)
 
 ######################################################################################################
 
@@ -332,15 +333,19 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
             else:
                 prior['MHs0_{0}_m{1}'.format(fit,mass)] = prior['MH_{0}_m{1}'.format(fit,mass)] + Fit['a']*Del 
                 prior['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(prior['MH_{0}_m{1}'.format(fit,mass)],Fit['a'])
+            if Fit['conf'] in ['Fs','SFs','UFs']:
+                prior['z0_{0}_m{1}'.format(fit,mass)] = make_z(0,t_0,Fit['Ml_m{0}'.format(mass)],Fit['M_Kaon'],prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])
+            else:
+                prior['z0_{0}_m{1}'.format(fit,mass)] = make_z(0,t_0,prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])
             for twist in Fit['twists']:
                 tag = '{0}_m{1}_tw{2}'.format(fit,mass,twist)
                 qsq = fs_data[fit]['qsq_m{0}_tw{1}'.format(mass,twist)]
                 if Fit['conf'] in ['Fs','SFs','UFs']:
                     prior['z_{0}'.format(tag)] = make_z(qsq,t_0,Fit['Ml_m{0}'.format(mass)],Fit['M_Kaon'],prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])
-                    prior['z0_{0}_m{1}'.format(fit,mass)] = make_z(0,t_0,Fit['Ml_m{0}'.format(mass)],Fit['M_Kaon'],prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])
+                    
                 else:
                     prior['z_{0}'.format(tag)] = make_z(qsq,t_0,prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])    # x values go in prior
-                    prior['z0_{0}_m{1}'.format(fit,mass)] = make_z(0,t_0,prior['MH_{0}_m{1}'.format(fit,mass)],Fit['M_daughter'])
+                    
                 prior['qsq_{0}'.format(tag)] = qsq
                 f['f0_{0}'.format(tag)] = fs_data[fit]['f0_m{0}_tw{1}'.format(mass,twist)]   # y values go in f   
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
@@ -576,7 +581,7 @@ def do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same,cons
     #if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
     #    p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     p0 = None    
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),debug=True,fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
     return(fit.p)
@@ -602,7 +607,7 @@ def make_p_physical_point_DK(pfit,Fits,Del,t_0):
             p['MD_{0}'.format(fit)] = MDphys
             p['MHs0_{0}_m{1}'.format(fit,mass)] = p['MH_{0}_m{1}'.format(fit,mass)] + Del
             p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(MDphys)
-            p['z0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys)
+            p['z0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys).mean #need mean here
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]
@@ -631,7 +636,7 @@ def make_p_Mh_BK(pfit,Fits,Del,MH):
             p['MD_{0}'.format(fit)] = MDphys
             p['MHs0_{0}_m{1}'.format(fit,mass)] = MH + Del
             p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(MH)
-            p['z0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys)
+            p['z0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys).mean #if it is zero with a small error the powers knacker it
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]
@@ -648,6 +653,7 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho,const2):
     f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq0,z0,Fits[0]['masses'][0],fpf0same,0)
     #     make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,z0,mass,fpf0same,amh)
     fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq0,z0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    
   #  fT0 = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
     qsq = qsqmaxphysDK.mean
     z = make_z(qsq,t_0,MDphys,MKphys)
@@ -670,7 +676,7 @@ def integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,cons
     p = make_p_physical_point_DK(pfit,Fits,Del,t_0)
     def integrand(qsq):
         p3 = ((qsq-MKphys**2-MDphys**2)**2/(4*MDphys**2)-MKphys**2)**(3/2)
-        z = make_z(qsq,t_0,MDphys,MKphys)
+        z = make_z(qsq,t_0,MDphys,MKphys).mean # need mean here
         fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0,const2=const2)
         integrand = p3 * fp**2
         #print(p3,fp,p3*fp**2,p3*fp**2*0.2)
@@ -691,19 +697,68 @@ def comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     bins = [0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,qsqmaxphysDK.mean]
     for i in range(len(bins)-1):
         p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2))
-    partials1 = ['17.82(3)','15.83(35)','13.91(32)','11.69(29)','9.36(26)','7.08(22)','5.34(19)','3.09(15)','1.28(11)'] ## D^0 to K^-
-    partials2 = ['17.79(47)','15.62(45)','14.02(43)','12.28(40)','8.92(34)','8.17(32)','4.96(25)','2.67(18)','1.19(13)']
-    Vcss = []
-    for i in range(len(partials1)):
-        #yprint(p3integrals[i]*GF**2/((6.582119569*1e-16)*24*np.pi**3))
-        Vcss.append(gv.sqrt( 24 * np.pi**3 * (gv.gvar(partials1[i])) * 6.582119569*1e-16 /(GF**2 * p3integrals[i])))
-        #print(0.97334/gv.sqrt(  24 * np.pi**3 * gv.gvar(partials[i]) * 6.582119569*1e-16 /(GF**2 * p3integrals[i])))
-    print(Vcss)
+    partials = [17.82,15.83,13.91,11.69,9.36,7.08,5.34,3.09,1.28,17.79,15.62,14.02,12.28,8.92,8.17,4.96,2.67,1.19] ## D^0 to K^- followed by D^+ to K^0
+    cov_mat = gv.load('covarience_matricies/CLEO.pickle')
+    partials  = gv.gvar(partials,cov_mat)
+    Vcss21 = []
+    Vcss22 = []
+    for i in range(int(len(partials)/2)):
+        Vcss21.append(( 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i])))
+    for i in range(int(len(partials)/2),len(partials)):
+        Vcss22.append(( 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i-int(len(partials)/2)])))
+    print('Cleo |V_cs|^2 D^0 to K^- by bin: ',Vcss21)
     average = 0
-    for elemnt in Vcss:
-        average += element/len(Vcss)
-    print(average)
+    for element in Vcss21:
+        average += element/len(Vcss21)
+        #print('Value {0}, exp error {1:.3f}, latt error {2:.3f}'.format(element, element.partialsdev(partials1[Vcss2.index(element)]),element.partialsdev(p3integrals[Vcss2.index(element)])))
+    print('Cleo |V_cs|^2 D^0 to K^- sqrt(average) = ',gv.sqrt(average))
+    print('Cleo |V_cs|^2 D^0 to K^- weighted average = ',(lsqfit.wavg(Vcss21)))
+    print('Cleo |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(lsqfit.wavg(Vcss21)))
+
+    print('Cleo |V_cs|^2 D^+ to K^0 by bin: ',Vcss22)
+    average = 0
+    for element in Vcss22:
+        average += element/len(Vcss22)
+        #print('Value {0}, exp error {1:.3f}, latt error {2:.3f}'.format(element, element.partialsdev(partials2[Vcss2.index(element)]),element.partialsdev(p3integrals[Vcss2.index(element)])))
+    print('Cleo |V_cs|^2 D^+ to K^0 sqrt(average) = ',gv.sqrt(average))
+    print('Cleo |V_cs|^2 D^+ to K^0 weighted average = ',(lsqfit.wavg(Vcss22)))
+    print('Cleo |V_cs|^2 D^+ to K^0 sqrt(weighted average) = ',gv.sqrt(lsqfit.wavg(Vcss22)))
+    total = []
+    for i in Vcss21:
+        total.append(i)
+    for j in Vcss22:
+        total.append(j)
+        
+    print('Cleo over all sqrt(weighted average) = ',gv.sqrt(lsqfit.wavg(total)))
     return()
+############################################################################################
+def comp_BES(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
+    #bins 0,0.2,0.4...1.6,inf
+    GF = gv.gvar('1.1663787(6)*1e-5') #Gev-2
+    p3integrals = []
+    bins = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,qsqmaxphysDK.mean]
+    for i in range(len(bins)-1):
+        p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2))
+    partials1 = gv.gvar(['8.812(116)','8.743(123)','8.295(124)','7.567(121)','7.486(120)','6.446(112)','6.200(110)','5.519(105)','5.028(0.099)','4.525(94)','3.972(87)','3.326(81)','2.828(74)','2.288(67)','1.737(59)','1.314(52)','0.858(44)','0.379(35)']) ## D^0 to K^-
+    #corrs1 = [[1.00,0.80,0.87,0.78,0.79,0.56,0.81,0.51,0.03],[0.80,1.00,0.97,0.98,0.96,0.92,0.92,0.87,0.57],[0.87,0.97,1.00,0.97,0.96,0.86,0.94,0.82,0.45],[0.78,0.98,0.97,1.00,0.98,0.94,0.94,0.90,0.59],[0.79,0.96,0.96,0.98,1.00,0.94,0.97,0.90,0.57],[0.56,0.92,0.86,0.94,0.94,1.00,0.89,0.97,0.80],[0.81,0.92,0.94,0.94,0.97,0.89,1.00,0.88,0.49],[0.51,0.87,0.82,0.90,0.90,0.97,0.88,1.00,0.82],[0.03,0.57,0.45,0.59,0.57,0.80,0.49,0.82,1.00]]
+    
+    #partials  = gv.correlate(partials1,corrs1)
+    Vcss2 = []
+    for i in range(len(partials1)):
+        Vcss2.append(( 24 * np.pi**3 * partials1[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i])))
+        
+    print('BES |V_cs|^2 D^0 to K^- by bin: ',Vcss2)
+    average = 0
+    for element in Vcss2:
+        average += element/len(Vcss2)
+        print('Value {0}, exp error {1:.3f}, latt error {2:.3f}'.format(element, element.partialsdev(partials1[Vcss2.index(element)]),element.partialsdev(p3integrals[Vcss2.index(element)])))
+    print('BES |V_cs|^2 D^0 to K^- sqrt(average) = ',gv.sqrt(average))
+    print('BES |V_cs|^2 D^0 to K^- weighted average = ',(lsqfit.wavg(Vcss2)))
+    print('BES |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(lsqfit.wavg(Vcss2)))
+
+    
+    return()
+
 ###########################Do stuff below here check stuff is for BK and t_0*a etc etc#######################################################
 ######################################################################################################
 

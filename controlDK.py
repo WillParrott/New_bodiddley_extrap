@@ -287,7 +287,6 @@ Npow = 3 #3
 Nijk = 3 #3
 Nm=3
 SHOWPLOTS = False
-Del = 0.45 #0.4 + 0.1  change in functions too
 t_0 = 'min' # for z conversion can be '0','rev','min' rev gives t_-
 adddata = False #include data in continuum from other papers currently only for f0 Bsetas max
 ############################################################################
@@ -315,7 +314,8 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho,constraint2)
 
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
-comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+#comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+#comp_BES(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #plot_poles(t_0)
 #speed_of_light(Fits)
 #f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
