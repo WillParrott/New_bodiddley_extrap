@@ -739,24 +739,51 @@ def comp_BES(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     bins = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,qsqmaxphysDK.mean]
     for i in range(len(bins)-1):
         p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2))
-    partials1 = gv.gvar(['8.812(116)','8.743(123)','8.295(124)','7.567(121)','7.486(120)','6.446(112)','6.200(110)','5.519(105)','5.028(0.099)','4.525(94)','3.972(87)','3.326(81)','2.828(74)','2.288(67)','1.737(59)','1.314(52)','0.858(44)','0.379(35)']) ## D^0 to K^-
-    #corrs1 = [[1.00,0.80,0.87,0.78,0.79,0.56,0.81,0.51,0.03],[0.80,1.00,0.97,0.98,0.96,0.92,0.92,0.87,0.57],[0.87,0.97,1.00,0.97,0.96,0.86,0.94,0.82,0.45],[0.78,0.98,0.97,1.00,0.98,0.94,0.94,0.90,0.59],[0.79,0.96,0.96,0.98,1.00,0.94,0.97,0.90,0.57],[0.56,0.92,0.86,0.94,0.94,1.00,0.89,0.97,0.80],[0.81,0.92,0.94,0.94,0.97,0.89,1.00,0.88,0.49],[0.51,0.87,0.82,0.90,0.90,0.97,0.88,1.00,0.82],[0.03,0.57,0.45,0.59,0.57,0.80,0.49,0.82,1.00]]
+    partials = [8.812,8.743,8.295,7.567,7.486,6.446,6.200,5.519,5.028,4.525,3.972,3.326,2.828,2.288,1.737,1.314,0.858,0.379] ## D^0 to K^-
     
-    #partials  = gv.correlate(partials1,corrs1)
+    cov_mat = gv.load('covarience_matricies/BES.pickle')
+    partials  = gv.gvar(partials,cov_mat)
     Vcss2 = []
-    for i in range(len(partials1)):
-        Vcss2.append(( 24 * np.pi**3 * partials1[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i])))
+    for i in range(len(partials)):
+        Vcss2.append(( 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i])))
         
     print('BES |V_cs|^2 D^0 to K^- by bin: ',Vcss2)
     average = 0
     for element in Vcss2:
         average += element/len(Vcss2)
-        print('Value {0}, exp error {1:.3f}, latt error {2:.3f}'.format(element, element.partialsdev(partials1[Vcss2.index(element)]),element.partialsdev(p3integrals[Vcss2.index(element)])))
+        #print('Value {0}, exp error {1:.3f}, latt error {2:.3f}'.format(element, element.partialsdev(partials1[Vcss2.index(element)]),element.partialsdev(p3integrals[Vcss2.index(element)])))
     print('BES |V_cs|^2 D^0 to K^- sqrt(average) = ',gv.sqrt(average))
     print('BES |V_cs|^2 D^0 to K^- weighted average = ',(lsqfit.wavg(Vcss2)))
     print('BES |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(lsqfit.wavg(Vcss2)))
 
+    return()
+
+#######################BaBar #####################################################
+
+def comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
+    #bins 0,0.2,0.4...1.6,inf
+    GF = gv.gvar('1.1663787(6)*1e-5') #Gev-2
+    p3integrals = []
+    bins = [0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,qsqmaxphysDK.mean]
+    for i in range(len(bins)-1):
+        p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2))
+    partials = gv.gvar(['17.74(37)','16.26(35)','14.42(30)','12.39(27)','9.92(23)','7.72(19)','5.32(16)','3.24(11)','1.290(80)','0.0619(61)']) ## D^0 to K^-
     
+    corr_mat = gv.load('covarience_matricies/corr_BaBar.pickle')
+    partials  = gv.correlate(partials,corr_mat)
+    Vcss2 = []
+    for i in range(len(partials)):
+        Vcss2.append(( 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i])))
+        
+    print('BaBar|V_cs|^2 D^0 to K^- by bin: ',Vcss2)
+    average = 0
+    for element in Vcss2:
+        average += element/len(Vcss2)
+        #print('Value {0}, exp error {1:.3f}, latt error {2:.3f}'.format(element, element.partialsdev(partials1[Vcss2.index(element)]),element.partialsdev(p3integrals[Vcss2.index(element)])))
+    print('BaBar |V_cs|^2 D^0 to K^- sqrt(average) = ',gv.sqrt(average))
+    print('BaBar |V_cs|^2 D^0 to K^- weighted average = ',(lsqfit.wavg(Vcss2)))
+    print('BaBar |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(lsqfit.wavg(Vcss2)))
+
     return()
 
 ###########################Do stuff below here check stuff is for BK and t_0*a etc etc#######################################################

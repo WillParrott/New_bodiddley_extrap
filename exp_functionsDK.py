@@ -36,6 +36,7 @@ MDsphys = gv.gvar('1.968340(70)')  #PDG
 MDsstarphys = gv.gvar('2.1122(4)')  #PDG 
 MBphys = gv.gvar('5.27933(13)') # PDG
 MDphys = gv.gvar('1.86965(5)')  #PDG
+MDs0phys = gv.gvar('2.3180(7)')
 Mpiphys = gv.gvar('0.1349770(5)')  #PDG
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
 #tensornorm = gv.gvar('1.09024(56)') # from Dan
@@ -72,7 +73,7 @@ mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
 qsqmaxphysBK = (MBphys-MKphys)**2
 qsqmaxphysDK = (MDphys-MKphys)**2
-Del = 0.45 # in control too
+Del = (MDs0phys-MDphys) # in control too MDs0 = 2.3180(7) 
 #####################################################################################################
 ############################### Other data #########################################################
 dataf0maxBK = None  #only works for BsEtas for now
@@ -658,7 +659,7 @@ def make_p_physical_point_DK(pfit,Fits,Del,t_0):
             p['MD_{0}'.format(fit)] = MDphys
             p['MHs0_{0}_m{1}'.format(fit,mass)] = p['MH_{0}_m{1}'.format(fit,mass)] + Del
             p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)])
-            p['z0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys)
+            p['z0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys).mean #issues if not
             p['fp_pole0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,p['MHsstar_{0}_m{1}'.format(fit,mass)]**2,p['MH_{0}_m{1}'.format(fit,mass)],MKphys) * make_phi_fp(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys)
             p['f0_pole0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,p['MHs0_{0}_m{1}'.format(fit,mass)]**2,p['MH_{0}_m{1}'.format(fit,mass)],MKphys) * make_phi_f0(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys)
     for key in pfit:
@@ -689,7 +690,7 @@ def make_p_Mh_BK(pfit,Fits,Del,MH):
             p['MD_{0}'.format(fit)] = MDphys
             p['MHs0_{0}_m{1}'.format(fit,mass)] = MH + Del
             p['MHsstar_{0}_m{1}'.format(fit,mass)] = make_MHsstar(MH)
-            p['z0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys)
+            p['z0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys).mean
             p['fp_pole0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,p['MHsstar_{0}_m{1}'.format(fit,mass)]**2,p['MH_{0}_m{1}'.format(fit,mass)],MKphys) * make_phi_fp(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys)
             p['f0_pole0_{0}_m{1}'.format(Fit['conf'],mass)] = make_z(0,p['MHs0_{0}_m{1}'.format(fit,mass)]**2,p['MH_{0}_m{1}'.format(fit,mass)],MKphys) * make_phi_f0(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],MKphys)
     for key in pfit:

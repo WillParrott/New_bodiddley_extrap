@@ -48,7 +48,7 @@ capsize = 10*factor
 
 ####################################################################################################
 
-def plot_poles(t_0):
+def plot_poles(t_0,Del):
     orig_pole = []
     outer_func_fp = []
     outer_func_f0 = []
@@ -81,7 +81,37 @@ def plot_poles(t_0):
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
-    plt.savefig('DKPlots/poles.pdf')
+    plt.savefig('DKPlots/vec_poles.pdf')
+
+
+    orig_pole = []
+    new_pole = []
+    qsq = []
+    for q2 in np.linspace(0,((MDphys+Del)**2).mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        orig_pole.append((1-q2/((MDphys+Del)**2)))
+        new_pole.append(10*(make_z(q2,(MDphys+Del)**2,MDphys,MKphys) * make_phi_f0(q2,t_0,MDphys,MKphys)))
+    #print(orig_pole)
+    #print(new_pole)
+    #print(outer_func)
+    plt.figure(102,figsize=figsize)
+    ymean,yerr = unmake_gvar_vec(orig_pole)
+    yupp,ylow = make_upp_low(orig_pole)
+    plt.plot(qsq, ymean, color='b',label='1/original pole')
+    plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
+    ymean,yerr = unmake_gvar_vec(new_pole)
+    yupp,ylow = make_upp_low(new_pole)
+    plt.plot(qsq, ymean, color='r',label='1/new pole')
+    
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend()#handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('DKPlots/sca_poles.pdf')
 
     
     plt.figure(101,figsize=figsize)
