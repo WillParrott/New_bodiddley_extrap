@@ -30,7 +30,7 @@ from collections import defaultdict
 # ans and pole masses
 # dict of different lattice spacings #done 
 ################### global variables ##########################################
-factor = 0.5 #multiplies everything to make smaller for big plots etc usually 1
+factor = 1.0 #multiplies everything to make smaller for big plots etc usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor
@@ -38,7 +38,10 @@ nopts = 200 #number of points on plot
 ms = 25*factor #markersize
 alpha = 0.4
 fontsizeleg = 25*factor #legend
-fontsizelab = 35*factor #legend
+if factor == 0.5:
+    fontsizelab = 45*factor #legend
+else:
+    fontsizelab = 35*factor
 cols = ['b','r','g','c'] #for each mass
 symbs = ['o','^','*']    # for each conf
 lines = ['-','--','-.'] # for each conf
@@ -651,6 +654,7 @@ def HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
+    plt.text((MBsphys.mean)**2,0.60,'$M^2_{B_s}$',fontsize=fontsizelab,horizontalalignment='center')
     plt.axes().yaxis.set_ticks_position('both')
     plt.axes().xaxis.set_major_locator(MultipleLocator(5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(1))

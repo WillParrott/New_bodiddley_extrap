@@ -105,6 +105,12 @@ def get_results(Fit,thpts):
     Fit['M_parent_m{0}'.format(Fit['m_c'])] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],Fit['m_c']))][0]
     for mass in Fit['masses']:
         Fit['M_parent_m{0}'.format(mass)] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0]
+        if Fit['conf'] == 'F':
+            print('F',p['dE:{0}'.format('meson-G5T.m{0}_m{1}'.format(Fit['m_s'],mass))][0]-p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0])
+        if Fit['conf'] == 'SF':
+            print('SF',p['dE:{0}'.format('meson2G5T.m{0}_m{1}'.format(Fit['m_s'],mass))][0]-p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0])
+        if Fit['conf'] == 'UF':
+            print('UF',p['dE:{0}'.format('Bs_G5T-G5T_m{1}'.format(Fit['m_s'],mass))][0]-p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],mass))][0])
         if 'Hsfilename' in Fit:
             mass2 = mass 
             if mass == '0.45':
