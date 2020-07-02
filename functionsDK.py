@@ -238,8 +238,10 @@ def make_t_0(t0,M_H,M_K,M_parent,M_daughter):
         t_0 = t_minus
     elif t0 == 'min': #not sure what this should be
         t_0 = t_plus * (1- (1 - (t_minus/t_plus))**(0.5))
+    elif type(t0) == gv._gvarcore.GVar:
+        t_0 = t0
     else:
-        print("t_0 needs to be '0', 'rev' or 'min'")
+        print("t_0 needs to be '0', 'rev' or 'min' or a gvar")
     return(t_0)
 ######################################################################################################
 
@@ -255,23 +257,35 @@ def make_z(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None): # this is give M_H and
         z = gv.gvar(0,1e-16) # ensures not 0(0)
     #print(qsq,z,M_H,M_K,M_parent,M_daughter,t0,t_0,t_plus)
     return(z)
-######################################################################################################
+###################################################################################################
 
-#def make_phi(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None,m_c=None):
+def make_phi_fp(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None,m_c=None):
     #we require all 3 values of t_0 here
-#    if t0 != 'min':
-#        print('Warning: Tring to use phi without t_0 = min')
-#    if m_c == None: #means we are evaluating in GeV
-#        m_c = 1.25 # GeV from PDG needs to be the lattice value otherwise
-#    t_plus = (M_H+M_K)**2
-#    t_minus = (M_parent-M_daughter)**2
-#    t_0 = make_t_0('min',M_H,M_K,M_parent,M_daughter)
-#    z_0 = make_z(qsq,'0',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
-#    z_t_0 = make_z(qsq,'min',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
-#    z_t_minus = make_z(qsq,'rev',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
-#    phi = np.sqrt(np.pi*m_c**2/3) * (z_0/(-qsq))**(5/2) * (z_t_0/(t_0-qsq))**(-1/2) * (z_t_minus/t_minus-qsq)**(-3/4) * (t_plus-qsq)/((t_plus-t_0)**(1/4))
-#    return(phi)
+    if t0 != 'min':
+        print('Warning: Tring to use phi without t_0 = min')
+    if m_c == None: #means we are evaluating in GeV
+        m_c = 1.25 # GeV from PDG needs to be the lattice value otherwise
+    t_plus = (M_H+M_K)**2
+    if M_parent == None:
+        M_parent = M_H
+    if M_daughter == None:
+        M_daughter = M_K
+    t_minus = (M_parent-M_daughter)**2
+    t_0 = make_t_0(t0,M_H,M_K,M_parent,M_daughter)
+    z_0 = make_z(qsq,'0',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
+    z_t_0 = make_z(qsq,t0,M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
+    z_t_minus = make_z(qsq,'rev',M_H,M_K,M_parent=M_parent,M_daughter=M_daughter)
+    if qsq == 0:
+        phi = np.sqrt(np.pi/3)* m_c * (1/(4*t_plus))**(5/2) * (z_t_0/(t_0-qsq))**(-1/2) * (z_t_minus/(t_minus-qsq))**(-3/4) * (t_plus-qsq)/((t_plus-t_0)**(1/4))
 
+    elif qsq == t_minus:
+        phi = np.sqrt(np.pi/3)* m_c * (z_0/(-qsq))**(5/2) * (z_t_0/(t_0-qsq))**(-1/2) * (1/(4*(t_plus-qsq)))**(-3/4)* (t_plus-qsq)/((t_plus-t_0)**(1/4))
+    elif qsq == t_0:
+        phi = np.sqrt(np.pi/3)* m_c * (z_0/(-qsq))**(5/2) * (1/(4*(t_plus-qsq)))**(-1/2) * (z_t_minus/(t_minus-qsq))**(-3/4) * (t_plus-qsq)/((t_plus-t_0)**(1/4))
+    else:
+        phi = np.sqrt(np.pi/3)* m_c * (z_0/(-qsq))**(5/2) * (z_t_0/(t_0-qsq))**(-1/2) * (z_t_minus/(t_minus-qsq))**(-3/4) * (t_plus-qsq)/((t_plus-t_0)**(1/4))
+    phi = phi # no 30 in this case
+    return(phi)
 ######################################################################################################
 
 def check_poles(Fits):
@@ -301,7 +315,7 @@ def check_poles(Fits):
 
 ########################################################################################################
 
-def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata,constraint):
+def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint):
     prior = gv.BufferDict()
     f = gv.BufferDict()
     for Fit in Fits:
@@ -399,6 +413,8 @@ def make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cval
             for n in range(Npow):
                 prior['0d'][i][1][0][n] = gv.gvar(di10npri)
                 prior['pd'][i][1][0][n] = gv.gvar(di10npri)
+                prior['0d'][0][0][0][n] = gv.gvar(d000npri)
+                prior['pd'][0][0][0][n] = gv.gvar(d000npri)
     prior['pclval'] = gv.gvar(Npow*[Nm*[cpri]])
     prior['pcs'] = gv.gvar(Npow*[cpri])
     prior['pcl'] = gv.gvar(Npow*[cpri])
@@ -437,7 +453,7 @@ def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,alat,mass,amh,fpf0same,newdata=False,c
                     if const:
                         an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MDphys']/p['MDphys'])) *  p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MDphys'])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k) * (1+mlpowsBK)
                     elif const2:
-                        an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MH_{0}_m{1}'.format(fit,mass)]/p['MD_{0}'.format(fit)])) *  p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k) * (1+mlpowsBK)
+                        an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MH_{0}_m{1}'.format(fit,mass)]/p['MD_{0}'.format(fit)])) *  p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k) * (1+mlpowsBK)
                     elif newdata:
                         print('Added external data in a{0}'.format(n), 'need to edit this only does BsEtas')
                         an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MBsphys']/p['MDsphys'])) *  p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MBsphys'])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k) * (1+mlpowsBsEtas)
@@ -450,7 +466,7 @@ def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,alat,mass,amh,fpf0same,newdata=False,c
                     if const:
                         an += p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MDphys'])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k) * (1+mlpowsBK)
                     elif const2:
-                        an += p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k) * (1+mlpowsBK)
+                        an += p['{0}d'.format(tagsamed)][i][j][k][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k) * (1+mlpowsBK)
                     elif newdata:
                         print('Added external data in a{0}'.format(n),'need to edit this to work properly')
                         an += p['{0}d'.format(tagsamed)][i][j][k][n] * (LQCD/p['MBsphys'])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*alat/np.pi)**int(2*k) * (1+mlpowsBsEtas)
@@ -524,6 +540,7 @@ def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=Fa
         else:
             print('Error in make_fp_BK(): newdata = {0} const = {1} const2 = {2}'.format(newdata,const,const2))
     fp = fp + f00 - fp0
+    #print(fp0/f00)
     return(fp)
 
 #########################################################################################################
@@ -581,7 +598,7 @@ def do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same,cons
     #if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
     #    p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     p0 = None    
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),debug=True,fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-12 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),debug=True,fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
     return(fit.p)
@@ -785,6 +802,101 @@ def comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     print('BaBar |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(lsqfit.wavg(Vcss2)))
 
     return()
+
+##################################################################################################
+
+def re_fit_fp(pfit,Fits,Del,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,const2):
+    nopts = 20
+    prior = gv.BufferDict()
+    f = gv.BufferDict()
+    ###### get the original fit in terms of q^2 ###############################
+    p = make_p_physical_point_DK(pfit,Fits,Del,t_0)
+    for qsq in np.linspace(0,qsqmaxphysDK.mean,nopts):
+        z = make_z(qsq,t_0,MDphys,MKphys).mean # need mean here
+        fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        f['fp_qsq{0}'.format(qsq)] = fp
+        ##################### make prior ############################################
+        prior['z_qsq{0}'.format(qsq)] = z = make_z(qsq,'min',MDphys,MKphys)
+        prior['pole_qsq{0}'.format(qsq)] = make_z(qsq,MDsstarphys**2,MDphys,MKphys) * make_phi_fp(qsq,'min',MDphys,MKphys) 
+    prior['a'] = gv.gvar(Npow*['0.0(1)'])
+
+    def fcn(p):
+        models = gv.BufferDict()
+        for qsq in np.linspace(0,qsqmaxphysDK.mean,nopts):
+            fitform = 0
+            for n in range(Npow):
+                fitform += (1/p['pole_qsq{0}'.format(qsq)]) * p['a'][n] * p['z_qsq{0}'.format(qsq)]**n #put 30 back in here
+            models['fp_qsq{0}'.format(qsq)] = fitform
+        return(models)
+    p0 = None
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
+    print(fit.format(maxline=True))
+    a0 = fit.p['a'][0]
+    a1 = fit.p['a'][1]
+    a2 = fit.p['a'][2]
+    print('exp a0 = ',a0,'a1 = ',a1, 'a2 = ',a2,'a1/a0 = ',a1/a0,'a2/a0 = ',a2/a0)
+    return()
+
+##################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ###########################Do stuff below here check stuff is for BK and t_0*a etc etc#######################################################
 ######################################################################################################

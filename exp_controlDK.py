@@ -271,19 +271,20 @@ Twists['UFs'] = [0,1,2,3,4]
 thpts['UFs'] = ['S','V']
 addrho = False #like this for DK
 fpf0same = False
-constraint = False#True #add constraint the f0(0)=fp(0)
+constraint = False #True #add constraint the f0(0)=fp(0)
 constraint2 = True
 svdnoise = False
 priornoise = False
 FitNegQsq = True
-dpri = '0.0(0.1)'
-di000pri = '0.0(0.1)'#'0.0(5.0)'very small because no real mass dependence
-di10npri = '0.00(0.05)'
-cpri = '0.0(0.03)'
-cvalpri ='0.0(0.1)'
-rhopri ='0.0(0.1)'
+dpri = '0.0(0.5)'
+d000npri = '0.0(4.0)' #backbone of an wihtout any discretisation
+di000pri = '0.0(0.5)'#'0.0(5.0)'very small because no real mass dependence
+di10npri = '0.00(0.5)'# 0.5 as expected to be smaller
+cpri = '0.0(0.3)'
+cvalpri ='0.0(1.0)'
+rhopri ='0.0(1.0)'
 DoFit = True
-Npow = 3 #3
+Npow = 4 #3
 Nijk = 3 #3
 Nm=3
 SHOWPLOTS = False
@@ -306,20 +307,23 @@ for Fit in Fits:
     results_tables(fs_data[Fit['conf']],Fit)
 check_poles(Fits)
 Z_V_plots(Fits,fs_data)
-prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata,constraint)
+prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 
-pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same,constraint2)
+pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,constraint2)
 #print values
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho,constraint2)
-
+#re_fit_fp(pfit,Fits,Del,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 plot_poles(t_0,Del)
+#a_ratios(pfit,Fits,Del,t_0,Npow,Nijk,Nm,addrho,fpf0same)
+
 #speed_of_light(Fits)
-#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata,constraint2)
+f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata,constraint2)
+
+f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
+fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata,constraint2)
 #fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
 #f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
