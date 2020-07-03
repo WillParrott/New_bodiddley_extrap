@@ -193,6 +193,8 @@ def get_results(Fit,thpts):
 
 ####### MH version
 def make_MHsstar(MH,p,a=1.0): # need one of these for lattice units and GeV set a=1.0 to give GeV
+    if a == 0:
+        a = 1.0
     DeltaD = p['MDsstarphys'] - p['MDphys']
     DeltaB = p['MBsstarphys'] - p['MBphys']
     MHsstar = MH + a**2*p['MDphys']*DeltaD/MH + a*p['MBphys']/MH * ( (MH-a*p['MDphys'])/(p['MBphys']-p['MDphys']) * (DeltaB - p['MDphys']/p['MBphys'] * DeltaD) )
@@ -521,10 +523,7 @@ def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
     f00 = 0
     logs = make_logs(p,Fit)
     #Del =  p['MDs0phys']- p['MDphys']
-    if p['a_{0}'.format(fit)] != 0:
-        MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p,p['a_{0}'.format(fit)])
-    else:
-        MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p)
+    MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p,p['a_{0}'.format(fit)])
     z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
     z = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
     pole = 1-(qsq/MHsstar**2)

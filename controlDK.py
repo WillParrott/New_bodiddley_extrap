@@ -235,7 +235,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [VCp,Cp,Fp,VC,C,F,SF]#,Fs,SFs]#,UFs]#,UF] # choose what to fit
+Fits = [VCp,Cp,Fp,VC,C,F,SF]#] # choose what to fit
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
@@ -276,7 +276,7 @@ constraint2 = True
 svdnoise = False
 priornoise = False
 FitNegQsq = True
-dpri = '0.0(1.0)'#1.0
+dpri = '0.0(0.5)'#1.0
 d000npri = '0.0(2.0)'# backbone of a without disc effects
 di000pri = '0.0(1.0)'#1.0'0.0(5.0)'very small because no real mass dependence
 di10npri = '0.0(0.5)' # 0.5 as expect to be smaller
@@ -286,7 +286,7 @@ rhopri ='0.0(1.0)'#1.0
 DoFit = True
 Npow = 3 #3
 Nijk = 3 #3
-Nm=3
+Nm = 3
 SHOWPLOTS = False
 t_0 = 'min' # for z conversion can be '0','rev','min' rev gives t_-
 adddata = False #include data in continuum from other papers currently only for f0 Bsetas max
@@ -311,7 +311,7 @@ prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cv
 pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,constraint2)
 #print values
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
+#re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
 #comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
@@ -319,10 +319,10 @@ re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constra
 #comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #plot_poles(t_0)
 #speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
 
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
