@@ -848,8 +848,9 @@ def re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,con
     a1 = fit.p['a'][1]
     a2 = fit.p['a'][2]
     print('exp a0 = ',a0,'a1 = ',a1, 'a2 = ',a2,'a1/a0 = ',a1/a0,'a2/a0 = ',a2/a0)
-    print('[a1/a0,a2/a0] corr matrix: ')
-    print(gv.evalcorr([a1/a0,a2/a0]))
+    print('[a1/a0,a2/a0] cov matrix: ')
+    #print(gv.evalcorr([a1/a0,a2/a0]))
+    print(gv.evalcov([a1/a0,a2/a0]))    
     return()
 
 ##################################################################################################

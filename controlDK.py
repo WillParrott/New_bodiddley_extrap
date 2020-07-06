@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore")
 VCp = collections.OrderedDict()
 VCp['conf']='VCp'
 VCp['label'] = 'Set 1'
-VCp['filename'] = 'Corrfits/VCprelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.797_smTrue_Stmin0_Vtmin0.pickle'
+VCp['filename'] = 'Corrfits/VCprelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.516_smTrue_Stmin0_Vtmin0.pickle'
 VCp['masses'] = ['0.8605']# note m eta_c for slightly wrong ensemble 0.863 = 
 VCp['Zdisc'] = [0.99197] 
 VCp['twists'] = ['0','2.013','3.05','3.969']
@@ -35,7 +35,7 @@ VCp['daughter-Tag'] = 5*['2pt_K_vc_tw{0}.ll']
 Cp = collections.OrderedDict()
 Cp['conf']='Cp'
 Cp['label'] = 'Set 2'
-Cp['filename'] = 'Corrfits/Cprelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.361_smTrue_Stmin0_Vtmin0.pickle'
+Cp['filename'] = 'Corrfits/Cprelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.369_smTrue_Stmin0_Vtmin0.pickle'
 Cp['masses'] = ['0.643']# note m eta_c is not corect for this
 Cp['Zdisc'] = [0.99718]
 Cp['twists'] = ['0','2.405','3.641','4.735']
@@ -270,9 +270,9 @@ Masses['UFs'] = [0]
 Twists['UFs'] = [0,1,2,3,4]
 thpts['UFs'] = ['S','V']
 addrho = False #like this for DK
-fpf0same = False
+fpf0same = True
 constraint = False#True #add constraint the f0(0)=fp(0)
-constraint2 = True
+constraint2 = False
 svdnoise = False
 priornoise = False
 FitNegQsq = True
@@ -288,7 +288,7 @@ Npow = 3 #3
 Nijk = 3 #3
 Nm = 3
 SHOWPLOTS = False
-t_0 = 'min' # for z conversion can be '0','rev','min' rev gives t_-
+t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
 adddata = False #include data in continuum from other papers currently only for f0 Bsetas max
 ############################################################################
 if t_0 != '0':
