@@ -39,7 +39,7 @@ ms = 25*factor #markersize
 alpha = 0.4
 fontsizeleg = 25*factor #legend
 fontsizelab = 35*factor #legend
-cols = ['g','r','b','c'] #for each mass
+cols = ['k','r','b','c'] #for each mass
 symbs = ['o','^','*','D','d','s','p','+']    # for each conf
 lines = ['-','--','-.','-',':','-','--'] # for each conf
 major = 15*factor
@@ -187,8 +187,8 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     #    plt.errorbar(qsqmaxphysBK.mean, dataf0maxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=dataf0maxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
     #if dataf00BK != None and adddata:
     #    plt.errorbar(0, dataf00BK.mean, yerr=dataf00BK.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
-    plt.errorbar(0,0.765, yerr=0.031,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
+    plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
@@ -284,11 +284,11 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.figure(4,figsize=figsize)
     plt.plot(qsq, ymean, color='r')
     plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
-    if datafpmaxBK != None and adddata:
-        plt.errorbar(qsqmaxphysBK.mean, datafpmaxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=datafpmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
-    plt.errorbar(0,0.765, yerr=0.031,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
-    plt.errorbar(0,0.745, yerr=0.011,fmt='rs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
-    plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
+#    if datafpmaxBK != None and adddata:
+#        plt.errorbar(qsqmaxphysBK.mean, datafpmaxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=datafpmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
+    plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
+    plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
+    plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2)
@@ -397,10 +397,10 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
-    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
     plt.tight_layout()
     plt.savefig('DKPlots/f0nopoleinqsq.pdf')
     plt.close()
@@ -422,10 +422,10 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
     plt.tight_layout()
     plt.savefig('DKPlots/f0nopoleinz.pdf')
     plt.close()
@@ -495,10 +495,10 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
-    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
     plt.tight_layout()
     plt.savefig('DKPlots/fpnopoleinqsq.pdf')
     plt.close()
@@ -517,7 +517,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
@@ -527,6 +527,261 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     return()
 
 ##########################################################################################################################
+
+def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
+    plt.figure(figsize=figsize)
+    d = comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
+    x = []
+    y = []
+    for i in range(len(d['Cleo1V2'])):
+        x.append((d['Cleobins'][i]+d['Cleobins'][i+1])/2)
+        y.append(gv.sqrt(d['Cleo1V2'][i]))
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ko' ,mfc='none',label='CLEO0',alpha=0.8)
+    x = []
+    y = []
+    for i in range(len(d['Cleo2V2'])):
+        x.append((d['Cleobins'][i]+d['Cleobins'][i+1])/2)
+        y.append(gv.sqrt(d['Cleo2V2'][i]))
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='rs' ,mfc='none',label='CLEO+',alpha=0.8)
+    x = []
+    y = []
+    for i in range(len(d['BESV2'])):
+        x.append((d['BESbins'][i]+d['BESbins'][i+1])/2)
+        y.append(gv.sqrt(d['BESV2'][i]))
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='b^' ,mfc='none',label='BES',alpha=0.8)
+    x = []
+    y = []
+    for i in range(len(d['BaBarV2'])):
+        x.append((d['BaBarbins'][i]+d['BaBarbins'][i+1])/2)
+        y.append(gv.sqrt(d['BaBarV2'][i]))
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='gd' ,mfc='none',label='BaBar',alpha=0.8)
+    av = (d['average'])
+    plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
+    plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], linestyle ='-',color='purple',alpha=alpha/2)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$V_{cs}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.xlim([0,qsqmaxphysDK.mean])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.tight_layout()
+    plt.savefig('DKPlots/Vcsbybin.pdf')
+    plt.close()
+    ##################################################################################################################
+    plt.figure(figsize=figsize)
+    x = []
+    y = []
+    terr = []
+    eerr = []
+    for i in range(len(d['Cleo1V2'])):
+        x.append((d['Cleobins'][i]+d['Cleobins'][i+1])/2)
+        y.append((d['Cleo1V2'][i]))
+        terr.append(d['Cleo1terr'][i])
+        eerr.append(d['Cleo1eerr'][i])
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ko' ,mfc='k',label='ClEO0',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    
+    av = d['Cleo1av']
+    plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
+    plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$V_{cs}^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.xlim([0,qsqmaxphysDK.mean])
+    plt.ylim([0.77,1.18])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.tight_layout()
+    plt.savefig('DKPlots/Cleo1Vcsbybin.pdf')
+    plt.close()
+    ############################################################################
+    plt.figure(figsize=figsize)
+    x = []
+    y = []
+    terr = []
+    eerr = []
+    for i in range(len(d['Cleo2V2'])):
+        x.append((d['Cleobins'][i]+d['Cleobins'][i+1])/2)
+        y.append((d['Cleo2V2'][i]))
+        terr.append(d['Cleo2terr'][i])
+        eerr.append(d['Cleo2eerr'][i])
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ks' ,mfc='k',label='CLEO+',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    av = d['Cleo2av']
+    plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
+    plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$V_{cs}^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.xlim([0,qsqmaxphysDK.mean])
+    plt.ylim([0.77,1.18])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.tight_layout()
+    plt.savefig('DKPlots/Cleo2Vcsbybin.pdf')
+    plt.close()
+    # ###########################################################################################
+    plt.figure(figsize=figsize)
+    x = []
+    y = []
+    terr = []
+    eerr = []
+    for i in range(len(d['BESV2'])):
+        x.append((d['BESbins'][i]+d['BESbins'][i+1])/2)
+        y.append((d['BESV2'][i]))
+        terr.append(d['BESterr'][i])
+        eerr.append(d['BESeerr'][i])
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='k^' ,mfc='k',label='BES',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    av = d['BESav']
+    plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
+    plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$V_{cs}^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.xlim([0,qsqmaxphysDK.mean])
+    plt.ylim([0.77,1.18])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.tight_layout()
+    plt.savefig('DKPlots/BESVcsbybin.pdf')
+    plt.close()
+    ###########################################################################################
+    plt.figure(figsize=figsize)
+    x = []
+    y = []
+    terr = []
+    eerr = []
+    for i in range(len(d['BaBarV2'])):
+        x.append((d['BaBarbins'][i]+d['BaBarbins'][i+1])/2)
+        y.append((d['BaBarV2'][i]))
+        terr.append(d['BaBarterr'][i])
+        eerr.append(d['BaBareerr'][i])
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='kd' ,mfc='k',label='BaBar',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    av = d['BaBarav']
+    plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
+    plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$V_{cs}^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.xlim([0,qsqmaxphysDK.mean])
+    plt.ylim([0.77,1.18])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.tight_layout()
+    plt.savefig('DKPlots/BaBarVcsbybin.pdf')
+    plt.close()
+    return()
+
+####################################################################################################
+
+
+def plot_Ht_H0(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
+    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    H0 = []
+    Ht = []
+    qsq = []
+    for q2 in np.linspace(0.05,qsqmaxphysDK.mean,nopts): #q2 now in GeV
+        pV = gv.sqrt((q2-(p['MDphys']+p['MKphys'])**2)*(q2-(p['MDphys']-p['MKphys'])**2)/(4*p['MDphys']**2))
+        qsq.append(q2)
+        Ht.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)/gv.sqrt(q2)) #only need one fit
+        H0.append(2*p['MDphys']*pV*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)/gv.sqrt(q2))
+    H0mean,H0err = unmake_gvar_vec(H0)
+    H0upp,H0low = make_upp_low(H0)
+    Htmean,Hterr = unmake_gvar_vec(Ht)
+    Htupp,Htlow = make_upp_low(Ht)
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, H0mean, color='b',label ='$H_0$')
+    plt.fill_between(qsq,H0low,H0upp, color='b',alpha=alpha)
+    plt.plot(qsq, Htmean, color='r',label ='$H_t$')
+    plt.fill_between(qsq,Htlow,Htupp, color='b',alpha=alpha)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.5))
+    plt.tight_layout()
+    plt.savefig('DKPlots/HtH0.pdf')
+    plt.close()
+    return()
+
+####################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

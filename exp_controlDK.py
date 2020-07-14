@@ -276,11 +276,11 @@ constraint2 = True
 svdnoise = False
 priornoise = False
 FitNegQsq = True
-dpri = '0.0(0.5)'#1.0
+dpri = '0.0(1.0)'#1.0
 d000npri = '0.0(4.0)'# backbone of a without disc effects
 di000pri = '0.0(1.0)'#1.0
-di10npri = '0.0(0.5)' # 0.5 as expect to be smaller
-cpri = '0.0(1.0)' #0.3
+di10npri = '0.0(1.0)' # 0.5 as expect to be smaller
+cpri = '0.0(0.5)' #0.5
 cvalpri ='0.0(1.0)'#1.0
 rhopri ='0.0(1.0)'#1.0
 DoFit = True
@@ -308,10 +308,10 @@ for Fit in Fits:
 Z_V_plots(Fits,fs_data)
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 
-pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,constraint2)
+pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 #print values
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
+#re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
 #comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
@@ -319,10 +319,10 @@ re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constra
 #comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #plot_poles(t_0)
 #speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
 
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
