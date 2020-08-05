@@ -165,7 +165,8 @@ UF['daughter-Tag'] = ['etas_G5-G5_tw0','etas_G5-G5_tw0.706','etas_G5-G5_tw1.529'
 Fs = collections.OrderedDict()
 Fs['conf']='Fs'
 Fs['label'] = 'Set 9'
-Fs['filename'] = '../../H_sToEta_s/Analysis/Fits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
+#Fs['filename'] = '../../H_sToEta_s/Analysis/Fits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
+Fs['filename'] = 'Corrfits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
 Fs['Hlfilename'] = F['filename']  # this is to get the H mass for t_plus etc
 Fs['Hltag'] = F['parent-Tag']
 Fs['ldaughtertag'] = F['daughter-Tag']
@@ -187,7 +188,8 @@ Fs['daughter-Tag'] = ['etas','etas_p0.0728','etas_p0.218','etas_p0.364','etas_p0
 SFs = collections.OrderedDict()
 SFs['conf']='SFs'
 SFs['label'] = 'Set 10'
-SFs['filename'] = '../../H_sToEta_s/Analysis/Fits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
+#SFs['filename'] = '../../H_sToEta_s/Analysis/Fits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
+SFs['filename'] = 'Corrfits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
 SFs['Hlfilename'] = SF['filename']
 SFs['Hltag'] = SF['parent-Tag']
 SFs['ldaughtertag'] = SF['daughter-Tag']
@@ -235,7 +237,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [VCp,Cp,Fp,VC,C,F,SF,Fs,SFs]#,C,UFs]#,UF] # choose what to fit
+Fits = [VCp,Cp,Fp,VC,C,F,SF,Fs,SFs] # choose what to fit make sure s not first
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
@@ -270,26 +272,26 @@ Masses['UFs'] = [0,1,2,3]
 Twists['UFs'] = [0,1,2,3,4]
 thpts['UFs'] = ['S','V']
 addrho = True
-fpf0same = False
+fpf0same = True
 constraint = False #add constraint the f0(0)=fp(0)
-constraint2 =True
+constraint2 =False
 svdnoise = False
 priornoise = False
 FitNegQsq = True
 dpri = '0.0(1.0)'
+d000npri = '0.0(2.0)'# backbone of a without disc effects
 di000pri = '0.0(1.0)'#'0.0(5.0)' for no rho
-di10npri = '0.0(0.5)'
-cpri = '0.0(0.3)'
+di10npri = '0.0(1.0)'
+cpri = '0.0(0.5)'
 cvalpri ='0.0(1.0)'
 rhopri ='0.0(1.0)'
 DoFit = True
 Npow = 3 #3
 Nijk = 3 #3
-Nm=3
+Nm=0 #redundant atm 
 SHOWPLOTS = False
-Del = 0.45 #  change in functions too
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
-adddata = False #include data in continuum from other papers currently only for f0 Bsetas max
+adddata = False #not working atm 
 ############################################################################
 if t_0 != '0':
     print('t_0 != 0, so fpf0same set to False')
@@ -305,24 +307,24 @@ for Fit in Fits:
     get_results(Fit,thpts)
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
     results_tables(fs_data[Fit['conf']],Fit)
-check_poles(Fits)
-Z_V_plots(Fits,fs_data)
-prior,f = make_prior_BK(fs_data,Fits,Del,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,di000pri,di10npri,adddata,constraint)
+#check_poles(Fits) Not working atm
+#Z_V_plots(Fits,fs_data)
+prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 
-pfit = do_fit_BK(Fits,f,Nijk,Npow,Nm,addrho,svdnoise,priornoise,prior,fpf0same,constraint2)
-#print values
-fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Del,Nijk,Npow,Nm,addrho,constraint2)
+pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
+fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+test(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
-speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata)
-#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata)
-f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
-#f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
+#speed_of_light(Fits)
+#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0)
 #Hill_ratios_in_E(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same)

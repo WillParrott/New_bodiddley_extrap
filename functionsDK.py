@@ -350,7 +350,7 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         prior['deltaFV_{0}'.format(fit)] = globals()['deltaFV{0}'.format(fit)]
         prior['mstuned_{0}'.format(fit)] = ms0val*(Metasphys/Metas)**2
         prior['ml10ms_{0}'.format(fit)] = ml0val/(10*prior['mstuned_{0}'.format(fit)])
-        mltuned = prior['mstuned_{0}'.format(Fit['conf'])]/prior['slratio'] 
+        mltuned = prior['mstuned_{0}'.format(fit)]/prior['slratio'] 
         prior['MD_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units
         prior['deltas_{0}'.format(fit)] = ms0-prior['mstuned_{0}'.format(fit)]     
         prior['deltasval_{0}'.format(fit)] = ms0val-prior['mstuned_{0}'.format(fit)]
@@ -392,8 +392,8 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
             for n in range(Npow):
                 prior['0d'][i][1][0][n] = gv.gvar(di10npri)*w
                 prior['pd'][i][1][0][n] = gv.gvar(di10npri)*w
-                prior['0d'][0][0][0][n] = gv.gvar(d000npri)*w # this is roughly the size of z, so scales 
-                prior['pd'][0][0][0][n] = gv.gvar(d000npri)*w#this is roughly the size of z, so scales
+                prior['0d'][0][0][0][n] = gv.gvar(d000npri)*w 
+                prior['pd'][0][0][0][n] = gv.gvar(d000npri)*w
     prior['pcs'] = gv.gvar(Npow*[cpri])*w
     prior['pcl'] = gv.gvar(Npow*[cpri])*w
     prior['pcc'] = gv.gvar(Npow*[cpri])*w
@@ -494,7 +494,6 @@ def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
     fp0 = 0
     f00 = 0
     logs = make_logs(p,Fit)
-    #Del =  p['MDs0phys']- p['MDphys']
     MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p,p['a_{0}'.format(fit)])
     z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
     z = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
@@ -509,11 +508,9 @@ def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
         z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
     for n in range(Npow):
         if const==True and const2 ==False and newdata ==False:
-            #print('Error,trying to input new data fp')
             an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,const=const)
             fp += (logsBK/fppole0) * an  * (z0const**n - (n/Npow) * (-1)**(n-Npow) *  z0const**Npow)
         elif newdata == True and const ==False and const2 ==False:
-            #print('Error,trying to input new data fp')
             an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,newdata=newdata)
             fp += logsBsEtas/(1-qsq/(p['MBsstarphys']**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
         elif const2==True and const ==False and newdata==False:
@@ -553,9 +550,6 @@ def make_fT_BK(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=Fa
 #######################################################################################################
 
 def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,const2):
-    # have to define function in here so it only takes p as an argument (I think)
-    ###############################
-    #(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=False,const=False)
     def fcn(p):
         models = gv.BufferDict()
         if 'constraint' in f:
@@ -590,7 +584,7 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
 
 ######################################################################################################
 
-def make_p_physical_point_DK(pfit,Fits,t_0):
+def make_p_physical_point_DK(pfit,Fits):
     #only need to evaluate at one Fit one mass but change all anyway
     # everything should now be in GeV
     p = gv.BufferDict()
@@ -646,7 +640,7 @@ def make_p_Mh_BK(pfit,Fits,MH):
 
 
 def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    p = make_p_physical_point_DK(pfit,Fits)
     qsq0 = 0
     f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0)
     fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
@@ -664,7 +658,7 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 ######################################################################################################
 
 def integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
-    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    p = make_p_physical_point_DK(pfit,Fits)
     def integrand(qsq):
         p3 = ((qsq-MKphys**2-p['MDphys']**2)**2/(4*p['MDphys']**2)-MKphys**2)**(3/2)
         fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
@@ -798,27 +792,34 @@ def comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
 
 ##################################################################################################
 
+def make_refit_fp(qsq,p,Npow):
+    z = make_z(qsq,'min',p['MDphys'],p['MKphys'])
+    pole = make_z(qsq,p['MDsstarphys']**2,p['MDphys'],p['MKphys']) * make_phi_fp(qsq,'min',p['MDphys'],p['MKphys'])
+    fp = 0
+    for n in range(Npow):
+        fp += (1/pole) * p['a'][n] * z**n #
+    return(fp)
+
+##################################################################################################
+
 def re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,const2):
     nopts = 20
     prior = gv.BufferDict()
     f = gv.BufferDict()
     ###### get the original fit in terms of q^2 ###############################
-    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    p = make_p_physical_point_DK(pfit,Fits)
     for qsq in np.linspace(0,qsqmaxphysDK.mean,nopts):
         fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
         f['fp_qsq{0}'.format(qsq)] = fp
         ##################### make prior ############################################
-        prior['z_qsq{0}'.format(qsq)] = z = make_z(qsq,'min',p['MDphys'],MKphys)
-        prior['pole_qsq{0}'.format(qsq)] = make_z(qsq,p['MDsstarphys']**2,p['MDphys'],MKphys) * make_phi_fp(qsq,'min',p['MDphys'],MKphys) 
+    prior['MKphys'] = copy.deepcopy(p['MKphys'])
+    prior['MDphys'] = copy.deepcopy(p['MDphys'])
+    prior['MDsstarphys'] = copy.deepcopy(p['MDsstarphys'])
     prior['a'] = gv.gvar(Npow*['0.0(0.5)'])
-
     def fcn(p):
         models = gv.BufferDict()
         for qsq in np.linspace(0,qsqmaxphysDK.mean,nopts):
-            fitform = 0
-            for n in range(Npow):
-                fitform += (1/p['pole_qsq{0}'.format(qsq)]) * p['a'][n] * p['z_qsq{0}'.format(qsq)]**n #
-            models['fp_qsq{0}'.format(qsq)] = fitform
+            models['fp_qsq{0}'.format(qsq)] = make_refit_fp(qsq,p,Npow)
         return(models)
     p0 = None
     fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-4 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
@@ -829,7 +830,7 @@ def re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,con
     print('exp a0 = ',a0,'a1 = ',a1, 'a2 = ',a2,'a1/a0 = ',a1/a0,'a2/a0 = ',a2/a0)
     print('Cov:')
     print(gv.evalcov([a1/a0,a2/a0]))
-    return()
+    return(p,fit.p)
 
 ##################################################################################################
 
@@ -948,7 +949,7 @@ def eval_at_different_spacings_BsEtas(asfm,pfit,Fits,fpf0same,Npow,Nijk,addrho):
     Fit = Fits[0]
     mass = Fit['masses'][0]
     fit = Fit['conf']
-    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
+    p = make_p_physical_point_BsEtas(pfit,Fits)
     forchris = collections.OrderedDict()
     forchris['M_B_s^*'] = p['MHsstar_{0}_m{1}'.format(fit,mass)]
     forchris['M_B_s^0'] = p['MHs0_{0}_m{1}'.format(fit,mass)]

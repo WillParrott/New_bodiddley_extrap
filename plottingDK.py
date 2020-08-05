@@ -40,7 +40,7 @@ alpha = 0.4
 fontsizeleg = 25*factor #legend
 fontsizelab = 35*factor #legend
 cols = ['k','r','b','c'] #for each mass
-symbs = ['o','^','*','D','d','s','p','+']    # for each conf
+symbs = ['o','^','*','D','d','s','p','>','<']    # for each conf
 lines = ['-','--','-.','-',':','-','--'] # for each conf
 major = 15*factor
 minor = 8*factor 
@@ -117,7 +117,7 @@ def Z_V_plots(Fits,fs_data):
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
-    plt.xlabel('$(am_h)^2$',fontsize=fontsizelab)
+    plt.xlabel('$(am_c)^2$',fontsize=fontsizelab)
     plt.ylabel('$Z_V$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -167,10 +167,10 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     qsq = []
     z = []
     y = []
-    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    p = make_p_physical_point_DK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
-        zed = make_z(q2,t_0,p['MDphys'],MKphys) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
         if zed == 0:
             z.append(zed)
         else:
@@ -268,11 +268,10 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     qsq = []
     z = []
     y = []
-    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    p = make_p_physical_point_DK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
-        zed = make_z(q2,t_0,p['MDphys'],MKphys) #all GeV dimensions
-        #zed0 = make_z(0,t_0,p['MDphys'],MKphys)
+        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
         if zed ==0:
             z.append(zed)
         else:
@@ -328,6 +327,176 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.savefig('DKPlots/fppoleinz.pdf')
     plt.close()
     return()
+###############################################################################################
+
+def f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
+    qsq = []
+    z = []
+    y0 = []
+    yp = []
+    p = make_p_physical_point_DK(pfit,Fits)
+    for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
+        if zed ==0:
+            z.append(zed)
+        else:
+            z.append(zed.mean)
+        #        make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
+        yp.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)) #only need one fit
+        y0.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+    y0mean,y0err = unmake_gvar_vec(y0)
+    y0upp,y0low = make_upp_low(y0)
+    ypmean,yperr = unmake_gvar_vec(yp)
+    ypupp,yplow = make_upp_low(yp)
+    plt.figure(4,figsize=figsize)
+    plt.plot(qsq, y0mean, color='r',label='$f_0$')
+    plt.fill_between(qsq,y0low,y0upp, color='r',alpha=alpha)
+    plt.plot(qsq, ypmean, color='b',label='$f_+$')
+    plt.fill_between(qsq,yplow,ypupp, color='b',alpha=alpha)
+
+    #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
+    #plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
+    #plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
+    plt.legend(fontsize=fontsizeleg,frameon=False)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_+(q^2)$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('DKPlots/f0fpinqsq.pdf')
+    plt.close()
+    
+    plt.figure(5,figsize=figsize)
+    plt.plot(z,y0mean, color='r',label='$f_0$')
+    plt.fill_between(z,y0low,y0upp, color='r',alpha=alpha)
+    plt.plot(z,ypmean, color='b',label='$f_+$')
+    plt.fill_between(z,yplow,ypupp, color='b',alpha=alpha)
+    plt.legend(fontsize=fontsizeleg,frameon=False)
+    plt.xlabel('$z$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_+(z)$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('DKPlots/f0fpinz.pdf')
+    plt.close()
+    return()
+##########################################################################################################################
+
+def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
+    i = 0
+    plotfits = []
+    for Fit in Fits:
+        if Fit['conf'] not in ['Fs','SFs','UFs']:
+            plotfits.append(Fit)
+    for Fit in plotfits:
+        j = 0
+        for mass in Fit['masses']:
+            qsq = []
+            z = []
+            y0 = []
+            yp = []
+            for twist in Fit['twists']:
+                if fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)] != None:
+                    q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)] # lat units
+                    qsq.append(q2/Fit['a']**2) #want qsq for the x value in GeV
+                    z.append(make_z(q2,t_0,Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))#all lat units
+                    yp.append(fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)])
+                    y0.append(fs_data[Fit['conf']]['f0_m{0}_tw{1}'.format(mass,twist)])
+            qsq,qsqerr = unmake_gvar_vec(qsq)
+            z,zerr = unmake_gvar_vec(z)
+            y0,y0err = unmake_gvar_vec(y0)
+            yp,yperr = unmake_gvar_vec(yp)            
+            plt.figure(108,figsize=figsize)
+            plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            
+            plt.figure(109,figsize=figsize)
+            plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            
+            j += 1
+        i += 1
+    qsq = []
+    z = []
+    y0 = []
+    yp = []
+    p = make_p_physical_point_DK(pfit,Fits)
+    for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
+        if zed ==0:
+            z.append(zed)
+        else:
+            z.append(zed.mean)
+        #        make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
+        yp.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)) #only need one fit
+        y0.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+    y0mean,y0err = unmake_gvar_vec(y0)
+    y0upp,y0low = make_upp_low(y0)
+    ypmean,yperr = unmake_gvar_vec(yp)
+    ypupp,yplow = make_upp_low(yp)
+    plt.figure(108,figsize=figsize)
+    plt.plot(qsq, y0mean, color='r',label='$f_0$')
+    plt.fill_between(qsq,y0low,y0upp, color='r',alpha=alpha)
+    plt.plot(qsq, ypmean, color='b',label='$f_+$')
+    plt.fill_between(qsq,yplow,ypupp, color='b',alpha=alpha)
+
+    #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
+    #plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
+    #plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
+
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_+(q^2)$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('DKPlots/f0fpdatainqsq.pdf')
+    plt.close()
+    
+    plt.figure(109,figsize=figsize)
+    plt.plot(z,y0mean, color='r',label='$f_0$')
+    plt.fill_between(z,y0low,y0upp, color='r',alpha=alpha)
+    plt.plot(z,ypmean, color='b',label='$f_+$')
+    plt.fill_between(z,yplow,ypupp, color='b',alpha=alpha)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2)
+    plt.xlabel('$z$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_+(z)$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('DKPlots/f0fpdatainz.pdf')
+    plt.close()
+    return()
 
 ################################################################################################
 
@@ -364,11 +533,11 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     qsq = []
     z = []
     y = []
-    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    p = make_p_physical_point_DK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         pole = 1 - q2/(p['MDs0phys'])**2
-        zed = make_z(q2,t_0,p['MDphys'],MKphys) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
         if zed == 0:
             z.append(zed)
         else:
@@ -467,11 +636,11 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     qsq = []
     z = []
     y = []
-    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    p = make_p_physical_point_DK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         pole = 1 - (q2/p['MDsstarphys']**2)
-        zed = make_z(q2,t_0,p['MDphys'],MKphys) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
         if zed ==0:
             z.append(zed)
         else:
@@ -720,7 +889,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
 
 
 def plot_Ht_H0(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
-    p = make_p_physical_point_DK(pfit,Fits,t_0)
+    p = make_p_physical_point_DK(pfit,Fits)
     H0 = []
     Ht = []
     qsq = []
@@ -755,10 +924,51 @@ def plot_Ht_H0(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2
 
 ####################################################################################################
 
+def plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,const2):
+    fitp,refitp = re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,const2)
+
+    qsq = []
+    orfit = []
+    refit = []
+    rat = []
+    for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        orfit.append(make_fp_BK(Nijk,Npow,Nm,addrho,fitp,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2))
+        refit.append(make_refit_fp(q2,refitp,Npow))
+        rat.append(make_fp_BK(Nijk,Npow,Nm,addrho,fitp,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)/make_refit_fp(q2,refitp,Npow))
+    orfitmean,orfiterr = unmake_gvar_vec(orfit)
+    orfitupp,orfitlow = make_upp_low(orfit)
+    refitmean,refiterr = unmake_gvar_vec(refit)
+    refitupp,refitlow = make_upp_low(refit)
+    ratmean,raterr = unmake_gvar_vec(rat)
+    ratupp,ratlow = make_upp_low(rat)
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, orfitmean, color='r')
+    plt.fill_between(qsq,orfitlow,orfitupp, color='r',alpha=alpha,label=r'$f_+(q^2)_{\mathrm{orig}}$')
+    plt.plot(qsq, refitmean, color='b')
+    plt.fill_between(qsq,refitlow,refitupp, color='b',alpha=alpha,label=r'$f_+(q^2)_{\mathrm{refit}}$')
+    plt.plot(qsq, ratmean, color='k')
+    plt.fill_between(qsq,ratlow,ratupp, color='k',alpha=alpha,label=r'$\frac{f_+(q^2)_{\mathrm{orig}}}{f_+(q^2)_{\mathrm{refit}}}$')
+
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    #plt.ylabel(r'$\frac{f_+(q^2)_{\mathrm{orig}}}{f_+(q^2)_{\mathrm{refit}}}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('DKPlots/fitvsrefit.pdf')
+    plt.close()
 
 
-
-
+###########################################################################################################################
 
 
 
