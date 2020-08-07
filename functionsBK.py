@@ -706,21 +706,27 @@ def fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 def make_h(qsq,m):
     x = 4 * m**2/qsq
     if x > 1:
-        h = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(x-1) * gv.arctan(1/(gv.sqrt(x-1))))
+        hR = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(x-1) * gv.arctan(1/(gv.sqrt(x-1))))
+        hI = 0
+    elif x == 0:
+        h = 4/9 * (2/3 + 1j*np.pi)
+        hR =  h.real
+        hI = h.imag
     elif x <= 1:
-        h = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x)) - 1j*np.pi/2 ))
-    print(h)
-    return(h)
+        #h = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x)) - 1j*np.pi/2 ))
+        hR = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x))  ))
+        hI =  4/9 * (2 + x) *  gv.sqrt(1-x) *  np.pi/2 
+    return(hR,hI)
 
 
 ##############################################################################################################
 
-def make_al_cl(qsq,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+def make_al_cl(qsq,m_l,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits)
     # check masses and cefficients for updates
     alphaEW = 1/gv.gvar('128.957(20)')
     VtbVts = gv.gvar('0.0405(8)')
-    m_l = gv.gvar('0.00345(55)') #PDG check this
+    #m_l = gv.gvar('0.00345(55)') #PDG check this
     m_c = gv.gvar('1.275(25)')
     m_b = gv.gvar('4.18(3)')
     C1 = gv.gvar('-2.57(5)')
@@ -731,37 +737,63 @@ def make_al_cl(qsq,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     C6 = 0.001
     C7eff = gv.gvar('-0.304(6)')
     C10eff = gv.gvar('-4.103(82)') #0811.1214
-    
-    Y = 4/3 * C3 + 64/9 * C5 + 64/27 * C6 - make_h(qsq,0)/2 * (C3 + 4/3 * C4 + 16 * C5 + 64/3 * C6) + make_h(qsq,m_c) * (4/3 * C1 + C2 + 6 * C3 + 60 * C5) - make_h(qsq,m_b)/2 * (7 * C3 + 4/3 * C4 + 76 * C5 + 64/3 * C6)
+    # h is complex -> C9 eff complex, and thus FV
+    hR0,hI0 = make_h(qsq,0)
+    hRc,hIc = make_h(qsq,m_c)
+    hRb,hIb = make_h(qsq,m_b)
+    YR = 4/3 * C3 + 64/9 * C5 + 64/27 * C6 - hR0/2 * (C3 + 4/3 * C4 + 16 * C5 + 64/3 * C6) + hRc * (4/3 * C1 + C2 + 6 * C3 + 60 * C5) - hRb/2 * (7 * C3 + 4/3 * C4 + 76 * C5 + 64/3 * C6)
+    YI = 4/3 * C3 + 64/9 * C5 + 64/27 * C6 - hI0/2 * (C3 + 4/3 * C4 + 16 * C5 + 64/3 * C6) + hIc * (4/3 * C1 + C2 + 6 * C3 + 60 * C5) - hIb/2 * (7 * C3 + 4/3 * C4 + 76 * C5 + 64/3 * C6)
 
-    C9eff = gv.gvar('4.211(84)') + Y 
+    C9effR = gv.gvar('4.211(84)') + YR 
+    C9effI = YI
     
-    f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
-    fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
-    fT0 = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
-    FA = C10*fp
-    FV = C9*fp + 2*m_b*C7*fT/(p['MBphys']+p['MKphys'])
-    FP = -m_l*C10*(fp - (p['MBphys']**2-p['MKphys']**2)*(f0-fp)/qsq)
+    f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    fT = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    FA = C10eff*fp
+    FVR = C9effR*fp + 2*m_b*C7eff*fT/(p['MBphys']+p['MKphys'])
+    FVI = C9effI*fp + 2*m_b*C7eff*fT/(p['MBphys']+p['MKphys'])    
+    FP = -m_l*C10eff*(fp - (p['MBphys']**2-p['MKphys']**2)*(f0-fp)/qsq)
+    #print('FA',FA,FVR,FVI,FP)
     ######################################################
     betal = gv.sqrt(1-4*m_l**2/qsq)
+
     lam = qsq**2 + p['MBphys']**4 + p['MKphys']**4 - 2*(p['MBphys']**2*p['MKphys']**2 + qsq*p['MBphys']**2 + qsq*p['MKphys']**2)
     C = GF**2 * alphaEW**2 * VtbVts**2 * betal * gv.sqrt(lam) / (2**9 * np.pi**5 * p['MBphys']**3)
 
-    al = C*( qsq*FP*np.conjugate(FP) + lam/4 * (FA*np.conjugate(FA) + FV*np.conjugate(FV)) + 4 * m_l**2 * p['MBphys']**2 * FA*np.conjugate(FA) + 2 * m_l * (p['MBphys']**2 - p['MKphys']**2 + qsq) * (FP * np.conjugate(FA)).real )
-    cl = -C*lam*betal**2/4 * (FA*np.conjugate(FA) + FV*np.conjugate(FV))
+    al = C*( qsq*FP**2 + lam/4 * (FA**2 + FVR**2+FVI**2) + 4 * m_l**2 * p['MBphys']**2 * FA**2 + 2 * m_l * (p['MBphys']**2 - p['MKphys']**2 + qsq) * (FP * FA) )
+    cl = -C*lam*betal**2/4 * (FA**2 + FVR**2+FVI**2)
+    #print(betal,lam,C,al,cl)
     return(al,cl)
 
 #####################################################################
 
 def test(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    for qsq in np.linspace(0.01,qsqmaxphysBK.mean,10):
-        al,cl = make_al_cl(qsq,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        print(al,cl)
+    m_l = 0.510998950 * 1e-9 # starts at (2ml)^2  this should be electron mass
+    #for qsq in np.linspace(((2*m_l)**2).mean,qsqmaxphysBK.mean,100):
+    qsq_min = ((2*m_l)**2)
+    qsq_max = qsqmaxphysBK.mean
+        
+    def integrand(qsq):
+        al,cl = make_al_cl(qsq,m_l,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        integrand = 2*al + 2*cl/3
+        return(integrand)
+    iters = 100
+    del_qsq =  (qsq_max-qsq_min) /iters
+    funcs = integrand(qsq_min) + integrand(qsq_max)
+    for i in range(1,iters):
+        funcs += 2*integrand(qsq_min+del_qsq*i)
+    result = del_qsq*funcs/2
+
+    tauB = gv.gvar('1.641(8)') #1e-12s
+    tauBGeV = tauB/(6.582119569*1e-13)
+
+    print('Branching = ', result*tauBGeV)
     return()
 
 
 
-
+##########################################################################
 
 
 

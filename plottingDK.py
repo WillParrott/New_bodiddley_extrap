@@ -41,7 +41,7 @@ fontsizeleg = 25*factor #legend
 fontsizelab = 35*factor #legend
 cols = ['k','r','b','c'] #for each mass
 symbs = ['o','^','*','D','d','s','p','>','<']    # for each conf
-lines = ['-','--','-.','-',':','-','--'] # for each conf
+lines = ['-','--','-.','-',':','-','--','-.'] # for each conf
 major = 15*factor
 minor = 8*factor 
 capsize = 10*factor
@@ -50,7 +50,7 @@ capsize = 10*factor
 
 def speed_of_light(Fits):
     plt.figure(1,figsize=figsize)
-    points = ['ko','k^','k*','ro','r^','r*','rD']
+    points = ['ko','k^','k*','ro','r^','r*','rD','r>']
     i=0
     plotfits = []
     for Fit in Fits:
@@ -67,7 +67,7 @@ def speed_of_light(Fits):
         plt.errorbar(x,y,yerr=yerr,fmt=points[i],label=Fit['label'],ms=ms,mfc='none')
         i += 1
     plt.plot([0,0.6],[1,1],'k--',lw=3)
-    plt.xlim((0,0.5))
+    plt.xlim((-0.02,0.5))
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(loc='upper right',handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
@@ -191,7 +191,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower right')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$f_0(q^2)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -732,7 +732,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], linestyle ='-',color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
-    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$V_{cs}$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -766,7 +766,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
-    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$V_{cs}^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -800,7 +800,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
-    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$V_{cs}^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -834,7 +834,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
-    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$V_{cs}^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -868,7 +868,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
-    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$V_{cs}^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)

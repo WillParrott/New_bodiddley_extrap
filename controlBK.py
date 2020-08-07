@@ -145,12 +145,13 @@ SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 UF = collections.OrderedDict()
 UF['conf']='UF'
 UF['label'] = 'Set 8'
-UF['filename'] = '../Fits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
+UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_231cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV3340unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.051_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 #UF['Hsfilename'] = UFs['Hsfilename']
 #UF['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
 UF['masses'] = ['0.194','0.45','0.6','0.8']
 UF['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UF['twists'] = ['0','0.706','1.529','2.235','4.705']
+UF['m_l'] = '0.00316'
 UF['m_s'] = '0.0165'
 UF['m_c'] = '0.194'
 UF['m_ssea'] = 0.0158
@@ -158,8 +159,8 @@ UF['m_lsea'] = 0.00316
 #UF['tp'] = 192
 UF['L'] = 64
 UF['w0/a'] = gv.gvar('3.892(12)')
-UF['parent-Tag'] = 'Bs_G5-G5_m{1}'
-UF['daughter-Tag'] = ['etas_G5-G5_tw0','etas_G5-G5_tw0.706','etas_G5-G5_tw1.529','etas_G5-G5_tw2.235','etas_G5-G5_tw4.705']
+UF['parent-Tag'] = 'B_G5-G5_m{1}'
+UF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 ######################### BsEtas ########################################
 ################################## F PARAMETERS ##########################
 Fs = collections.OrderedDict()
@@ -212,7 +213,7 @@ SFs['daughter-Tag'] = ['etas_p0','etas_p0.143','eta_s_tw2.108_m0.0234','etas_p0.
 UFs = collections.OrderedDict()
 UFs['conf']='UFs'
 UFs['label'] = 'Set 11'
-UFs['filename'] = '../../H_sToEta_s/Analysis/Fits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
+UFs['filename'] = 'Corrfits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
 UFs['Hlfilename'] = UF['filename']
 UFs['Hltag'] = UF['parent-Tag']
 UFs['ldaughtertag'] = UF['daughter-Tag']
@@ -237,7 +238,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [VCp,Cp,Fp,VC,C,F,SF,Fs,SFs] # choose what to fit make sure s not first
+Fits = [VCp,Cp,Fp,VC,C,F,SF,UF,Fs,SFs,UFs] # choose what to fit make sure s not first
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
@@ -314,13 +315,13 @@ prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cv
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-test(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#test(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
 #speed_of_light(Fits)
-#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)

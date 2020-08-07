@@ -652,7 +652,7 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
-    print('Vcs = {0}'.format(gv.gvar('0.7180(33)')/fp0))# from #1909.12524 p318
+    print('Vcs at q^2=0 = {0}'.format(gv.gvar('0.7180(33)')/fp0))# from #1909.12524 p318
     return()
 
 ######################################################################################################
@@ -765,8 +765,8 @@ def comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     total.extend(BESV2)
     total.extend(BaBarV2)
     av = gv.sqrt(lsqfit.wavg(total))
-    print(gv.sqrt(lsqfit.wavg([Cleo1av,Cleo2av,BESav,BaBarav])))
-    print(av)
+    #print(gv.sqrt(lsqfit.wavg([Cleo1av,Cleo2av,BESav,BaBarav])))
+    print('Average V_cs = ', av)
     d = collections.OrderedDict()
     d['Cleo1V2'] = Cleo1V2
     d['Cleo2V2'] = Cleo2V2
@@ -822,7 +822,7 @@ def re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,con
             models['fp_qsq{0}'.format(qsq)] = make_refit_fp(qsq,p,Npow)
         return(models)
     p0 = None
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-4 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-3 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
     print(fit.format(maxline=True))
     a0 = fit.p['a'][0]
     a1 = fit.p['a'][1]
