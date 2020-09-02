@@ -5,6 +5,9 @@ import lsqfit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+#from matplotlib import Scatter
 
 plt.rc("font",**{"size":20})
 plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
@@ -48,6 +51,42 @@ capsize = 10*factor
 
 ####################################################################################################
 
+def plot_gold_non_split(Fits):
+    confs = ['VCp','Cp','Fp','VC','C','F','SF','UF']
+    sets = ['Set 1','Set 2','Set 3','Set 4','Set 5','Set 6','Set 7','Set 8']
+    ams = [0.8605,0.643,0.432,0.888,0.664,0.449,0.274,0.194]
+    splits = gv.gvar(['0.00596(77)','0.00195(37)','0.00035(71)','0.00514(79)','0.00213(22)','0.00100(37)','6(465)e-06','0.00109(69)']) 
+    plt.figure(figsize=figsize)
+    for Fit in Fits:
+        i = confs.index(Fit['conf'])
+        x = float(ams[i])**2
+        y = (splits[i]/Fit['a']).mean
+        yerr = (splits[i]/Fit['a']).sdev
+        if confs[i][-1] == 'p':
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=sets[i],ms=ms,mfc='none')
+        else:
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=sets[i],ms=ms,mfc='none')
+    plt.plot([-0.1,0.9],[0,0],'k--')
+    plt.xlim([0,0.85])
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.xlabel('$(am_c)^2$',fontsize=fontsizelab)
+    plt.ylabel('$(M_{D_{\mathrm{non-gold}}}-M_{D_{\mathrm{gold}}})[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.001))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
+    plt.tight_layout()
+    plt.savefig('DKPlots/gold-non-split.pdf')            
+    return()
+
+
+####################################################################################################
 def speed_of_light(Fits):
     plt.figure(1,figsize=figsize)
     points = ['ko','k^','k*','ro','r^','r*','rD','r>']
@@ -398,6 +437,8 @@ def f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,con
 def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
     i = 0
     plotfits = []
+    legend_elements = []
+    #legend_elements = [Line2D([0], [0], color='b', lw=4, label='Line'), Line2D([0], [0], marker='o', color='w', label='Scatter', markerfacecolor='g', markersize=15), Patch(facecolor='orange', edgecolor='r',label='Color Patch')]
     for Fit in Fits:
         if Fit['conf'] not in ['Fs','SFs','UFs']:
             plotfits.append(Fit)
@@ -422,6 +463,7 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
             plt.figure(108,figsize=figsize)
             plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
             plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            legend_elements.append(Line2D([0], [0],color='k',linestyle='None', marker=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass))))
             plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
             plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
             
@@ -457,12 +499,15 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
     plt.fill_between(qsq,y0low,y0upp, color='r',alpha=alpha)
     plt.plot(qsq, ypmean, color='b',label='$f_+$')
     plt.fill_between(qsq,yplow,ypupp, color='b',alpha=alpha)
-
+    legend_elements.append(Line2D([0], [0], color='r', lw=4, label='$f_0$'))
+    legend_elements.append(Line2D([0], [0], color='b', lw=4, label='$f_+$'))
     #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     #plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
     #plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
 
-    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2)
+    #plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2)
+    
+    plt.legend(handles=legend_elements,fontsize=fontsizeleg,frameon=False,ncol=2)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     #plt.ylabel(r'$f_+(q^2)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -482,7 +527,8 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
     plt.fill_between(z,y0low,y0upp, color='r',alpha=alpha)
     plt.plot(z,ypmean, color='b',label='$f_+$')
     plt.fill_between(z,yplow,ypupp, color='b',alpha=alpha)
-    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2)
+    #plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2)
+    plt.legend(handles=legend_elements,fontsize=fontsizeleg,frameon=False,ncol=2)
     plt.xlabel('$z$',fontsize=fontsizelab)
     #plt.ylabel(r'$f_+(z)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -970,13 +1016,155 @@ def plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornois
 
 ###########################################################################################################################
 
+def error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,const2):
+    qsqs = np.linspace(0,qsqmaxphysDK.mean,nopts)
+    f0,fp = output_error_DK(pfit,prior,Fits,Nijk,Npow,Nm,f,qsqs,t_0,addrho,fpf0same,const2)
+
+    plt.figure(18,figsize=figsize)
+    ax1 = plt.subplot(211)
+    ax1b = ax1.twinx()
+    ax1.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
+    ax1.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
+    ax1.plot(qsqs,f0[3],color='b',ls='-',lw=2,label='Statistics')
+    #ax1.plot(qsqs,f0[4],color='b',ls='-.',lw=2,label='HQET')
+    ax1.plot(qsqs,f0[4],color='k',ls='-',lw=4,label='Discretisation')
+    ax1.set_ylabel('$(f_0(q^2)~\% \mathrm{err})^2 $ ',fontsize=fontsizelab)
+    ax1.tick_params(width=2,labelsize=fontsizelab)
+    ax1.tick_params(which='major',length=major)
+    ax1.tick_params(which='minor',length=minor)
+    #plt.gca().yaxis.set_ticks_position('both')
+    ax1.xaxis.set_ticks_position('none')
+    plt.setp(ax1.get_xticklabels(), visible=False)
+    ax1.yaxis.set_major_locator(MultipleLocator(0.2))
+    ax1.yaxis.set_minor_locator(MultipleLocator(0.1))
+    ax1.set_xlim([0,qsqmaxphysDK.mean])
+    ####################################### right hand y axis ###
+    ax1b.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
+    ax1b.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
+    ax1b.plot(qsqs,f0[3],color='b',ls='-',lw=2,label='Statistics')
+    #ax1b.plot(qsqs,f0[4],color='b',ls='-.',lw=2,label='HQET')
+    ax1b.plot(qsqs,f0[4],color='k',ls='-',lw=4,label='Discretisation')
+    ax1b.set_ylabel('$f_0(q^2)~\% \mathrm{err}$ ',fontsize=fontsizelab)
+    ax1b.tick_params(width=2,labelsize=fontsizelab)
+    ax1b.tick_params(which='major',length=major)
+    ax1b.tick_params(which='minor',length=minor)
+    low,upp = ax1.get_ylim()
+    ax1b.set_ylim([low,upp])
+    points = []
+    rootpoints = []
+    i = 0.1
+    while i != 'stop':
+        if i**2 < upp:
+            points.append(i**2)
+            if int(10*i)%2 == 0:
+                rootpoints.append('{0}'.format(i))
+            else:
+                rootpoints.append('')
+            i+=0.1
+        else:
+            i ='stop'
+    ax1b.set_yticks(points)
+    ax1b.set_yticklabels(rootpoints)
+    
+    plt.legend(loc='upper right',ncol=2,fontsize=fontsizeleg,frameon=False)
+
+    ax2 = plt.subplot(212,sharex=ax1)
+    ax2b = ax2.twinx()
+    ax2.plot(qsqs,fp[1],color='r', ls='--',lw=2)
+    ax2.plot(qsqs,fp[2],color='purple',ls=':',lw=2)
+    ax2.plot(qsqs,fp[3],color='b',ls='-',lw=2)
+    #ax2.plot(qsqs,fp[4],color='b',ls='-.',lw=2)
+    ax2.plot(qsqs,fp[4],color='k',ls='-',lw=4)
+    ax2.set_xlabel(r'$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    ax2.set_ylabel('$(f_+(q^2)~\%\mathrm{err})^2$',fontsize=fontsizelab)
+    ax2.tick_params(width=2,labelsize=fontsizelab)
+    ax2.tick_params(which='major',length=major)
+    ax2.tick_params(which='minor',length=minor)
+    ax2.xaxis.set_major_locator(MultipleLocator(0.5))
+    ax2.xaxis.set_minor_locator(MultipleLocator(0.1))
+    ax2.yaxis.set_major_locator(MultipleLocator(0.5))
+    ax2.yaxis.set_minor_locator(MultipleLocator(0.1))
+    ax2.set_xlim([0,qsqmaxphysDK.mean])
+    #plt.axes().set_ylim([-0.8,2.5])
+    #plt.axes().set_xlim([lower-0.22,upper+0.22])
+    ######## right hand axis ##
+    ax2b.plot(qsqs,fp[1],color='r', ls='--',lw=2)
+    ax2b.plot(qsqs,fp[2],color='purple',ls=':',lw=2)
+    ax2b.plot(qsqs,fp[3],color='b',ls='-',lw=2)
+    #ax2b.plot(qsqs,fp[4],color='b',ls='-.',lw=2)
+    ax2b.plot(qsqs,fp[4],color='k',ls='-',lw=4)
+    ax2b.set_xlabel(r'$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    ax2b.set_ylabel('$f_+(q^2)~\%\mathrm{err}$',fontsize=fontsizelab)
+    ax2b.tick_params(width=2,labelsize=fontsizelab)
+    ax2b.tick_params(which='major',length=major)
+    ax2b.tick_params(which='minor',length=minor)
+    low,upp = ax2.get_ylim()
+    ax2b.set_ylim([low,upp])
+    points = []
+    rootpoints = []
+    i = 0.2
+    while i != 'stop':
+        if i**2 < upp:
+            points.append(i**2)
+            if int(10*i)%4 == 0:
+                rootpoints.append('{0}'.format(i))
+            else:
+                rootpoints.append('')
+            i+=0.2
+        else:
+            i ='stop'
+    ax2b.set_yticks(points)
+    ax2b.set_yticklabels(rootpoints)
+    plt.tight_layout()
+    plt.savefig('DKPlots/f0fpluserr.pdf')
+    plt.close()
+    return()
+
+###################################################################################################
+
+def table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho):
+    list0 = []
+    listp = []
+    Fit = Fits[0]
+    mass = Fit['masses'][0]
+    fit = Fit['conf']
+    p = make_p_physical_point_DK(pfit,Fits)
+    atab = open('Tables/DKtablesofas.txt','w')
+    for n in range(Npow):
+        if n == 0:
+            atab.write('      {0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same)))
+        else:
+            atab.write('{0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same)))
+        list0.append(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same))
+        listp.append(make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,0,fpf0same))
+    MDsstar = p['MDsstarphys']
+    MDs0 = p['MDs0phys']
+    for n in range(Npow):           
+        atab.write('{0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,0,fpf0same)))
+    atab.write('{0}&{1}\\\\ [1ex]\n'.format(MDs0,MDsstar))
+    atab.write('      \hline \n')
+    list0.extend(listp)
+    list0.append(MDs0)
+    list0.append(MDsstar)
+    covar = gv.evalcorr(list0)
+    for i in range(2*Npow+2):
+            atab.write('\n      ')
+            for k in range(i):
+                atab.write('&')
+            for j in range(i,2*Npow+2):
+                #print(covar[i][j])
+                atab.write('{0:.5f}'.format(covar[i][j]))
+                if j != 2*Npow+1:
+                    atab.write('&')
+                else:
+                    atab.write('\\\\ [0.5ex]')
+    atab.close()
+    return()
 
 
 
 
-
-
-
+################################################################################################################
 
 
 
@@ -1727,150 +1915,7 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
     plt.close()
     return()
 
-###################################################################################################
 
-def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
-    qsqs = np.linspace(0,qsqmaxphysBK.mean,nopts)
-    f0,fp = output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,Del,addrho,fpf0same)
-
-    plt.figure(18,figsize=figsize)
-    ax1 = plt.subplot(211)
-    ax1b = ax1.twinx()
-    ax1.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
-    ax1.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
-    ax1.plot(qsqs,f0[3],color='g',ls='-',lw=2,label='Statistics')
-    ax1.plot(qsqs,f0[4],color='b',ls='-.',lw=2,label='HQET')
-    ax1.plot(qsqs,f0[5],color='k',ls='-',lw=4,label='Discretisation')
-    ax1.set_ylabel('$(f_0(q^2)~\% \mathrm{err})^2 $ ',fontsize=fontsizelab)
-    ax1.tick_params(width=2,labelsize=fontsizelab)
-    ax1.tick_params(which='major',length=major)
-    ax1.tick_params(which='minor',length=minor)
-    #plt.gca().yaxis.set_ticks_position('both')
-    ax1.xaxis.set_ticks_position('none')
-    plt.setp(ax1.get_xticklabels(), visible=False)
-    ax1.yaxis.set_major_locator(MultipleLocator(20))
-    ax1.yaxis.set_minor_locator(MultipleLocator(5))
-    ax1.set_xlim([0,qsqmaxphysBK.mean])
-    ####################################### right hand y axis ###
-    ax1b.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
-    ax1b.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
-    ax1b.plot(qsqs,f0[3],color='g',ls='-',lw=2,label='Statistics')
-    ax1b.plot(qsqs,f0[4],color='b',ls='-.',lw=2,label='HQET')
-    ax1b.plot(qsqs,f0[5],color='k',ls='-',lw=4,label='Discretisation')
-    ax1b.set_ylabel('$f_0(q^2)~\% \mathrm{err}$ ',fontsize=fontsizelab)
-    ax1b.tick_params(width=2,labelsize=fontsizelab)
-    ax1b.tick_params(which='major',length=major)
-    ax1b.tick_params(which='minor',length=minor)
-    low,upp = ax1.get_ylim()
-    ax1b.set_ylim([low,upp])
-    points = []
-    rootpoints = []
-    i = 2
-    while i != 'stop':
-        if i**2 < upp:
-            points.append(i**2)
-            if i%2 == 0:
-                rootpoints.append('{0}'.format(i))
-            else:
-                rootpoints.append('')
-            i+=1
-        else:
-            i ='stop'
-    ax1b.set_yticks(points)
-    ax1b.set_yticklabels(rootpoints)
-    
-    plt.legend(loc='upper right',ncol=2,fontsize=fontsizeleg,frameon=False)
-
-    ax2 = plt.subplot(212,sharex=ax1)
-    ax2b = ax2.twinx()
-    ax2.plot(qsqs,fp[1],color='r', ls='--',lw=2)
-    ax2.plot(qsqs,fp[2],color='purple',ls=':',lw=2)
-    ax2.plot(qsqs,fp[3],color='g',ls='-',lw=2)
-    ax2.plot(qsqs,fp[4],color='b',ls='-.',lw=2)
-    ax2.plot(qsqs,fp[5],color='k',ls='-',lw=4)
-    ax2.set_xlabel(r'$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
-    ax2.set_ylabel('$(f_+(q^2)~\%\mathrm{err})^2$',fontsize=fontsizelab)
-    ax2.tick_params(width=2,labelsize=fontsizelab)
-    ax2.tick_params(which='major',length=major)
-    ax2.tick_params(which='minor',length=minor)
-    ax2.xaxis.set_major_locator(MultipleLocator(5))
-    ax2.xaxis.set_minor_locator(MultipleLocator(1))
-    ax2.yaxis.set_major_locator(MultipleLocator(20))
-    ax2.yaxis.set_minor_locator(MultipleLocator(5))
-    ax2.set_xlim([0,qsqmaxphysBK.mean])
-    #plt.axes().set_ylim([-0.8,2.5])
-    #plt.axes().set_xlim([lower-0.22,upper+0.22])
-    ######## right hand axis ##
-    ax2b.plot(qsqs,fp[1],color='r', ls='--',lw=2)
-    ax2b.plot(qsqs,fp[2],color='purple',ls=':',lw=2)
-    ax2b.plot(qsqs,fp[3],color='g',ls='-',lw=2)
-    ax2b.plot(qsqs,fp[4],color='b',ls='-.',lw=2)
-    ax2b.plot(qsqs,fp[5],color='k',ls='-',lw=4)
-    ax2b.set_xlabel(r'$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
-    ax2b.set_ylabel('$f_+(q^2)~\%\mathrm{err}$',fontsize=fontsizelab)
-    ax2b.tick_params(width=2,labelsize=fontsizelab)
-    ax2b.tick_params(which='major',length=major)
-    ax2b.tick_params(which='minor',length=minor)
-    low,upp = ax2.get_ylim()
-    ax2b.set_ylim([low,upp])
-    points = []
-    rootpoints = []
-    i = 2
-    while i != 'stop':
-        if i**2 < upp:
-            points.append(i**2)
-            if i%2 == 0:
-                rootpoints.append('{0}'.format(i))
-            else:
-                rootpoints.append('')
-            i+=1
-        else:
-            i ='stop'
-    ax2b.set_yticks(points)
-    ax2b.set_yticklabels(rootpoints)
-    plt.tight_layout()
-    plt.savefig('DKPlots/f0fpluserr.pdf')
-    plt.close()
-    return()
-
-###################################################################################################
-
-def table_of_as(Fits,pfit,Nijk,Npow,fpf0same,addrho,Del):
-    list0 = []
-    listp = []
-    Fit = Fits[0]
-    mass = Fit['masses'][0]
-    fit = Fit['conf']
-    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    atab = open('Tables/tablesofas.txt','w')
-    for n in range(Npow):
-        if n == 0:
-            atab.write('      {0}&'.format(make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same)))
-        else:
-            atab.write('{0}&'.format(make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same)))
-        list0.append(make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same))
-        listp.append(make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same))
-    for n in range(Npow):           
-        atab.write('{0}&'.format(make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same)))
-    atab.write('{0}&{1}\\\\ [1ex]\n'.format(p['MHs0_{0}_m{1}'.format(fit,mass)],p['MHsstar_{0}_m{1}'.format(fit,mass)]))
-    atab.write('      \hline \n')
-    list0.extend(listp)
-    list0.append(p['MHs0_{0}_m{1}'.format(fit,mass)])
-    list0.append(p['MHsstar_{0}_m{1}'.format(fit,mass)])
-    covar = gv.evalcorr(list0)
-    for i in range(2*Npow+2):
-            atab.write('\n      ')
-            for k in range(i):
-                atab.write('&')
-            for j in range(i,2*Npow+2):
-                #print(covar[i][j])
-                atab.write('{0:.5f}'.format(covar[i][j]))
-                if j != 2*Npow+1:
-                    atab.write('&')
-                else:
-                    atab.write('\\\\ [0.5ex]')
-    atab.close()
-    return()
 
 ##################################################################################################
 

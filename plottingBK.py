@@ -5,6 +5,8 @@ import lsqfit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 plt.rc("font",**{"size":20})
 plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
@@ -30,7 +32,7 @@ from collections import defaultdict
 # ans and pole masses
 # dict of different lattice spacings #done 
 ################### global variables ##########################################
-factor = 1.0 #multiplies everything to make smaller for big plots etc usually 1
+factor = 0.5 #multiplies everything to make smaller for big plots etc usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor
@@ -50,7 +52,7 @@ capsize = 10*factor
 
 def speed_of_light(Fits):
     plt.figure(1,figsize=figsize)
-    points = ['bo','b^','b*','ko','k^','k*','kD']
+    points = ['bo','b^','b*','ko','k^','k*','kD','ks']
     i=0
     plotfits = []
     for Fit in Fits:
@@ -705,7 +707,7 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.fill_between(MHs,fT0low,fT0upp, color='g',alpha=alpha)
     plt.plot(MHs, fTmaxmean, color='purple')
     plt.fill_between(MHs,fTmaxlow,fTmaxupp, color='purple',alpha=alpha)
-    plt.xlabel('$M_{H_s}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.xlabel('$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
@@ -746,21 +748,399 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.savefig('Plots/f0fpfTinmh.pdf')
     plt.close()
     return()
+
 #####################################################################################################
 
 
 
+def B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    B,Rmue,Fe,Fmu = comp_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    #################### Exp ################################################################
+    Bmean,Berr = unmake_gvar_vec(B)
+    BABARmean = [1.36,0.94,0.90,0.49,-1,0.67]
+    BABARupp = [0.27,0.2,0.2,0.15,0,0.24]
+    BABARlow = [0.24,0.19,0.19,0.14,0,0.22]
+    Bellemean = [1.36,1.00,0.55,0.38,-1,0.98]
+    Belleupp = [0.24,0.2,0.16,0.19,0,0.21]
+    Bellelow = [0.22,0.19,0.14,0.12,0,0.19]
+    CDFmean = [1.29,1.05,0.48,0.52,-1,0.38]
+    CDFupp = [0.2,0.18,0.1,0.095,0,0.092]
+    CDFlow = [0.2,0.18,0.1,0.095,0,0.092]
+    LHCb0mean = [0.65,1.22,0.5,0.2,-1,0.35]
+    LHCb0upp = [0.45,0.31,0.22,0.13,0,0.21]
+    LHCb0low = [0.35,0.31,0.19,0.09,0,0.14]
+    LHCbpmean = [1.21,1.00,0.57,0.38,0.35,-1]
+    LHCbpupp = [0.11,0.081,0.054,0.045,0.045,0]
+    LHCbplow = [0.11,0.081,0.054,0.045,0.045,0]
+    x = [1,2,3,4,5,6]#np.arange(len(B))
+    plt.figure(figsize=figsize)
+    plt.xticks(x, ['(1,6)', '(4.3,8.68)', '(10.09,12.86)', '(14.18,16)', '(16,18)','(16,$q^2_{\mathrm{max}}$)'],fontsize=5,rotation=40)
+    x = [0.75,1.75,2.75,3.75,4.75,5.75]
+    plt.errorbar(x, CDFmean, yerr=[CDFlow,CDFupp], color='g', fmt='*',ms=ms, mfc='none',label=('CDF'),capsize=capsize)
+    x = [0.85,1.85,2.85,3.85,4.85,5.85]
+    plt.errorbar(x, BABARmean, yerr=[BABARlow,BABARupp], color='r', fmt='D',ms=ms, mfc='none',label=('BABAR'),capsize=capsize)
+    x = [0.95,1.95,2.95,3.95,4.95,5.95]
+    plt.errorbar(x, LHCbpmean, yerr=[LHCbplow,LHCbpupp], color='purple', fmt='o',ms=ms, mfc='none',label=('LHCb+'),capsize=capsize)
+    
+    x = [1.05,2.05,3.05,4.05,5.05,6.05]
+    plt.errorbar(x, Bmean, yerr=Berr, color='k', fmt='d',ms=ms, mfc='k',label=('This work'),capsize=capsize)
+    
+    x = [1.15,2.15,3.15,4.15,5.15,6.15]
+    plt.errorbar(x, LHCb0mean, yerr=[LHCb0low,LHCb0upp], color='purple', fmt='^',ms=ms, mfc='none',label=('LHCb0'),capsize=capsize)
+    x = [1.25,2.25,3.25,4.25,5.25,6.25]
+    plt.errorbar(x, Bellemean, yerr=[Bellelow,Belleupp], color='b', fmt='s',ms=ms, mfc='none',label=('Belle'),capsize=capsize)
+    plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel('$10^7\mathcal{B}_{\ell}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
+    plt.axes().set_ylim([0,1.7])
+    plt.tight_layout()
+    plt.savefig('Plots/Bbybinexp.pdf')
+    plt.close()
+    ##############################################Theor ###########################################################
+    # 4 = 1206.0273 5 = 1212.2321 8 = 1211.0234
+    ref1306mean = [1.81,1.65,0.87,0.442,0.391,0.797]
+    ref1306err = [0.61,0.42,0.13,0.051,0.042,0.082]
+    ref1206mean = [1.29,-1,-1,0.43,-1,0.86]
+    ref1206err = [0.30,0,0,0.1,0,0.2]
+    ref1212mean = [1.63,1.38,-1,0.34,0.309,0.634]
+    ref1212upp = [0.56,0.51,0,0.179,0.176,0.382]
+    ref1212low = [0.27,0.25,0,0.083,0.081,0.175]
+    ref1211mean = [1.76,1.39,-1,-1,-1,-1]
+    ref1211upp = [0.6,0.53,0,0,0,0]
+    ref1211low = [0.23,0.22,0,0,0,0]
+
+    x = [1,2,3,4,5,6]#np.arange(len(B))
+    plt.figure(figsize=figsize)
+    plt.xticks(x, ['(1,6)', '(4.3,8.68)', '(10.09,12.86)', '(14.18,16)', '(16,18)','(16,$q^2_{\mathrm{max}}$)'],fontsize=5,rotation=40)
+    x = [0.8,1.8,2.8,3.8,4.8,5.8]
+    plt.errorbar(x, ref1306mean, yerr=ref1306err, color='r', fmt='*',ms=ms, mfc='none',label=('arXiv: 1306.0434'),capsize=capsize)
+    x = [0.9,1.9,2.9,3.9,4.9,5.9]
+    plt.errorbar(x, ref1206mean, yerr=ref1206err, color='b', fmt='o',ms=ms, mfc='none',label=('arXiv: 1206.0273'),capsize=capsize)
+    x = [1,2,3,4,5,6]
+    plt.errorbar(x, Bmean, yerr=Berr, color='k', fmt='d',ms=ms, mfc='k',label=('This work'),capsize=capsize)
+    x = [1.1,2.1,3.1,4.1,5.1,6.1]
+    plt.errorbar(x, ref1212mean, yerr=[ref1212low,ref1212upp], color='purple', fmt='^',ms=ms, mfc='none',label=('arXiv: 1212.2321'),capsize=capsize)
+    x = [1.2,2.2,3.2,4.2,5.2,6.2]
+    plt.errorbar(x, ref1211mean, yerr=[ref1211low,ref1211upp], color='g', fmt='s',ms=ms, mfc='none',label=('arXiv: 1211.0234'),capsize=capsize)
+
+    plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel('$10^7\mathcal{B}_{\ell}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
+    plt.axes().set_ylim([0,2.5])
+    plt.tight_layout()
+    plt.savefig('Plots/Bbybintheory.pdf')
+    plt.close()
+    ############################################ other stuff #################
+    x = [1,2,3,4,5,6]#np.arange(len(B))
+    Rmuemean,Rmueerr = unmake_gvar_vec(Rmue)
+    Femean,Feerr = unmake_gvar_vec(Fe)
+    Femean,Feerr = unmake_gvar_vec(Fe)
+    Fmumean,Fmuerr = unmake_gvar_vec(Fmu)
+    R1306mean = [0.74,0.89,1.35,1.98,2.56,3.86]
+    R1306err = [0.35,0.25,0.23,0.22,0.23,0.29]
+    Fe1306mean = [0.577,0.2722,0.1694,0.1506,0.1525,0.1766]
+    Fe1306err = [0.01,0.0054,0.0053,0.0052,0.0055,0.0068]
+    Fmu1306mean = [2.441,1.158,0.722,0.642,0.649,0.751]
+    Fmu1306err = [0.043,0.023,0.022,0.022,0.023,0.029]
+    Fmu1212mean = [2.54,1.24,-1,0.704,0.318,0.775]
+    Fmu1212upp = [0.2,0.12,0,0.147,0.201,0.210]
+    Fmu1212low = [0.36,0.2,0,0.196,0.092,0.254]
+    
+    
+    plt.figure(figsize=figsize)
+    
+
+    ax1 = plt.subplot(311)
+    plt.errorbar(x,Rmuemean,yerr=Rmueerr,fmt='kd',ms=ms,mfc='none',capsize=capsize,label=('This work'))
+    plt.errorbar(x, R1306mean, yerr=R1306err, color='r', fmt='s',ms=ms, mfc='none',label=('arXiv: 1306.0434'),capsize=capsize)
+    plt.errorbar(1,0.31,yerr=[[0.07],[0.1]],color='b', fmt='o',ms=ms, mfc='none',label=('arXiv: 0709.4174'),capsize=capsize)
+    plt.setp(ax1.get_xticklabels(), fontsize=fontsizelab)
+    plt.setp(ax1.get_xticklabels(), visible=False)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.gca().yaxis.set_ticks_position('both')
+    plt.gca().xaxis.set_ticks_position('none')
+    plt.gca().yaxis.set_major_locator(MultipleLocator(1))
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.5))
+    plt.ylabel('$10^3(R^{\mu}_e-1)$',fontsize=fontsizelab)
+    xlabs = ['(1,6)', '(4.3,8.68)', '(10.09,12.86)', '(14.18,16)', '(16,18)','(16,$q^2_{\mathrm{max}}$)']
+    for i in range(len(xlabs)):
+        plt.text(i+1,plt.ylim()[1],xlabs[i],fontsize=fontsizeleg, verticalalignment='bottom',horizontalalignment='center',rotation =40)
+    ax2 = plt.subplot(312, sharex=ax1)
+    plt.errorbar(x,Femean,yerr=Feerr,fmt='kd',ms=ms,mfc='none',capsize=capsize)
+    plt.errorbar(x, Fe1306mean, yerr=Fe1306err, color='r', fmt='s',ms=ms, mfc='none',label=('arXiv: 1306.0434'),capsize=capsize)
+    # make these tick labels invisible
+    plt.setp(ax2.get_xticklabels(), visible=False)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.ylabel('$10^6F_H^e$',fontsize=fontsizelab)
+    plt.gca().yaxis.set_ticks_position('both')
+    plt.gca().xaxis.set_ticks_position('none')
+    plt.gca().set_ylim([0,0.7])
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.2)) 
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.1))
 
 
+    ax3 = plt.subplot(313, sharex=ax1)
+    plt.errorbar(x,Fmumean,yerr=Fmuerr,fmt='kd',ms=ms,mfc='none',capsize=capsize)
+    plt.errorbar(x, Fmu1306mean, yerr=Fmu1306err, color='r', fmt='s',ms=ms, mfc='none',label=('arXiv: 1306.0434'),capsize=capsize)
+    plt.errorbar(x, Fmu1212mean, yerr=[Fmu1212low,Fmu1212upp], color='purple', fmt='^',ms=ms, mfc='none',label=('arXiv: 1212.2321'),capsize=capsize)
+    plt.setp(ax3.get_xticklabels(), visible=False)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.ylabel('$10^2F_H^{\mu}$',fontsize=fontsizelab)
+    plt.gca().yaxis.set_ticks_position('both')
+    plt.gca().set_ylim([-0.2,3.5])
+    plt.gca().yaxis.set_major_locator(MultipleLocator(1))
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.5)) 
+    plt.gca().xaxis.set_ticks_position('none')
+    legend_elements = [Line2D([0], [0],color='k',linestyle='None', marker='d',ms=ms, mfc='none',label=('This work')),Line2D([0], [0],color='b',linestyle='None', marker='o',ms=ms, mfc='none',label=('arXiv: 0709.4174')),Line2D([0], [0],color='r',linestyle='None', marker='s',ms=ms, mfc='none',label=('arXiv: 1306.0434')),Line2D([0], [0],color='purple',linestyle='None', marker='^',ms=ms, mfc='none',label=('arXiv: 1212.2321'))]
+    plt.legend(handles=legend_elements,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
+    plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.tight_layout()
+    plt.savefig('Plots/RandFbybin.pdf')
+    return()
+
+####################################### tau stuff ##########################################################
+
+def tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    Btau,Rtaumu,Rtaue,Ftau = comp_by_bin3(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    
+    x = [1,2,3,4]#np.arange(len(B))
+    Btaumean,Btauerr = unmake_gvar_vec(Btau) 
+    Rtaumumean,Rtaumuerr = unmake_gvar_vec(Rtaumu)
+    Rtauemean,Rtaueerr = unmake_gvar_vec(Rtaue)
+    Ftaumean,Ftauerr = unmake_gvar_vec(Ftau)
+    Bmean = [1.44,0.349,0.413,1.09]
+    Berr = [0.15,0.04,0.044,0.11]
+    Rmumean = [1.158,0.790,1.055,1.361]
+    Rmuerr = [0.039,0.025,0.033,0.046]
+    #Rtauemean = [1.161,0.792,1.058,1.367]
+    #Rtaueerr = [0.040,0.025,0.034,0.047]
+    Fmean = [0.8856,0.9176,0.8784,0.8753]
+    Ferr = [0.0037,0.0026,0.0038,0.0042]
+    plt.figure(figsize=figsize)
+    
+
+    ax1 = plt.subplot(311)
+    plt.errorbar(x,Rtaumumean,yerr=Rtaumuerr,fmt='kd',ms=ms,mfc='none',capsize=capsize,label=('This work'))
+    plt.errorbar(x, Rmumean, yerr=Rmuerr, color='r', fmt='s',ms=ms, mfc='none',label=('arXiv: 1306.0434'),capsize=capsize)
+    plt.setp(ax1.get_xticklabels(), fontsize=fontsizelab)
+    plt.setp(ax1.get_xticklabels(), visible=False)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.gca().yaxis.set_ticks_position('both')
+    plt.gca().xaxis.set_ticks_position('none')
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.05))
+    plt.ylabel('$R^{\tau}_{\mu}$',fontsize=fontsizelab)
+    xlabs = ['$(14.18,q^2_{\mathrm{max}})$', '(14.18,16)','(16,18)', '(16,18)','(16,$q^2_{\mathrm{max}}$)']
+    for i in range(len(xlabs)):
+        plt.text(i+1,plt.ylim()[1],xlabs[i],fontsize=fontsizeleg, verticalalignment='bottom',horizontalalignment='center',rotation =40)
+    ax2 = plt.subplot(312, sharex=ax1)
+    plt.errorbar(x,Btaumean,yerr=Btauerr,fmt='kd',ms=ms,mfc='none',capsize=capsize)
+    plt.errorbar(x, Bmean, yerr=Berr, color='r', fmt='s',ms=ms, mfc='none',label=('arXiv: 1306.0434'),capsize=capsize)
+    plt.errorbar(1, 1.26, yerr=[[0.23],[0.41]], color='b', fmt='o',ms=ms, mfc='none',label=('arXiv: 1111.2558'),capsize=capsize)
+    # make these tick labels invisible
+    plt.setp(ax2.get_xticklabels(), visible=False)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.ylabel('$10^7\mathcal{B}_{\tau}$',fontsize=fontsizelab)
+    plt.gca().yaxis.set_ticks_position('both')
+    plt.gca().xaxis.set_ticks_position('none')
+    #plt.gca().set_ylim([0,0.7])
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.5)) 
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.1))
 
 
+    ax3 = plt.subplot(313, sharex=ax1)
+    plt.errorbar(x,Ftaumean,yerr=Ftauerr,fmt='kd',ms=ms,mfc='none',capsize=capsize)
+    plt.errorbar(x, Fmean, yerr=Ferr, color='r', fmt='s',ms=ms, mfc='none',label=('arXiv: 1306.0434'),capsize=capsize)
+    plt.errorbar(1, 0.89, yerr=[[0.045],[0.033]], color='b', fmt='o',ms=ms, mfc='none',label=('arXiv: 1111.2558'),capsize=capsize)
+    plt.setp(ax3.get_xticklabels(), visible=False)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.ylabel('$F_H^{\tau}$',fontsize=fontsizelab)
+    plt.gca().yaxis.set_ticks_position('both')
+    #plt.gca().set_ylim([-0.2,3.5])
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.05)) 
+    plt.gca().xaxis.set_ticks_position('none')
+    #legend_elements = [Line2D([0], [0],color='k',linestyle='None', marker='d',ms=ms, mfc='none',label=('This work')),Line2D([0], [0],color='b',linestyle='None', marker='o',ms=ms, mfc='none',label=('arXiv: 0709.4174')),Line2D([0], [0],color='r',linestyle='None', marker='s',ms=ms, mfc='none',label=('arXiv: 1306.0434')),Line2D([0], [0],color='purple',linestyle='None', marker='^',ms=ms, mfc='none',label=('arXiv: 1212.2321'))]
+    #plt.legend(handles=legend_elements,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
+    plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.tight_layout()
+    plt.savefig('Plots/Taustuffbybin.pdf')
+    return()
+
+################################################################################################################
 
 
+def dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2): # results from 1403.8044
+    Bp,B0 = comp_by_bin2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    Bpmean,Bperr = unmake_gvar_vec(Bp)
+    B0mean,B0err = unmake_gvar_vec(B0)
+    pmean = [33.2,23.3,28.2,25.4,22.1,23.1,24.5,23.1,17.7,19.3,16.1,16.4,20.6,13.7,7.4,5.9,4.3,24.2,12.1]
+    pupp = [2.5,1.9,2.1,2.0,1.8,1.8,1.8,1.8,1.6,1.6,1.3,1.3,1.5,1.2,0.9,0.8,0.7,1.4,0.7]
+    plow = pupp
+    b0mean = [12.2,18.7,17.3,27.0,12.7,14.3,7.8,18.7,9.5]
+    b0upp = [5.9,5.6,5.4,6.0,4.5,3.6,1.7,3.6,1.7]
+    b0low = [5.2,5.0,4.9,5.5,4.0,3.3,1.6,3.3,1.6]
+    x = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    plt.figure(figsize=figsize)
+    plt.xticks(x, ['(0.1,0.98)', '(1.1,2.0)', '(2.0,3.0)', '(3.0,4.0)', '(4.0,5.0)','(5.0,6.0)','(6.0,7.0)','(7.0,8.0)','(11.0,11.8)','(11.8,12.5)','(15.0,16.0)','(16.0,17.0)','(17.0,18.0)','(18.0,19.0)','(19.0,20.0)','(20.0,21.0)','(21.0,22.0)','(1.1,6.0)','(15.0,22.0)'],fontsize=5,rotation=40)
+    
+    plt.errorbar(x, pmean, yerr=[plow,pupp], color='r', fmt='o',ms=ms, mfc='none',label=('arXiv: 1403.8044 (+)'),capsize=capsize)
+    plt.errorbar(x, Bpmean, yerr=Bperr, color='k', fmt='d',ms=ms, mfc='k',label=('This work'),capsize=capsize)
+    plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel('$10^9 d\mathcal{B}_{\mu}/dq^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
+    #plt.axes().set_ylim([0,1.7])
+    plt.tight_layout()
+    plt.savefig('Plots/dBdq2bybinp.pdf')
+    plt.close()
+
+    plt.figure(figsize=figsize)
+    x = [1,2,3,4,5,6,7,8,9]
+    plt.xticks(x, ['(0.1,2.0)', '(2.0,4.0)', '(4.0,6.0)', '(6.0,8.0)', '(11.0,12.5)','(15.0,17.0)','(17.0,22.0)','(1.1,6.0)','(15.0,22.0)'],fontsize=5,rotation=40)
+ 
+    plt.errorbar(x, b0mean, yerr=[b0low,b0upp], color='r', fmt='o',ms=ms, mfc='none',label=('arXiv: 1403.8044 (0)'),capsize=capsize)
+    plt.errorbar(x, B0mean, yerr=B0err, color='k', fmt='d',ms=ms, mfc='k',label=('This work'),capsize=capsize)
+    plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel('$10^9 d\mathcal{B}_{\mu}/dq^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
+    #plt.axes().set_ylim([0,1.7])
+    plt.tight_layout()
+    plt.savefig('Plots/dBdq2bybin0.pdf')
+    plt.close()
+    
+    return()
+
+####################################################################################################################
 
 
+def dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    p = make_p_physical_point_BK(pfit,Fits)
+    m_mu = 105.6583755 * 1e-3
+    tauB0 = gv.gvar('1.519(4)') #1e-12s # HFLAV 
+    tauBpm = gv.gvar('1.638(4)') #1e-12s # HFLAV 
+    tauB0GeV = tauB0/(6.582119569*1e-13)
+    tauBpmGeV = tauBpm/(6.582119569*1e-13)
+    pmean = [33.2,23.3,28.2,25.4,22.1,23.1,24.5,23.1,17.7,19.3,16.1,16.4,20.6,13.7,7.4,5.9,4.3,24.2,12.1]
+    pupp = [2.5,1.9,2.1,2.0,1.8,1.8,1.8,1.8,1.6,1.6,1.3,1.3,1.5,1.2,0.9,0.8,0.7,1.4,0.7]
+    plow = pupp
+    b0mean = [12.2,18.7,17.3,27.0,12.7,14.3,7.8,18.7,9.5]
+    b0upp = [5.9,5.6,5.4,6.0,4.5,3.6,1.7,3.6,1.7]
+    b0low = [5.2,5.0,4.9,5.5,4.0,3.3,1.6,3.3,1.6]
+    BABARmean = [1.36,0.94,0.90,0.49,0.67]
+    BABARupp = [0.27,0.2,0.2,0.15,0.24]
+    BABARlow = [0.24,0.19,0.19,0.14,0.22]
+    Bellemean = [1.36,1.00,0.55,0.38,0.98]
+    Belleupp = [0.24,0.2,0.16,0.19,0.21]
+    Bellelow = [0.22,0.19,0.14,0.12,0.19]
+    CDFmean = [1.29,1.05,0.48,0.52,0.38]
+    CDFupp = [0.2,0.18,0.1,0.095,0.092]
+    CDFlow = [0.2,0.18,0.1,0.095,0.092]
+    bin_starts_p = [0.1,1.1,2,3,4,5,6,7,11,11.8,15,16,17,18,19,20,21,1.1,15]
+    bin_ends_p =   [0.98,2,3,4,5,6,7,8,11.8,12.5,16,17,18,19,20,21,22,6,22]
+    bin_starts_0 = [0.1,2,4,6,11,15,17,1.1,15]
+    bin_ends_0 =   [2,4,6,8,12.5,17,22,6,22]
+    bin_starts_BABAR = [1,4.3,10.11,14.18,16]
+    bin_ends_BABAR = [6,8.12,12.89,16,qsqmaxphysBK.mean]
+    bin_starts_other = [1,4.3,10.09,14.18,16]
+    bin_ends_other = [6,8.68,12.86,16,qsqmaxphysBK.mean]
+    B = []
+    qsq = []
+    for q2 in np.linspace(0.1,qsqmaxphysBK.mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        al,cl = make_al_cl(p,q2,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        B.append((2*al + 2*cl/3)*tauB0GeV*1e9) # we're using B0
 
+    Bmean,Berr = unmake_gvar_vec(B)
+    Bupp,Blow = make_upp_low(B)
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, Bmean, color='b')
+    plt.fill_between(qsq,Blow,Bupp, color='b',alpha=alpha)
+    
+    x,xerr = make_x_from_bins(bin_starts_0,bin_ends_0)
+    plt.errorbar(x, b0mean,xerr=xerr, yerr=[b0low,b0upp], color='r', fmt='o',ms=ms, mfc='none',label=('LHCb (0)'),capsize=capsize)
+    x,xerr = make_x_from_bins(bin_starts_p,bin_ends_p)
+    plt.errorbar(x, pmean,xerr=xerr, yerr=[plow,pupp], color='b', fmt='o',ms=ms, mfc='none',label=('LHCb (+)'),capsize=capsize)
+    
+    x,xerr = make_x_from_bins(bin_starts_BABAR,bin_ends_BABAR)
+    y,yupp,ylow = make_y_from_bins(BABARmean,BABARupp,BABARlow,bin_starts_BABAR,bin_ends_BABAR)
+    plt.errorbar(x, y,xerr=xerr, yerr=[ylow,yupp], color='g', fmt='s',ms=ms, mfc='none',label=('BABAR'),capsize=capsize)
+    
+    x,xerr = make_x_from_bins(bin_starts_other,bin_ends_other)
+    y,yupp,ylow = make_y_from_bins(Bellemean,Belleupp,Bellelow,bin_starts_other,bin_ends_other)
+    plt.errorbar(x, y,xerr=xerr, yerr=[ylow,yupp], color='k', fmt='d',ms=ms, mfc='none',label=('Belle'),capsize=capsize)
+    y,yupp,ylow = make_y_from_bins(CDFmean,CDFupp,CDFlow,bin_starts_other,bin_ends_other)
+    plt.errorbar(x, y,xerr=xerr, yerr=[ylow,yupp], color='purple', fmt='*',ms=ms, mfc='none',label=('CDF'),capsize=capsize)
+    
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel('$10^9 d\mathcal{B}_{\mu}/dq^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
 
-
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
+    #plt.axes().set_ylim([0,1.7])
+    plt.tight_layout()
+    plt.savefig('Plots/dBdq2.pdf')
+    plt.close()
+    
+    return()
+##############################################################################################################
 
 
 

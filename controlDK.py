@@ -145,7 +145,7 @@ SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 UF = collections.OrderedDict()
 UF['conf']='UF'
 UF['label'] = 'Set 8'
-UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_231cfgs_neg0.19400.7061.5292.2354.705BGBNGKGSV3340unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.094_smTrue_Stmin2_Vtmin2.pickle'
+UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_261cfgs_neg0.19400.7061.5292.2354.705BGBNGKGSV3340unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.096_smTrue_Stmin2_Vtmin2.pickle'
 #UF['Hsfilename'] = UFs['Hsfilename']
 #UF['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
 UF['masses'] = ['0.194','0.45','0.6','0.8']
@@ -161,73 +161,6 @@ UF['L'] = 64
 UF['w0/a'] = gv.gvar('3.892(12)')
 UF['parent-Tag'] = 'B_G5-G5_m{1}'
 UF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
-######################### BsEtas ########################################
-################################## F PARAMETERS ##########################
-Fs = collections.OrderedDict()
-Fs['conf']='Fs'
-Fs['label'] = 'Set 9'
-Fs['filename'] = '../../H_sToEta_s/Analysis/Fits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
-Fs['Hlfilename'] = F['filename']  # this is to get the H mass for t_plus etc
-Fs['Hltag'] = F['parent-Tag']
-Fs['ldaughtertag'] = F['daughter-Tag']
-Fs['masses'] = ['0.449','0.566','0.683','0.8']
-Fs['Zdisc'] = [0.99892,0.99826,0.99648,0.99377]
-Fs['twists'] = ['0','0.4281','1.282','2.141','2.570']
-Fs['m_l'] = '0.0376'
-Fs['m_s'] = '0.0376'
-Fs['m_c'] = '0.449'
-Fs['m_ssea'] = 0.037
-Fs['m_lsea'] = 0.0074
-#F['tp'] = 96
-Fs['L'] = 32
-Fs['w0/a'] = gv.gvar('1.9006(20)')
-Fs['parent-Tag'] = 'meson.m{0}_m{1}'
-Fs['daughter-Tag'] = ['etas','etas_p0.0728','etas_p0.218','etas_p0.364','etas_p0.437','etas_p0.509']      
-
-######################## SFs PARAMETERS ####################################
-SFs = collections.OrderedDict()
-SFs['conf']='SFs'
-SFs['label'] = 'Set 10'
-SFs['filename'] = '../../H_sToEta_s/Analysis/Fits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
-SFs['Hlfilename'] = SF['filename']
-SFs['Hltag'] = SF['parent-Tag']
-SFs['ldaughtertag'] = SF['daughter-Tag']
-SFs['masses'] = ['0.274','0.450','0.6','0.8']
-SFs['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
-SFs['twists'] = ['0','1.261','2.108','2.946','3.624']
-SFs['m_l'] = '0.0234'  #treating strange as light here
-SFs['m_s'] = '0.0234'
-SFs['m_c'] = '0.274'
-SFs['m_ssea'] = 0.024
-SFs['m_lsea'] = 0.0048
-#SF['tp'] = 144
-SFs['L'] = 48
-SFs['w0/a'] = gv.gvar('2.896(6)')
-SFs['parent-Tag'] = 'meson.m{0}_m{1}' 
-SFs['daughter-Tag'] = ['etas_p0','etas_p0.143','eta_s_tw2.108_m0.0234','etas_p0.334','eta_s_tw3.624_m0.0234']
-
-
-######################## UFs PARAMETERS ####################################
-UFs = collections.OrderedDict()
-UFs['conf']='UFs'
-UFs['label'] = 'Set 11'
-UFs['filename'] = '../../H_sToEta_s/Analysis/Fits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
-UFs['Hlfilename'] = UF['filename']
-UFs['Hltag'] = UF['parent-Tag']
-UFs['ldaughtertag'] = UF['daughter-Tag']
-UFs['masses'] = ['0.194','0.45','0.6','0.8']
-UFs['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
-UFs['twists'] = ['0','0.706','1.529','2.235','4.705']
-UFs['m_l'] = '0.0165'
-UFs['m_s'] = '0.0165'
-UFs['m_c'] = '0.194'
-UFs['m_ssea'] = 0.0158
-UFs['m_lsea'] = 0.00316
-#UF['tp'] = 192
-UFs['L'] = 64
-UFs['w0/a'] = gv.gvar('3.892(12)')
-UFs['parent-Tag'] = 'Bs_G5-G5_m{1}'
-UFs['daughter-Tag'] = ['etas_G5-G5_tw0','etas_G5-G5_tw0.706','etas_G5-G5_tw1.529','etas_G5-G5_tw2.235','etas_G5-G5_tw4.705']
 
 
 ##################### USER INPUTS ##########################################
@@ -236,7 +169,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [VCp,Cp,Fp,VC,C,F,SF,UF]#] # choose what to fit
+Fits = [VCp,Cp,Fp,VC,C,F,SF,UF] # choose what to fit
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
@@ -306,11 +239,13 @@ for Fit in Fits:
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
     results_tables(fs_data[Fit['conf']],Fit)
 #check_poles(Fits) Doesn't work atm 
-#Z_V_plots(Fits,fs_data)
+
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
+#Z_V_plots(Fits,fs_data)
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#plot_gold_non_split(Fits)
 #plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
 #plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #plot_Ht_H0(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
@@ -322,6 +257,9 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+
+#error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
+#table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
 
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
 #f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
@@ -340,5 +278,4 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.09)
 #f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.12)
 #fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.12)
-#error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same)
-#table_of_as(Fits,pfit,Nijk,Npow,fpf0same,addrho,Del)
+

@@ -30,13 +30,15 @@ Metas_UF = gv.gvar('0.154107(88)') #from new BsEast fit
 Metas_Fs = Metas_F#gv.gvar('0.314015(89)') #from BsEtas fits
 Metas_SFs = Metas_SF#gv.gvar('0.207021(65)')#from new BsEtas fit
 Metas_UFs = Metas_UF#gv.gvar('0.154107(88)') #from new BsEast fit
-MKphys = gv.gvar('0.497611(13)') #PD K^0
-MBsphys = gv.gvar('5.36688(17)') # PDG
+#MKphys = gv.gvar('0.497611(13)') #PD K^0
+MKphys = gv.gvar('0.493677(13)')#PD K^pm  we are doing D_0 to K^pm 
+MBsphys = gv.gvar('5.36688(17)') # PDG 
 MDsphys = gv.gvar('1.968340(70)')  #PDG
 MDs0phys = gv.gvar('2.3180(7)')
 MDsstarphys = gv.gvar('2.1122(4)')  #PDG 
-MBphys = gv.gvar('5.27933(13)') # PDG
-MDphys = gv.gvar('1.86965(5)')  #PDG
+MBphys = gv.gvar('5.27965(12)') # PDG B0  
+#MDphys = gv.gvar('1.86965(5)')  #PDG Dpm
+MDphys = gv.gvar('1.86483(5)')  #PDG D0 
 Mpiphys = gv.gvar('0.1349770(5)')  #PDG
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
 #tensornorm = gv.gvar('1.09024(56)') # from Dan
@@ -328,7 +330,7 @@ def check_poles(Fits):
 def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint,w=1):
     prior = gv.BufferDict()
     f = gv.BufferDict()
-    prior['g'] = gv.gvar('0.51(20)')
+    prior['g'] = gv.gvar('0.570(6)')#1304.5009 pg 19 
     prior['Metacphys'] = Metacphys
     prior['MDphys'] = MDphys
     prior['MKphys'] = MKphys
@@ -689,17 +691,22 @@ def comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     Vcss22 = []
     terr2 = []
     eerr2 = []
+    ints1 = []
+    ints2 = []
     for i in range(int(len(partials)/2)):
         V2 = ( 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i]))
         Vcss21.append(V2)
         terr1.append(V2.partialsdev(p3integrals[i]))
         eerr1.append(V2.partialsdev(partials[i]))
+        ints1.append(p3integrals[i])
     for i in range(int(len(partials)/2),len(partials)):
         V2 = ( 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i-int(len(partials)/2)]))
         Vcss22.append(V2)
         terr2.append(V2.partialsdev(p3integrals[i-int(len(partials)/2)]))
-        eerr2.append(V2.partialsdev( partials[i]))   
-    return(Vcss21,terr1,eerr1,Vcss22,terr2,eerr2,bins)
+        eerr2.append(V2.partialsdev( partials[i]))
+        ints2.append(p3integrals[i-int(len(partials)/2)])
+        
+    return(Vcss21,terr1,eerr1,Vcss22,terr2,eerr2,bins,ints1,ints2,partials)
 
 ############################################################################################
 
@@ -716,12 +723,14 @@ def comp_BES(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     Vcss2 = []
     terr = []
     eerr = []
+    ints = []
     for i in range(len(partials)):
         V2 = ( 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i]))
         Vcss2.append(V2)
         terr.append(V2.partialsdev(p3integrals[i]))
         eerr.append(V2.partialsdev(partials[i]))
-    return(Vcss2,terr,eerr,bins)
+        ints.append(p3integrals[i])
+    return(Vcss2,terr,eerr,bins,ints,partials)
 
 #######################BaBar #####################################################
 
@@ -738,19 +747,44 @@ def comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     Vcss2 = []
     terr = []
     eerr = []
+    ints = []
     for i in range(len(partials)):
         V2 = ( 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i]))
         Vcss2.append(V2)
         terr.append(V2.partialsdev(p3integrals[i]))
         eerr.append(V2.partialsdev(partials[i]))
-    return(Vcss2,terr,eerr,bins)
+        ints.append(p3integrals[i])
+    return(Vcss2,terr,eerr,bins,ints,partials)
 
 ##################################################################################################
 
+def total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BESpars,BaBarpars):
+    total = []
+    total.extend(Cleo1V2)
+    total.extend(Cleo2V2)
+    total.extend(BESV2)
+    total.extend(BaBarV2)
+    av = gv.sqrt(lsqfit.wavg(total))
+    print('Average V_cs = ', av)
+    ints = []
+    pars = []
+    ints.extend(C1ints)
+    ints.extend(C2ints)
+    ints.extend(BESints)
+    ints.extend(BaBarints)
+    pars.extend(Cpars)
+    pars.extend(BESpars)
+    pars.extend(BaBarpars)
+    terr = av.partialsdev(tuple(ints))
+    eerr = av.partialsdev(tuple(pars))
+    print('Theory error = {0:.4f} Exp error = {1:.4f} Total = {2:.4f}'.format(terr,eerr,np.sqrt(eerr**2+terr**2)))
+    return(av)
+
+##################################################################################################
 def comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
-    Cleo1V2,Cleo1terr,Cleo1eerr,Cleo2V2,Cleo2terr,Cleo2eerr,Cleobins = comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
-    BESV2,BESterr,BESeerr,BESbins = comp_BES(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
-    BaBarV2,BaBarterr,BaBareerr,BaBarbins = comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
+    Cleo1V2,Cleo1terr,Cleo1eerr,Cleo2V2,Cleo2terr,Cleo2eerr,Cleobins,C1ints,C2ints,Cpars = comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
+    BESV2,BESterr,BESeerr,BESbins,BESints,BESpars = comp_BES(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
+    BaBarV2,BaBarterr,BaBareerr,BaBarbins,BaBarints,BaBarpars = comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
     Cleo1av = lsqfit.wavg(Cleo1V2)
     Cleo2av = lsqfit.wavg(Cleo2V2)
     BESav = lsqfit.wavg(BESV2)
@@ -759,14 +793,7 @@ def comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     print('Cleo |V_cs|^2 D^+ to K^0 sqrt(weighted average) = ',gv.sqrt(Cleo2av))
     print('BES |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BESav))
     print('BaBar |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BaBarav))
-    total = []
-    total.extend(Cleo1V2)
-    total.extend(Cleo2V2)
-    total.extend(BESV2)
-    total.extend(BaBarV2)
-    av = gv.sqrt(lsqfit.wavg(total))
-    #print(gv.sqrt(lsqfit.wavg([Cleo1av,Cleo2av,BESav,BaBarav])))
-    print('Average V_cs = ', av)
+    av = total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BESpars,BaBarpars)
     d = collections.OrderedDict()
     d['Cleo1V2'] = Cleo1V2
     d['Cleo2V2'] = Cleo2V2
@@ -835,7 +862,80 @@ def re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,con
 ##################################################################################################
 
 
+def output_error_DK(pfit,prior,Fits,Nijk,Npow,Nm,f,qsqs,t_0,addrho,fpf0same,const2):
+    p = make_p_physical_point_DK(pfit,Fits)
+    f0dict = collections.OrderedDict()
+    fpdict = collections.OrderedDict()
+    for i in range(1,5):
+        f0dict[i] = []
+        fpdict[i] = []
+    disclist = []
+    qmislist = []
+    #heavylist = []
+    dat = []
+    extinputs = [prior['g'],prior['Metacphys'],prior['MDphys'],prior['MKphys'],prior['MDsstarphys'],prior['MDs0phys'],prior['MBphys'],prior['MBsstarphys'],prior['slratio']]
+    for Fit in Fits:
+        extinputs.append(prior['Metac_{0}'.format(Fit['conf'])])
+    for n in range(Npow):
+        #if addrho:
+        #    heavylist.append(prior['0rho'][n])
+        qmislist.append(prior['0cl'][n])
+        qmislist.append(prior['0cs'][n])
+        qmislist.append(prior['0cc'][n])
+        qmislist.append(prior['0csval'][n])
+        qmislist.append(prior['0clval'][n])
+        #if addrho:
+        #    heavylist.append(prior['prho'][n])
+        qmislist.append(prior['pcl'][n])
+        qmislist.append(prior['pcs'][n])
+        qmislist.append(prior['pcc'][n])
+        qmislist.append(prior['pcsval'][n])
+        qmislist.append(prior['pclval'][n])
+        
+        for i in range(Nijk):
+            for j in range(Nijk):
+                for k in range(Nijk):
+                    if j != 0 or k != 0:
+                        disclist.append(prior['0d'][i][j][k][n])
+                        disclist.append(prior['pd'][i][j][k][n])
+                    #else:
+                    #    heavylist.append(prior['0d'][i][j][k][n])
+                    #    heavylist.append(prior['pd'][i][j][k][n])
+    for key in prior:
+        if not isinstance(prior[key],(list,tuple,np.ndarray)):
+            if prior[key] not in disclist + qmislist  + extinputs:  # + heavylist:
+                dat.append(prior[key])
+    for key in f:
+        dat.append(f[key])
+    Fit = Fits[0]
+    mass = Fit['masses'][0]
+    fit = Fit['conf']
+    for qsq in qsqs:
+        f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,0)
+        fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,0,const2=const2)
+        var1 = (100*(f0.partialsdev(tuple(extinputs)))/f0.mean)**2
+        var2 = (100*(f0.partialsdev(tuple(qmislist)))/f0.mean)**2
+        var3 = (100*(f0.partialsdev(tuple(dat)))/f0.mean)**2
+        #var4 = (100*(f0.partialsdev(tuple(heavylist)))/f0.mean)**2
+        var4 = (100*(f0.partialsdev(tuple(disclist)))/f0.mean)**2
+        f0dict[1].append(var1)
+        f0dict[2].append(var1+var2)
+        f0dict[3].append(var1+var2+var3)
+        f0dict[4].append(var1+var2+var3+var4)
+        #f0dict[5].append(var1+var2+var3+var4+var5)
+        var1 = (100*(fp.partialsdev(tuple(extinputs)))/fp.mean)**2
+        var2 = (100*(fp.partialsdev(tuple(qmislist)))/fp.mean)**2
+        var3 = (100*(fp.partialsdev(tuple(dat)))/fp.mean)**2
+        #var4 = (100*(fp.partialsdev(tuple(heavylist)))/fp.mean)**2
+        var4 = (100*(fp.partialsdev(tuple(disclist)))/fp.mean)**2
+        fpdict[1].append(var1)
+        fpdict[2].append(var1+var2)
+        fpdict[3].append(var1+var2+var3)
+        fpdict[4].append(var1+var2+var3+var4)
+        #fpdict[5].append(var1+var2+var3+var4+var5)
+    return(f0dict,fpdict)
 
+#######################################################################################################
 
 
 
@@ -962,78 +1062,4 @@ def eval_at_different_spacings_BsEtas(asfm,pfit,Fits,fpf0same,Npow,Nijk,addrho):
     gv.dump(forchris,'Tables/forchris.pickle')
     return()
 
-#####################################################################################################
 
-def output_error_BsEtas(pfit,prior,Fits,Nijk,Npow,f,qsqs,t_0,addrho,fpf0same):
-    p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    f0dict = collections.OrderedDict()
-    fpdict = collections.OrderedDict()
-    for i in range(1,6):
-        f0dict[i] = []
-        fpdict[i] = []
-    disclist = []
-    qmislist = []
-    heavylist = []
-    dat = []
-    extinputs = [MBsphys,MBsphys+Del,MDsphys,MBsstarphys,prior['Metacphys']]
-    for Fit in Fits:
-        extinputs.append(prior['Metac_{0}'.format(Fit['conf'])])
-    for n in range(Npow):
-        if addrho:
-            heavylist.append(prior['0rho'][n])
-        qmislist.append(prior['0cl'][n])
-        qmislist.append(prior['0cs'][n])
-        qmislist.append(prior['0cc'][n])
-        qmislist.append(prior['0csval'][n])
-        if addrho:
-            heavylist.append(prior['prho'][n])
-        qmislist.append(prior['pcl'][n])
-        qmislist.append(prior['pcs'][n])
-        qmislist.append(prior['pcc'][n])
-        qmislist.append(prior['pcsval'][n])
-        
-        for i in range(Nijk):
-            for j in range(Nijk):
-                for k in range(Nijk):
-                    if j != 0 or k != 0:
-                        disclist.append(prior['0d'][i][j][k][n])
-                        disclist.append(prior['pd'][i][j][k][n])
-                    else:
-                        heavylist.append(prior['0d'][i][j][k][n])
-                        heavylist.append(prior['pd'][i][j][k][n])
-    for key in prior:
-        if not isinstance(prior[key],(list,tuple,np.ndarray)):
-            if prior[key] not in disclist + qmislist + heavylist + extinputs:
-                dat.append(prior[key])
-    for key in f:
-        dat.append(f[key])
-    Fit = Fits[0]
-    mass = Fit['masses'][0]
-    fit = Fit['conf']
-    for qsq in qsqs:
-        z = make_z(qsq,t_0,MBsphys,Metasphys).mean
-        f0 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,0,qsq,z,mass,fpf0same,0)
-        fp = make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,0,qsq,z,mass,fpf0same,0)
-        var1 = (100*(f0.partialsdev(tuple(extinputs)))/f0.mean)**2
-        var2 = (100*(f0.partialsdev(tuple(qmislist)))/f0.mean)**2
-        var3 = (100*(f0.partialsdev(tuple(dat)))/f0.mean)**2
-        var4 = (100*(f0.partialsdev(tuple(heavylist)))/f0.mean)**2
-        var5 = (100*(f0.partialsdev(tuple(disclist)))/f0.mean)**2
-        f0dict[1].append(var1)
-        f0dict[2].append(var1+var2)
-        f0dict[3].append(var1+var2+var3)
-        f0dict[4].append(var1+var2+var3+var4)
-        f0dict[5].append(var1+var2+var3+var4+var5)
-        var1 = (100*(fp.partialsdev(tuple(extinputs)))/fp.mean)**2
-        var2 = (100*(fp.partialsdev(tuple(qmislist)))/fp.mean)**2
-        var3 = (100*(fp.partialsdev(tuple(dat)))/fp.mean)**2
-        var4 = (100*(fp.partialsdev(tuple(heavylist)))/fp.mean)**2
-        var5 = (100*(fp.partialsdev(tuple(disclist)))/fp.mean)**2
-        fpdict[1].append(var1)
-        fpdict[2].append(var1+var2)
-        fpdict[3].append(var1+var2+var3)
-        fpdict[4].append(var1+var2+var3+var4)
-        fpdict[5].append(var1+var2+var3+var4+var5)
-    return(f0dict,fpdict)
-
-#######################################################################################################
