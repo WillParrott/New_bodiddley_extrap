@@ -145,9 +145,8 @@ SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 UF = collections.OrderedDict()
 UF['conf']='UF'
 UF['label'] = 'Set 8'
-UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_231cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV3340unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.051_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
-#UF['Hsfilename'] = UFs['Hsfilename']
-#UF['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
+#UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_261cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV3340unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.053_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_261cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV3340unchained_Nexp5_sfac0.1_pfac1.0_Q1.00_chi0.097_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 UF['masses'] = ['0.194','0.45','0.6','0.8']
 UF['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UF['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -292,7 +291,7 @@ Nijk = 3 #3
 Nm=0 #redundant atm 
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
-adddata = False #not working atm 
+adddata = False #not working atm and only one thing can be included anyway
 ############################################################################
 if t_0 != '0':
     print('t_0 != 0, so fpf0same set to False')
@@ -315,17 +314,25 @@ prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cv
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#test(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
 #speed_of_light(Fits)
 f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+
+
+
+###############
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0)
 #Hill_ratios_in_E(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same)
