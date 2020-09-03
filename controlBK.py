@@ -167,9 +167,9 @@ Fs['conf']='Fs'
 Fs['label'] = 'Set 9'
 #Fs['filename'] = '../../H_sToEta_s/Analysis/Fits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
 Fs['filename'] = 'Corrfits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
-Fs['Hlfilename'] = F['filename']  # this is to get the H mass for t_plus etc
-Fs['Hltag'] = F['parent-Tag']
-Fs['ldaughtertag'] = F['daughter-Tag']
+#Fs['Hlfilename'] = F['filename']  # this is to get the H mass for t_plus etc
+#Fs['Hltag'] = F['parent-Tag']
+#Fs['ldaughtertag'] = F['daughter-Tag']
 Fs['masses'] = ['0.449','0.566','0.683','0.8']
 Fs['Zdisc'] = [0.99892,0.99826,0.99648,0.99377]
 Fs['twists'] = ['0','0.4281','1.282','2.141','2.570']
@@ -180,7 +180,7 @@ Fs['m_ssea'] = 0.037
 Fs['m_lsea'] = 0.0074
 #F['tp'] = 96
 Fs['L'] = 32
-Fs['w0/a'] = gv.gvar('1.9006(20)')
+Fs['w0/a'] = F['w0/a']#gv.gvar('1.9006(20)')
 Fs['parent-Tag'] = 'meson.m{0}_m{1}'
 Fs['daughter-Tag'] = ['etas','etas_p0.0728','etas_p0.218','etas_p0.364','etas_p0.437','etas_p0.509']      
 
@@ -189,11 +189,11 @@ SFs = collections.OrderedDict()
 SFs['conf']='SFs'
 SFs['label'] = 'Set 10'
 #SFs['filename'] = '../../H_sToEta_s/Analysis/Fits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
-SFs['filename'] = 'Corrfits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
-SFs['Hlfilename'] = SF['filename']
-SFs['Hltag'] = SF['parent-Tag']
-SFs['ldaughtertag'] = SF['daughter-Tag']
-SFs['masses'] = ['0.274','0.450','0.6','0.8']
+SFs['filename'] = 'Corrfits/relabelled-SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0'
+#SFs['Hlfilename'] = SF['filename']
+#SFs['Hltag'] = SF['parent-Tag']
+#SFs['ldaughtertag'] = SF['daughter-Tag']
+SFs['masses'] = ['0.274','0.45','0.6','0.8']
 SFs['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
 SFs['twists'] = ['0','1.261','2.108','2.946','3.624']
 SFs['m_l'] = '0.0234'  #treating strange as light here
@@ -203,7 +203,7 @@ SFs['m_ssea'] = 0.024
 SFs['m_lsea'] = 0.0048
 #SF['tp'] = 144
 SFs['L'] = 48
-SFs['w0/a'] = gv.gvar('2.896(6)')
+SFs['w0/a'] = SF['w0/a']#gv.gvar('2.896(6)')
 SFs['parent-Tag'] = 'meson.m{0}_m{1}' 
 SFs['daughter-Tag'] = ['etas_p0','etas_p0.143','eta_s_tw2.108_m0.0234','etas_p0.334','eta_s_tw3.624_m0.0234']
 
@@ -213,9 +213,9 @@ UFs = collections.OrderedDict()
 UFs['conf']='UFs'
 UFs['label'] = 'Set 11'
 UFs['filename'] = 'Corrfits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
-UFs['Hlfilename'] = UF['filename']
-UFs['Hltag'] = UF['parent-Tag']
-UFs['ldaughtertag'] = UF['daughter-Tag']
+#UFs['Hlfilename'] = UF['filename']
+#UFs['Hltag'] = UF['parent-Tag']
+#UFs['ldaughtertag'] = UF['daughter-Tag']
 UFs['masses'] = ['0.194','0.45','0.6','0.8']
 UFs['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UFs['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -226,7 +226,7 @@ UFs['m_ssea'] = 0.0158
 UFs['m_lsea'] = 0.00316
 #UF['tp'] = 192
 UFs['L'] = 64
-UFs['w0/a'] = gv.gvar('3.892(12)')
+UFs['w0/a'] = UF['w0/a']#gv.gvar('3.892(12)')
 UFs['parent-Tag'] = 'Bs_G5-G5_m{1}'
 UFs['daughter-Tag'] = ['etas_G5-G5_tw0','etas_G5-G5_tw0.706','etas_G5-G5_tw1.529','etas_G5-G5_tw2.235','etas_G5-G5_tw4.705']
 
@@ -315,20 +315,20 @@ pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priorno
 
 fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
 #speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 
 
 
