@@ -53,19 +53,19 @@ Cp['daughter-Tag'] = 5*['2pt_K_coarse_tw{0}.ll']
 Fp = collections.OrderedDict()
 Fp['conf']='Fp'
 Fp['label'] = 'Set 3'
-Fp['filename'] = 'Corrfits/Fprelabelled_binned_584_confs_G5G5_freshfullwall0.43202.3153.5074.563BGBNGKGSV16192225unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.201_smTrue_Stmin0_Vtmin0.pickle'
-Fp['masses'] = ['0.432']
-Fp['Zdisc'] = [0.99938]
-Fp['twists'] = ['0','2.315','3.507','4.563']
+Fp['filename'] = 'Corrfits/Fpall_streams_500cfgs0.4330.6830.800.85632.9985.140BGBNGKGKNGSTV141720unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.158_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+Fp['masses'] = ['0.433','0.683','0.8']
+Fp['Zdisc'] = [0.99938,0.99648,0.99377]
+Fp['twists'] = ['0','0.8563','2.998','5.140']
 Fp['m_l'] = '0.0012'
 Fp['m_s'] = '0.036'
-Fp['m_c'] = '0.432'
+Fp['m_c'] = '0.433'
 Fp['m_ssea'] = 0.0363
 Fp['m_lsea'] = 0.0012
 #F['tp'] = 96
 Fp['L'] = 64
 Fp['w0/a'] = gv.gvar('1.9518(7)')
-Fp['parent-Tag'] = 'D_G5-G5_m0.432'
+Fp['parent-Tag'] = 'B_G5-G5_m{1}'
 Fp['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 ################################################
 VC = collections.OrderedDict()
@@ -244,9 +244,9 @@ thpts['VCp'] = ['S','V']
 Masses['Cp'] = [0]                                     # Choose which masses to fit
 Twists['Cp'] = [0,1,2,3] 
 thpts['Cp'] = ['S','V']
-Masses['Fp'] = [0]                                     # Choose which masses to fit
+Masses['Fp'] = [0,1,2]                                     # Choose which masses to fit
 Twists['Fp'] = [0,1,2,3]
-thpts['Fp'] = ['S','V']
+thpts['Fp'] = ['S','V','T']
 Masses['VC'] = [0]                                     # Choose which masses to fit
 Twists['VC'] = [0,1,2,3]
 thpts['VC'] = ['S','V','T']
@@ -314,21 +314,21 @@ prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cv
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Now to plot whatever we like, we only need the fit output, pfit, the fs from the data fs_data and Fit
 
-#speed_of_light(Fits)
-#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+speed_of_light(Fits)
+f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 
 
 

@@ -329,7 +329,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     i = 0
     plotfits = []
     for Fit in Fits:
-        if Fit['conf'] not in ['Fp','VCp','Cp','Fs','SFs','UFs']:
+        if Fit['conf'] not in ['VCp','Cp','Fs','SFs','UFs']:
             plotfits.append(Fit)
     for Fit in plotfits:
         j = 0
@@ -639,18 +639,20 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     yTmean,yTerr = unmake_gvar_vec(yT)
     yTupp,yTlow = make_upp_low(yT)
     plt.figure(10,figsize=figsize)
-    plt.plot(qsq, y0mean, color='b',label='$f_0(q^2)$')
+    plt.plot(qsq, y0mean, color='b',linestyle='-',label='$f_0(q^2)$')
     plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
-    plt.plot(qsq, ypmean, color='r',label='$f_+(q^2)$')
+    plt.plot(qsq, ypmean, color='r',linestyle='-',label='$f_+(q^2)$')
     plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
-    plt.plot(qsq, yTmean, color='g',label='$f_T(q^2)$')
+    plt.plot(qsq, yTmean, color='g',linestyle='-',label='$f_T(q^2)$')
     plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=alpha)
     plt.errorbar(0,0.319, yerr=0.066,fmt='r*',ms=ms,mfc='none')#,label = r'arXiv:1306.2384',lw=lw)
     plt.errorbar(qsqmaxphysBK.mean,0.861, yerr=0.048,fmt='b*',ms=ms,mfc='none',label = r'arXiv:1306.2384',lw=lw)
     plt.errorbar(qsqmaxphysBK.mean,2.63, yerr=0.13,fmt='r*',ms=ms,mfc='none',label = r'arXiv:1306.2384',lw=lw)
     plt.errorbar(0,0.270, yerr=0.095,fmt='g*',ms=ms,mfc='none')#,label = r'arXiv:1306.2384',lw=lw)
     plt.errorbar(qsqmaxphysBK.mean,2.39, yerr=0.17,fmt='g*',ms=ms,mfc='none',label = r'arXiv:1306.2384',lw=lw)
-    plt.legend(fontsize=fontsizeleg,frameon=False,loc='upper left')
+    handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -697,15 +699,15 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     fT0upp,fT0low = make_upp_low(fT0)
     fTmaxupp,fTmaxlow = make_upp_low(fTmax)
     plt.figure(11,figsize=figsize)
-    plt.plot(MHs, f00mean, color='k')
+    plt.plot(MHs, f00mean, color='k',label=r'$f_{0/+}(0)$')
     plt.fill_between(MHs,f00low,f00upp, color='k',alpha=alpha)
-    plt.plot(MHs, f0maxmean, color='b')
+    plt.plot(MHs, f0maxmean, color='b',label=r'$f_{0}(q^2_{\mathrm{max}})$')
     plt.fill_between(MHs,f0maxlow,f0maxupp, color='b',alpha=alpha)
-    plt.plot(MHs, fpmaxmean, color='r')
+    plt.plot(MHs, fpmaxmean, color='r',label=r'$f_{+}(q^2_{\mathrm{max}})$')
     plt.fill_between(MHs,fpmaxlow,fpmaxupp, color='r',alpha=alpha)
-    plt.plot(MHs, fT0mean, color='g')
+    plt.plot(MHs, fT0mean, color='g',label=r'$f_{T}(0)$')
     plt.fill_between(MHs,fT0low,fT0upp, color='g',alpha=alpha)
-    plt.plot(MHs, fTmaxmean, color='purple')
+    plt.plot(MHs, fTmaxmean, color='purple',label=r'$f_{T}(q^2_{\mathrm{max}})$')
     plt.fill_between(MHs,fTmaxlow,fTmaxupp, color='purple',alpha=alpha)
     plt.xlabel('$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -739,9 +741,9 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.errorbar(MDphys.mean,2.130, yerr=0.096,fmt='rd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,0.979, yerr=0.019,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,1.336, yerr=0.054,fmt='rs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    handles, labels = plt.gca().get_legend_handles_labels()
-    handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')#handles=handles,labels=labels)
     ##################################
     plt.axes().set_ylim([0,4.0])
     plt.tight_layout()

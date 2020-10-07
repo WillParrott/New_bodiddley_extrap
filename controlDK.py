@@ -125,7 +125,7 @@ F['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 SF = collections.OrderedDict()
 SF['conf']='SF'
 SF['label'] = 'Set 7'
-SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_415cfgs_negscalarvector0.27401.2612.1082.9463.624BGBNGKGSV202530unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.180_smTrue_Stmin2_Vtmin2.pickle' 
+SF['filename'] = 'Corrfits/SFnohimem-KBscalarvectortensor_415cfgs_negscalarvector0.27401.2612.1082.9463.624BGBNGKGSV202530unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.180_smTrue_Stmin2_Vtmin2.pickle'
 SF['masses'] = ['0.274','0.45','0.6','0.8']
 SF['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
 SF['twists'] = ['0','1.261','2.108','2.946','3.624']
@@ -146,8 +146,6 @@ UF = collections.OrderedDict()
 UF['conf']='UF'
 UF['label'] = 'Set 8'
 UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_261cfgs_neg0.19400.7061.5292.2354.705BGBNGKGSV3340unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.096_smTrue_Stmin2_Vtmin2.pickle'
-#UF['Hsfilename'] = UFs['Hsfilename']
-#UF['Hsparent-Tag'] = 'Bs_G5-G5_m{1}'
 UF['masses'] = ['0.194','0.45','0.6','0.8']
 UF['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UF['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -248,8 +246,6 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #plot_gold_non_split(Fits)
 #plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
 #plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
-#plot_Ht_H0(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#plot_poles(t_0)
 #speed_of_light(Fits)
 #f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
@@ -279,3 +275,4 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.12)
 #fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.12)
 
+#plot_Ht_H0(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)

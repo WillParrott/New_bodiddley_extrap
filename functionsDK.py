@@ -654,7 +654,12 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
-    print('Vcs at q^2=0 = {0}'.format(gv.gvar('0.7180(33)')/fp0))# from #1909.12524 p318
+    HFLAV= gv.gvar('0.7180(33)')# from #1909.12524 p318
+    Vcsq20 = HFLAV/fp0
+    terr = Vcsq20.partialsdev(fp0)
+    eerr = Vcsq20.partialsdev(HFLAV)
+    print('Vcs at q^2=0 = {0}'.format(Vcsq20))
+    print('Theory error = {0:.4f} Exp error = {1:.4f} Total = {2:.4f}'.format(terr,eerr,np.sqrt(eerr**2+terr**2)))
     return()
 
 ######################################################################################################
