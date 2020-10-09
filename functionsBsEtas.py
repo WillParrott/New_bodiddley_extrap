@@ -476,9 +476,11 @@ def make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,Del,MH_s):
     if MH_s == MBsphys.mean:
         print('delta at MBs = ',delta)
         print('alpha at MBs = ',alpha)
+        print('beta at MBs = ',1/invbeta)
     if MH_s == MDsphys.mean:
         print('delta at MDs = ',delta)
         print('alpha at MDs = ',alpha)
+        print('beta at MDs = ',1/invbeta)
     return(alpha,delta,invbeta)
 
 
