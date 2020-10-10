@@ -353,7 +353,7 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         prior['mstuned_{0}'.format(fit)] = ms0val*(Metasphys/Metas)**2
         prior['ml10ms_{0}'.format(fit)] = ml0val/(10*prior['mstuned_{0}'.format(fit)])
         mltuned = prior['mstuned_{0}'.format(fit)]/prior['slratio'] 
-        prior['MD_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units
+        #prior['MD_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units
         prior['deltas_{0}'.format(fit)] = ms0-prior['mstuned_{0}'.format(fit)]     
         prior['deltasval_{0}'.format(fit)] = ms0val-prior['mstuned_{0}'.format(fit)]
         prior['deltal_{0}'.format(fit)] = ml0-mltuned
@@ -604,7 +604,7 @@ def make_p_physical_point_DK(pfit,Fits):
         p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
             p['MH_{0}_m{1}'.format(fit,mass)] = pfit['MDphys']
-            p['MD_{0}'.format(fit)] = pfit['MDphys']
+            #p['MD_{0}'.format(fit)] = pfit['MDphys']
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]
@@ -632,7 +632,7 @@ def make_p_Mh_BK(pfit,Fits,MH):
         p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
             p['MH_{0}_m{1}'.format(fit,mass)] = MH
-            p['MD_{0}'.format(fit)] = pfit['MDphys']
+            #p['MD_{0}'.format(fit)] = pfit['MDphys']
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]

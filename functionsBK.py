@@ -654,9 +654,9 @@ def make_p_physical_point_BK(pfit,Fits):
         p['deltalval_{0}'.format(fit)] = 0
         p['ml10ms_{0}'.format(fit)] = 1/(10*pfit['slratio'])
         p['deltaFV_{0}'.format(fit)] = 0
+        p['MD_{0}'.format(fit)] = pfit['MDphys']
         for mass in Fit['masses']:
             p['MH_{0}_m{1}'.format(fit,mass)] = pfit['MBphys']
-            p['MD_{0}'.format(fit)] = pfit['MDphys']
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]
@@ -678,10 +678,9 @@ def make_p_Mh_BK(pfit,Fits,MH):
         p['deltalval_{0}'.format(fit)] = 0
         p['ml10ms_{0}'.format(fit)] = 1/(10*pfit['slratio'])
         p['deltaFV_{0}'.format(fit)] = 0
+        p['MD_{0}'.format(fit)] = pfit['MDphys']
         for mass in Fit['masses']:
-            #p['MHs_{0}_m{1}'.format(fit,mass)] = MBsphys
             p['MH_{0}_m{1}'.format(fit,mass)] = MH
-            p['MD_{0}'.format(fit)] = pfit['MDphys']
                 
     for key in pfit:
         if key not in p:
@@ -727,6 +726,42 @@ def fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('f_T(max) = {0}  error: {1:.2%}'.format(fTmax,fTmax.sdev/fTmax.mean))
     return()
 
+##############################################################################################################
+
+
+def make_beta_delta_BK(Fits,t_0,Nijk,Npow,Nm,addrho,p,fpf0same,MH,const2):
+    if const2 == True:
+        print('ERROR Alpha, beta delat not compatable with const2')
+        return()
+    t0 = make_t_0(t_0,MH,p['MKphys'],MH,p['MKphys'])
+    t_plus = make_t_plus(MH,p['MKphys'])
+    logs  = make_logs(p,Fits[0]['masses'][0],Fits[0])
+    MHs0 = MH+Del
+    MHsstar = make_MHsstar(MH,p)
+    zMHsstar = make_z((MHsstar**2).mean,t_0,MH,p['MKphys'])
+    fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+    alpharat = 0
+    zprime0 = -1/(2*(t_plus+gv.sqrt(t_plus*(t_plus-t0))))
+    z0 = make_z(0,t_0,MH,p['MKphys'])
+    f0prime0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)/(MHs0**2)
+    fpprime0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)/(MHsstar**2)
+    for n in range(Npow):
+        alpharat += 1/fp0 * make_an_BK(n,Nijk,Nm,addrho,p,'p',Fits[0],Fits[0]['masses'][0],0,fpf0same)* ( zMHsstar**(n) - (n/Npow) * (-1)**(n-Npow) * zMHsstar**(Npow))
+        if n !=0:
+            f0prime0 += logs * make_an_BK(n,Nijk,Nm,addrho,p,'0',Fits[0],Fits[0]['masses'][0],0,fpf0same) * n * zprime0 * z0**(n-1)
+            fpprime0 += logs * make_an_BK(n,Nijk,Nm,addrho,p,'p',Fits[0],Fits[0]['masses'][0],0,fpf0same) * ( n * zprime0 * z0**(n-1) - n * (-1)**(n-Npow) * zprime0 * z0**(Npow-1))
+    alpha = 1-1/alpharat
+    delta = 1 - ((MH**2-p['MKphys']**2)/fp0) * (fpprime0-f0prime0)
+    invbeta = ((MH**2-p['MKphys']**2)/fp0) * f0prime0
+    if MH == MBphys.mean:
+        print('delta at MB = ',delta)
+        print('alpha at MB = ',alpha)
+        print('beta at MB = ',1/invbeta)
+    if MH == MDphys.mean:
+        print('delta at MD = ',delta)
+        print('alpha at MD = ',alpha)
+        print('beta at MD = ',1/invbeta)
+    return(alpha,delta,invbeta)
 
 
 ##############################################################################################################
@@ -1040,36 +1075,6 @@ def ratio_fp_B_D_BsEtas(pfit,Fits,Nijk,Npow,addrho,fpf0same,t_0):
 
 
 ######################################################################################################
-
-def make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,MH_s):
-    #an = make_an_BsEtas(n,Nijk,addrho,p,tag,Fit,alat,mass,amh,f0fpsame)
-    z0 = make_z(0,t_0,MH_s,Metasphys).mean
-    zHsstar = make_z(((MH_s+x/MH_s)**2).mean,t_0,MH_s,Metasphys).mean
-    Fit = Fits[0]
-    mass = Fit['masses'][0]
-    fit = Fit['conf']
-    fp0 = make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,0,0,z0,mass,fpf0same,0)
-    fpHsstar = make_an_BsEtas(0,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same) 
-    f00 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,0,0,z0,mass,fpf0same,0)
-    t_plus = (MH_s + Metasphys)**2
-    t_nought = make_t_0(t_0,MH_s,MKphys)
-    zprime = (-1) / (2* (t_plus + gv.sqrt( t_plus * (t_plus - t_nought) ) ) )
-    f0prime = (f00/p['MHs0_{0}_m{1}'.format(fit,mass)]**2)
-    fpprime = (fp0/p['MHsstar_{0}_m{1}'.format(fit,mass)]**2)
-    for n in range(1,Npow):
-        f0prime += zprime * n * make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same) * z0**(n-1)
-        fpprime += zprime * n * make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same) * ( z0**(n-1) - (-1)**(n-Npow) * z0**(Npow-1))
-        fpHsstar += make_an_BsEtas(n,Nijk,addrho,p,'p',Fit,0,mass,0,fpf0same) * ( zHsstar**(n) - (n/Npow) * (-1)**(n-Npow) * zHsstar**(Npow))
-    delta = 1 - ((MH_s**2-Metasphys**2)/fp0) * (fpprime-f0prime)
-    invbeta = ((MH_s**2-Metasphys**2)/fp0) * f0prime
-    alpha = 1 - (fp0/fpHsstar)
-    if MH_s == MBsphys.mean:
-        print('delta at MBs = ',delta)
-        print('alpha at MBs = ',alpha)
-    if MH_s == MDsphys.mean:
-        print('delta at MDs = ',delta)
-        print('alpha at MDs = ',alpha)
-    return(alpha,delta,invbeta)
 
 
 #####################################################################################################

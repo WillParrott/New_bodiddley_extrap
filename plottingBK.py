@@ -645,6 +645,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
     plt.plot(qsq, yTmean, color='g',linestyle='-',label='$f_T(q^2)$')
     plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=alpha)
+    plt.plot
     plt.errorbar(0,0.319, yerr=0.066,fmt='r*',ms=ms,mfc='none')#,label = r'arXiv:1306.2384',lw=lw)
     plt.errorbar(qsqmaxphysBK.mean,0.861, yerr=0.048,fmt='b*',ms=ms,mfc='none',label = r'arXiv:1306.2384',lw=lw)
     plt.errorbar(qsqmaxphysBK.mean,2.63, yerr=0.13,fmt='r*',ms=ms,mfc='none',label = r'arXiv:1306.2384',lw=lw)
@@ -668,7 +669,53 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.savefig('Plots/f0fpfTinqsq.pdf')
     plt.close()
     return()
+################################################################################################
 
+def Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    E = []
+    e19 = []
+    e20 = []
+    p = make_p_physical_point_BK(pfit,Fits)
+    for q2 in np.linspace(0.01,qsqmaxphysBK.mean,nopts): #q2 now in GeV
+        Ek = -(q2-p['MBphys']**2-p['MKphys']**2)/(2*p['MBphys'])
+        E.append(Ek.mean)
+        fT = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)
+        fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)
+        e19.append((fp-f0)/(q2*fT/p['MBphys']**2))
+        e20.append(((1-Ek/p['MBphys'])*fp-0.5*f0)/(q2*fT/p['MBphys']**2))
+    expectation = p['MBphys']/(p['MBphys']+p['MKphys'])
+    e19mean,e19err = unmake_gvar_vec(e19)
+    e19upp,e19low = make_upp_low(e19)
+    e20mean,e20err = unmake_gvar_vec(e20)
+    e20upp,e20low = make_upp_low(e20)
+    plt.figure(10,figsize=figsize)
+    plt.plot(E, e19mean, color='b',linestyle='-',label='$eq19$')
+    plt.fill_between(E,e19low,e19upp, color='b',alpha=alpha)
+    plt.plot(E, e20mean, color='r',linestyle='-',label='$eq20$')
+    plt.fill_between(E,e20low,e20upp, color='r',alpha=alpha)
+    plt.plot([0,3],[expectation.mean,expectation.mean],label='expectation',color='k')
+    #print('expectation',expectation)
+    handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper right')
+    plt.xlabel('$E_K[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
+    #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
+    #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
+    plt.ylim([0.3,1.3])
+    plt.xlim([E[nopts-1],E[0]])
+    plt.tight_layout()
+    plt.savefig('Plots/Hill1920.pdf')
+    plt.close()
+    return()
 
 ################################################################################################
 
@@ -748,6 +795,69 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().set_ylim([0,4.0])
     plt.tight_layout()
     plt.savefig('Plots/f0fpfTinmh.pdf')
+    plt.close()
+    return()
+
+#####################################################################################################
+
+def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    MHs = []
+    delta = []
+    invbeta = []
+    alp =[]
+    for MH in np.linspace(MDphys.mean,MBphys.mean,nopts): #q2 now in GeV
+        p = make_p_Mh_BK(pfit,Fits,MH)
+        MHs.append(MH)
+        al,d,invb = make_beta_delta_BK(Fits,t_0,Nijk,Npow,Nm,addrho,p,fpf0same,MH,const2)
+        delta.append(d) 
+        invbeta.append(invb)
+        alp.append(al)
+    alphamean,alphaerr = unmake_gvar_vec(alp)
+    deltamean,deltaerr = unmake_gvar_vec(delta)
+    invbetamean,invbetaerr = unmake_gvar_vec(invbeta)
+    alphaupp,alphalow = make_upp_low(alp)
+    deltaupp,deltalow = make_upp_low(delta)
+    invbetaupp,invbetalow = make_upp_low(invbeta)
+    plt.figure(12,figsize=figsize)
+    plt.plot(MHs, alphamean, color='k')
+    plt.fill_between(MHs,alphalow,alphaupp, color='k',alpha=alpha)
+    plt.plot(MHs, invbetamean, color='b')
+    plt.fill_between(MHs,invbetalow,invbetaupp, color='b',alpha=alpha)
+    plt.plot(MHs, deltamean, color='r')
+    plt.fill_between(MHs,deltalow, deltaupp, color='r',alpha=alpha)
+    plt.xlabel('$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.plot([MDphys.mean,MDphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(MDphys.mean+0.05,-0.05,'$M_{D}$',fontsize=fontsizelab)
+    plt.plot([MBphys.mean,MBphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(MBphys.mean-0.05,-0.05,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='right')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.text(3.5,0.1,r'$\delta$',fontsize=fontsizelab,color='r')
+    plt.text(2.7,0.6,r'$\beta^{-1}$',fontsize=fontsizelab,color='b')
+    plt.text(4.3,0.5,r'$\alpha$',fontsize=fontsizelab,color='k')
+    plt.axes().set_ylim([-0.1,1.0])
+    ############ add data ############
+    # data from hep-lat/0409116
+    plt.errorbar(MBphys.mean,0.63,yerr=0.05,fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{B\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean,0.847, yerr=0.036,fmt='b*',ms=ms,mfc='none',label = r'$1/\beta^{B\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.44,yerr=0.04,fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{D\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.50,yerr=0.04,fmt='ko',ms=ms,mfc='none',label = r'$\alpha^{D\to K} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.709, yerr=0.030,fmt='b*',ms=ms,mfc='none',label = r'$1/\beta^{D\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(MDphys.mean,0.763, yerr=0.041,fmt='bo',ms=ms,mfc='none',label = r'$1/\beta^{D\to K} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+
+    
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper center',ncol=2)
+    ##################################
+    plt.tight_layout()
+    plt.savefig('Plots/betadeltainmh.pdf')
     plt.close()
     return()
 
@@ -1213,64 +1323,7 @@ def dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 
 
-#####################################################################################################
 
-def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
-    MHs = []
-    delta = []
-    invbeta = []
-    alp =[]
-    for Mh in np.linspace(MDsphys.mean,MBsphys.mean,nopts): #q2 now in GeV
-        p = make_p_Mh_BsEtas(pfit,Fits,Del,Mh)
-        MHs.append(Mh)
-        al,d,invb = make_beta_delta_BsEtas(Fits,t_0,Nijk,Npow,addrho,p,fpf0same,Del,Mh)
-        delta.append(d) 
-        invbeta.append(invb)
-        alp.append(al)
-    alphamean,alphaerr = unmake_gvar_vec(alp)
-    deltamean,deltaerr = unmake_gvar_vec(delta)
-    invbetamean,invbetaerr = unmake_gvar_vec(invbeta)
-    alphaupp,alphalow = make_upp_low(alp)
-    deltaupp,deltalow = make_upp_low(delta)
-    invbetaupp,invbetalow = make_upp_low(invbeta)
-    plt.figure(12,figsize=figsize)
-    plt.plot(MHs, alphamean, color='k')
-    plt.fill_between(MHs,alphalow,alphaupp, color='k',alpha=alpha)
-    plt.plot(MHs, invbetamean, color='b')
-    plt.fill_between(MHs,invbetalow,invbetaupp, color='b',alpha=alpha)
-    plt.plot(MHs, deltamean, color='r')
-    plt.fill_between(MHs,deltalow, deltaupp, color='r',alpha=alpha)
-    plt.xlabel('$M_{H_s}[\mathrm{GeV}]$',fontsize=fontsizelab)
-    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
-    plt.axes().tick_params(which='major',length=major)
-    plt.axes().tick_params(which='minor',length=minor)
-    plt.axes().yaxis.set_ticks_position('both')
-    plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
-    plt.text(MDsphys.mean+0.05,-0.45,'$M_{D_s}$',fontsize=fontsizelab)
-    plt.plot([MBsphys.mean,MBsphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
-    plt.text(MBsphys.mean-0.05,-0.45,'$M_{B_s}$',fontsize=fontsizelab,horizontalalignment='right')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
-    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.text(3.5,-0.1,r'$\delta$',fontsize=fontsizelab)
-    plt.text(2.7,0.7,r'$\beta^{-1}$',fontsize=fontsizelab)
-    plt.text(4.3,0.4,r'$\alpha$',fontsize=fontsizelab)
-    plt.axes().set_ylim([-0.5,1.32])
-    ############ add data ############
-    plt.errorbar(MBphys.mean+0.01,0.80,yerr=[[0.2],[0.5]],fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{B\to\pi}(\beta^{-1}=0.833)$',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBphys.mean-0.01,0.60, yerr=[[0.7],[0.3]],fmt='r*',ms=ms,mfc='none',label = r'$\delta^{B\to\pi}(\beta^{-1}=0.833)$',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean+0.01,1+1/1.6-1.1,yerr=[[0.2],[0.6]],fmt='r^',ms=ms,mfc='none',label = r'$\delta^{D\to\pi}(\beta^{-1}=0.625)$',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean-0.01,1+1/1.8-0.91, yerr=[[0.05],[0.12]],fmt='ro',ms=ms,mfc='none',label = r'$\delta^{D\to{}K}(\beta^{-1}=0.556)$',lw=lw)#,capsize=capsize)
-    
-    handles, labels = plt.gca().get_legend_handles_labels()
-    handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper center',ncol=2)
-    ##################################
-    plt.tight_layout()
-    plt.savefig('Plots/betadeltainmh.pdf')
-    plt.close()
-    return()
 
 #####################################################################################################
 
