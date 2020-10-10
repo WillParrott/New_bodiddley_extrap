@@ -673,7 +673,7 @@ def Hill_ratios_in_E(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     Es = []
     rat0 = []
     ratp = []
-    Emax = (MDsphys**2 + Metasphys**2)/MDsphys
+    Emax = (MDsphys**2 + Metasphys**2)/(2*MDsphys)
     Emin = Metasphys
     thmean = gv.sqrt(MBsphys/MDsphys)
     therr = thmean*LQCD**2*(1/MDsphys**2 - 1/MBsphys**2)
@@ -772,7 +772,7 @@ def Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
 ####################################################################################################
 
 def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
-    Emax = (MDsphys**2 + Metasphys**2)/MDsphys
+    Emax = (MDsphys**2 + Metasphys**2)/(2*MDsphys)
     Emin = Metasphys
     E = Emin
     M_h = []
@@ -828,7 +828,7 @@ def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
 #####################################################################################################
 
 def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
-    Emax = (MDsphys**2 + Metasphys**2)/MDsphys
+    Emax = (MDsphys**2 + Metasphys**2)/(2*MDsphys)
     Emin = Metasphys
     E = Emax
     M_h = []
@@ -850,7 +850,7 @@ def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
         ratp.append(fpB/fph)
         rat0.append(f0h/f0B)
         thmean = gv.sqrt(MBsphys/Mh)
-        therr = thmean * LQCD**2 * abs((1/MBsphys**2).mean -1/Mh**2)
+        therr = thmean * LQCD * abs((1/MBsphys).mean -1/Mh) #elected to unsquare
         theory.append(gv.gvar('{0:.7f}({1:.7f})'.format(thmean.mean,therr.mean)))
     rat0mean,rat0err = unmake_gvar_vec(rat0)
     ratpmean,ratperr = unmake_gvar_vec(ratp)
@@ -885,6 +885,74 @@ def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.savefig('Plots/Hillratininvmh_E{0}.pdf'.format(E))
     plt.close()
     return()
+#####################################################################################################
+
+def both_Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
+    Emax = (MDsphys**2 + Metasphys**2)/(2*MDsphys)
+    Emin = Metasphys
+    M_h = []
+    rat0min = []
+    rat0max = []
+    theory = []
+    for Mh in np.linspace(MDsphys.mean+0.001,50,nopts*2): #q2 now in GeV
+        E = Emin
+        ph = make_p_Mh_BsEtas(pfit,Fits,Del,Mh)
+        pB = make_p_physical_point_BsEtas(pfit,Fits,Del)
+        qsqh = Mh**2 + Metasphys**2 - 2*Mh*E
+        qsqB =  MBsphys**2 + Metasphys**2 - 2*MBsphys*E
+        zh = make_z(qsqh,t_0,Mh,Metasphys)
+        zB = make_z(qsqB,t_0,MBsphys,Metasphys)
+        f0minh = make_f0_BsEtas(Nijk,Npow,addrho,ph,Fits[0],0,qsqh,zh,Fits[0]['masses'][0],fpf0same,0)
+        f0minB = make_f0_BsEtas(Nijk,Npow,addrho,pB,Fits[0],0,qsqB,zB,Fits[0]['masses'][0],fpf0same,0)
+        thmean = gv.sqrt(MBsphys/Mh)
+        therr = thmean * LQCD * abs((1/MBsphys).mean -1/Mh)
+        rat0min.append(f0minh/f0minB)
+        E = Emax
+        qsqh = Mh**2 + Metasphys**2 - 2*Mh*E
+        qsqB =  MBsphys**2 + Metasphys**2 - 2*MBsphys*E
+        zh = make_z(qsqh,t_0,Mh,Metasphys)
+        zB = make_z(qsqB,t_0,MBsphys,Metasphys)
+        f0maxh = make_f0_BsEtas(Nijk,Npow,addrho,ph,Fits[0],0,qsqh,zh,Fits[0]['masses'][0],fpf0same,0)
+        f0maxB = make_f0_BsEtas(Nijk,Npow,addrho,pB,Fits[0],0,qsqB,zB,Fits[0]['masses'][0],fpf0same,0)
+        rat0max.append(f0maxh/f0maxB)
+        #print(f0maxh,f0maxB)
+        M_h.append(1/Mh)
+        theory.append(gv.gvar('{0:.7f}({1:.7f})'.format(thmean.mean,therr.mean)))
+    #print(rat0max)
+    rat0minmean,rat0minerr = unmake_gvar_vec(rat0min)
+    rat0maxmean,rat0maxerr = unmake_gvar_vec(rat0max)
+    theorymean,theoryerr = unmake_gvar_vec(theory)
+    rat0minupp,rat0minlow = make_upp_low(rat0min)
+    rat0maxupp,rat0maxlow = make_upp_low(rat0max)
+    theoryupp,theorylow = make_upp_low(theory)
+    plt.figure(15,figsize=figsize)
+    plt.plot(M_h, rat0minmean, color='b',label=r'$\frac{f_0^{H_s}(E_{\mathrm{min}})}{f_0^{B_s}(E_{\mathrm{min}})}$')
+    plt.fill_between(M_h,rat0minlow,rat0minupp, color='b',alpha=alpha)
+    plt.plot(M_h, rat0maxmean, color='r',label=r'$\frac{f_0^{H_s}(E_{\mathrm{max}})}{f_0^{B_s}(E_{\mathrm{max}})}$')
+    plt.fill_between(M_h,rat0maxlow, rat0maxupp, color='r',alpha=alpha)
+    plt.plot(M_h,theorymean,color='k',label =r'$\sqrt{\frac{M_{B_s}}{M_{H_s}}}$')
+    plt.fill_between(M_h,theorylow,theoryupp,color='k',alpha=alpha)
+    plt.xlabel(r'$M_{H_s}^{-1}[\mathrm{GeV}^{-1}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.legend(fontsize=fontsizeleg,frameon=False,loc='lower right')
+    #plt.plot([MDsphys.mean,MDsphys.mean],[-10,10],'k--',lw=1)
+    #plt.text(MDsphys.mean+0.05,-0.45,'$M_{D_s}$',fontsize=fontsizelab)
+    plt.plot([1/MBsphys.mean,1/MBsphys.mean],[-10,10],'k--',lw=1)
+    plt.text(1/MBsphys.mean,0.1,r'$M_{B_s}^{-1}$',fontsize=fontsizelab,horizontalalignment='left')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.02))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().set_xlim([0.02,1/MDsphys.mean])
+    plt.axes().set_ylim([0,2.0])
+    plt.tight_layout()
+    plt.savefig('Plots/BothHillratininvmh.pdf')
+    plt.close()
+    return()
+
 #####################################################################################################
 
 def Hill_ratio_log(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
