@@ -315,7 +315,6 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         Metas = globals()['Metas_{0}'.format(fit)]/Fit['a'] # in GeV
         prior['Metac_{0}'.format(fit)] = globals()['Metac{0}'.format(fit)]/Fit['a'] #in GeV
         prior['deltaFV_{0}'.format(fit)] = globals()['deltaFV{0}'.format(fit)]
-        prior['Metacphys'] = Metacphys
         prior['mstuned_{0}'.format(fit)] = ms0val*(Metasphys/Metas)**2
         prior['ml10ms_{0}'.format(fit)] = ml0val/(10*prior['mstuned_{0}'.format(fit)])
         prior['mltuned_{0}'.format(fit)] = prior['mstuned_{0}'.format(fit)]/prior['slratio'] 
