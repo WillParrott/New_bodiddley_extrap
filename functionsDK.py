@@ -50,7 +50,7 @@ MetacC = gv.gvar('1.876536(48)') #2005.01845
 MetacVC = gv.gvar('2.331899(72)') # correct mass 2005.01845
 MetacVCp = gv.gvar('2.283452(45)')# from Bp's data 
 MetacCp = gv.gvar('1.833947(14)')# from fitting Judd's data '1.833950(18)' 2005.01845   
-MetacFp = gv.gvar('1.327173(30)')# adjusted from '1.32929(3)' 1408.4169 for am_h =0.433 not 0.432 not correct
+MetacFp = gv.gvar('1.32929(3)')# adjusted from '1.32929(3)' 1408.4169 for am_h =0.433 can adjust to 1.327173(30) for 0.432
 MetacF = gv.gvar('1.364919(40)')  #adjusted from '1.367014(40)'for 0.45 not 0.449 not correct
 MetacSF = gv.gvar('0.896675(24)')       #2005.01845 
 MetacUF = gv.gvar('0.666818(39)')       #2005.01845
@@ -667,7 +667,7 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 def integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     p = make_p_physical_point_DK(pfit,Fits)
     def integrand(qsq):
-        p3 = ((qsq-MKphys**2-p['MDphys']**2)**2/(4*p['MDphys']**2)-MKphys**2)**(3/2)
+        p3 = ((qsq-p['MKphys']**2-p['MDphys']**2)**2/(4*p['MDphys']**2)-p['MKphys']**2)**(3/2)
         fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
         integrand = p3 * fp**2
         return(integrand)
@@ -745,10 +745,12 @@ def comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     bins = [0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,qsqmaxphysDK.mean]
     for i in range(len(bins)-1):
         p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2))
-    partials = gv.gvar(['17.74(37)','16.26(35)','14.42(30)','12.39(27)','9.92(23)','7.72(19)','5.32(16)','3.24(11)','1.290(80)','0.0619(61)']) ## D^0 to K^-
+    partials = [18.15, 16.63, 14.75, 12.67, 10.14, 7.90, 5.44, 3.32, 1.320, 0.0633] ## D^0 to K^-
     
-    corr_mat = gv.load('covarience_matricies/corr_BaBar.pickle')
-    partials  = gv.correlate(partials,corr_mat)
+    cov_mat = gv.load('covarience_matricies/BaBar.pickle')
+    #print(cov_mat)
+    partials  = gv.gvar(partials,cov_mat)
+    #print(partials)
     Vcss2 = []
     terr = []
     eerr = []

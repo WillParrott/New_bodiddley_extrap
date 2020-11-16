@@ -933,7 +933,44 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.tight_layout()
     plt.savefig('DKPlots/BaBarVcsbybin.pdf')
     plt.close()
+    ############################################################################################
+    ##compare V_cs
+    plt.figure(figsize=figsize)
+    p = make_p_physical_point_DK(pfit,Fits)
+    fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    HFLAV= gv.gvar('0.7180(33)')# from #1909.12524 p318
+    Vcsq20 = HFLAV/fp0
+    av = (d['average'])
+    ETMC1 = gv.gvar('0.945(38)')#1706.03017
+    ETMC2 = gv.gvar('0.970(33)')#1706.03657
+    HPQCD1 = gv.gvar('0.961(26)')#1008.4562
+    HPQCD2 = gv.gvar('0.963(15)')#1305.1462
+    plt.errorbar(av.mean, 6, xerr=av.sdev,ms=ms,fmt='kd' ,mfc='none',capsize=capsize,lw=lw)
+    plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[7,7], color='k',alpha=alpha/2)
+    plt.errorbar(Vcsq20.mean, 5, xerr=Vcsq20.sdev,ms=ms,fmt='rd' ,mfc='none',capsize=capsize,lw=lw)
+    plt.errorbar(ETMC2.mean, 4, xerr=ETMC2.sdev,ms=ms,fmt='k*' ,mfc='none',capsize=capsize,lw=lw)
+    plt.errorbar(ETMC1.mean, 3, xerr=ETMC1.sdev,ms=ms,fmt='r*' ,mfc='none',capsize=capsize,lw=lw)
+    plt.plot([0.8,1.1],[2.5,2.5],color='k')
+    plt.errorbar(HPQCD2.mean, 2, xerr=HPQCD2.sdev,ms=ms,fmt='ks' ,mfc='none',capsize=capsize,lw=lw)
+    plt.errorbar(HPQCD1.mean, 1, xerr=HPQCD1.sdev,ms=ms,fmt='ro' ,mfc='none',capsize=capsize,lw=lw)
+    plt.text(0.91,1.5,'$N_f=2+1$',fontsize=fontsizelab)
+    plt.text(0.91,4.5,'$N_f=2+1+1$',fontsize=fontsizelab)
+    plt.xlabel('$|V_{cs}|$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('none')
+    plt.xlim([0.90,1.01])
+    plt.ylim([0.5,6.5])
+    plt.gca().set_yticks([6,5,4,3,2,1])
+    plt.gca().set_yticklabels(['This work','This work','arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.tight_layout()
+    plt.savefig('DKPlots/Vcscomp.pdf')
+    plt.close()
     return()
+
 
 ####################################################################################################
 
@@ -1023,15 +1060,14 @@ def plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornois
 def error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,const2):
     qsqs = np.linspace(0,qsqmaxphysDK.mean,nopts)
     f0,fp = output_error_DK(pfit,prior,Fits,Nijk,Npow,Nm,f,qsqs,t_0,addrho,fpf0same,const2)
-
     plt.figure(18,figsize=figsize)
     ax1 = plt.subplot(211)
     ax1b = ax1.twinx()
     ax1.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
-    ax1.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
-    ax1.plot(qsqs,f0[3],color='b',ls='-',lw=2,label='Statistics')
+    ax1.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='+ q mistunings')
+    ax1.plot(qsqs,f0[3],color='b',ls='-',lw=2,label='+ Statistics')
     #ax1.plot(qsqs,f0[4],color='b',ls='-.',lw=2,label='HQET')
-    ax1.plot(qsqs,f0[4],color='k',ls='-',lw=4,label='Discretisation')
+    ax1.plot(qsqs,f0[4],color='k',ls='-',lw=4,label='+ Discretisation')
     ax1.set_ylabel('$(f_0(q^2)~\% \mathrm{err})^2 $ ',fontsize=fontsizelab)
     ax1.tick_params(width=2,labelsize=fontsizelab)
     ax1.tick_params(which='major',length=major)
@@ -1044,10 +1080,10 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,const2):
     ax1.set_xlim([0,qsqmaxphysDK.mean])
     ####################################### right hand y axis ###
     ax1b.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
-    ax1b.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='q mistunings')
-    ax1b.plot(qsqs,f0[3],color='b',ls='-',lw=2,label='Statistics')
+    ax1b.plot(qsqs,f0[2],color='purple',ls=':',lw=2,label='+ q mistunings')
+    ax1b.plot(qsqs,f0[3],color='b',ls='-',lw=2,label='+ Statistics')
     #ax1b.plot(qsqs,f0[4],color='b',ls='-.',lw=2,label='HQET')
-    ax1b.plot(qsqs,f0[4],color='k',ls='-',lw=4,label='Discretisation')
+    ax1b.plot(qsqs,f0[4],color='k',ls='-',lw=4,label='+ Discretisation')
     ax1b.set_ylabel('$f_0(q^2)~\% \mathrm{err}$ ',fontsize=fontsizelab)
     ax1b.tick_params(width=2,labelsize=fontsizelab)
     ax1b.tick_params(which='major',length=major)
@@ -1133,7 +1169,8 @@ def table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho):
     mass = Fit['masses'][0]
     fit = Fit['conf']
     p = make_p_physical_point_DK(pfit,Fits)
-    atab = open('Tables/DKtablesofas.txt','w')
+    logs = make_logs(p,Fit)
+    atab = open('DKTables/tablesofas.txt','w')
     for n in range(Npow):
         if n == 0:
             atab.write('      {0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same)))
@@ -1145,30 +1182,83 @@ def table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho):
     MDs0 = p['MDs0phys']
     for n in range(Npow):           
         atab.write('{0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,0,fpf0same)))
-    atab.write('{0}&{1}\\\\ [1ex]\n'.format(MDs0,MDsstar))
+    atab.write('{0}&{1}&{2}\\\\ [1ex]\n'.format(MDs0,MDsstar,logs))
     atab.write('      \hline \n')
     list0.extend(listp)
     list0.append(MDs0)
     list0.append(MDsstar)
+    list0.append(logs)
     covar = gv.evalcorr(list0)
-    for i in range(2*Npow+2):
+    for i in range(2*Npow+3):
             atab.write('\n      ')
             for k in range(i):
                 atab.write('&')
-            for j in range(i,2*Npow+2):
+            for j in range(i,2*Npow+3):
                 #print(covar[i][j])
                 atab.write('{0:.5f}'.format(covar[i][j]))
-                if j != 2*Npow+1:
+                if j != 2*Npow+2:
                     atab.write('&')
                 else:
                     atab.write('\\\\ [0.5ex]')
     atab.close()
     return()
 
-
-
-
 ################################################################################################################
+def results_tables(fs_data,Fit):
+    table = open('DKTables/{0}table.txt'.format(Fit['conf']),'w')
+    for mass in Fit['masses']:
+        table.write('      \hline \n')
+        table.write('      &{0}'.format(mass))
+        for tw,twist in enumerate(Fit['twists']):
+            if tw == 0:
+                table.write('&{1}&{0}&{2}&{3}&{4}'.format(fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['M_parent_m{0}'.format(mass)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)]))
+            else:
+                table.write('      &&&{0}&{1}&{2}&{3}'.format(fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)]))
+            if fs_data['fp_m{0}_tw{1}'.format(mass,twist)] != None:
+                table.write('&{0}&{1}\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)],fs_data['fp_m{0}_tw{1}'.format(mass,twist)]))
+            else:
+                table.write('&{0}&\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)]))
+
+        
+    table.close()
+    return()
+###################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1360,6 +1450,11 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
 ################################################################################################
 #Not changed below here
 ################################################################################################
+
+
+
+
+
 
 ###############################################################################################
 
@@ -1923,22 +2018,4 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
 
 ##################################################################################################
 
-def results_tables(fs_data,Fit):
-    table = open('Tables/{0}table.txt'.format(Fit['conf']),'w')
-    for mass in Fit['masses']:
-        table.write('      \hline \n')
-        table.write('      &{0}'.format(mass))
-        for tw,twist in enumerate(Fit['twists']):
-            if tw == 0:
-                table.write('&{1}&{0}&{2}&{3}&{4}'.format(fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['M_parent_m{0}'.format(mass)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)]))
-            else:
-                table.write('      &&&{0}&{1}&{2}&{3}'.format(fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)]))
-            if fs_data['fp_m{0}_tw{1}'.format(mass,twist)] != None:
-                table.write('&{0}&{1}\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)],fs_data['fp_m{0}_tw{1}'.format(mass,twist)]))
-            else:
-                table.write('&{0}&\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)]))
 
-        
-    table.close()
-    return()
-###################################################################################################

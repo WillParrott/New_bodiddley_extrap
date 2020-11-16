@@ -53,25 +53,29 @@ Cp['daughter-Tag'] = 5*['2pt_K_coarse_tw{0}.ll']
 Fp = collections.OrderedDict()
 Fp['conf']='Fp'
 Fp['label'] = 'Set 3'
-Fp['filename'] = 'Corrfits/Fprelabelled_binned_584_confs_G5G5_freshfullwall0.43202.3153.5074.563BGBNGKGSV16192225unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.202_smTrue_Stmin0_Vtmin0.pickle'
-Fp['masses'] = ['0.432']
+Fp['filename'] = 'Corrfits/Fpall_streams_620cfgs0.43300.85632.9985.140BGBNGKGSV141720unchained_Nexp6_sfac0.5_pfac1.0_Q1.00_chi0.401_smTrue_Stmin2_Vtmin2.pickle'
+#Fp['filename'] = 'Corrfits/Fpall_streams_620cfgs0.43300.85632.9985.140BGBNGKGSV141720unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.350_smTrue_Stmin2_Vtmin2.pickle'
+Fp['masses'] = ['0.433']
 Fp['Zdisc'] = [0.99938]
-Fp['twists'] = ['0','2.315','3.507','4.563']
+#Fp['twists'] = ['0','2.315','3.507','4.563']
+Fp['twists'] = ['0','0.8563','2.998','5.140']
 Fp['m_l'] = '0.0012'
 Fp['m_s'] = '0.036'
-Fp['m_c'] = '0.432'
+Fp['m_c'] = '0.433'
 Fp['m_ssea'] = 0.0363
 Fp['m_lsea'] = 0.0012
 #F['tp'] = 96
 Fp['L'] = 64
 Fp['w0/a'] = gv.gvar('1.9518(7)')
-Fp['parent-Tag'] = 'D_G5-G5_m0.432'
-Fp['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
+#Fp['parent-Tag'] = 'D_G5-G5_m0.432'
+#Fp['daughter-Tag'] = 4*['K_G5-G5_tw{0}']
+Fp['parent-Tag'] = 'B_G5-G5_m{1}'
+Fp['daughter-Tag'] = 4*['K_G5-G5_tw{0}']
 #######################################VC PARAMETERS ####################
 VC = collections.OrderedDict()
 VC['conf']='VC'
 VC['label'] = 'Set 4'
-VC['filename'] = 'Corrfits/VCtest-KDscalarvectortensor_1020cfgs_neg0.88800.36651.0971.828BGBNGKGKNGSTV9121518unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.399_smTrue_Stmin1_Ttmin1_Vtmin1.pickle'
+VC['filename'] = 'Corrfits/VCtest-KDscalarvectortensor_1020cfgs_neg0.88800.36651.0971.828BGBNGKGSV9121518unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.544_smTrue_Stmin1_Vtmin1.pickle'
 VC['masses'] = ['0.888']# note m eta_c for slightly wrong ensemble 0.863 = 
 VC['Zdisc'] = [0.99105]  
 VC['twists'] = ['0','0.3665','1.097','1.828']
@@ -145,7 +149,8 @@ SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 UF = collections.OrderedDict()
 UF['conf']='UF'
 UF['label'] = 'Set 8'
-UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_261cfgs_neg0.19400.7061.5292.2354.705BGBNGKGSV3340unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.096_smTrue_Stmin2_Vtmin2.pickle'
+#UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_375cfgs_neg0.19400.7061.5292.2354.705BGBNGKGSV243340unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.135_smTrue_Stmin1_Vtmin1.pickle'
+UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_375cfgs_neg0.19400.7061.5292.2354.705BGBNGKGSV243340unchained_Nexp6_sfac0.01_pfac1.0_Q1.00_chi0.478_smTrue_Stmin1_Vtmin1.pickle'
 UF['masses'] = ['0.194','0.45','0.6','0.8']
 UF['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UF['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -245,18 +250,18 @@ pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priorno
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #plot_gold_non_split(Fits)
 #plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
-#plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #speed_of_light(Fits)
-#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 
 #error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
-#table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
-
+table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
+##################################################################################
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same)
 #f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same)

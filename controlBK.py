@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore")
 VCp = collections.OrderedDict()
 VCp['conf']='VCp'
 VCp['label'] = 'Set 1'
-VCp['filename'] = 'Corrfits/VCprelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.833_smTrue_Stmin0_Vtmin0.pickle'
+VCp['filename'] = 'Corrfits/VCprelabelled_relabelled_all_VCp_998cfg0.860502.0133.053.969BGBNGKGSV9121518unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.516_smTrue_Stmin0_Vtmin0.pickle'
 VCp['masses'] = ['0.8605']# note m eta_c for slightly wrong ensemble 0.863 = 
 VCp['Zdisc'] = [0.99197] 
 VCp['twists'] = ['0','2.013','3.05','3.969']
@@ -35,7 +35,7 @@ VCp['daughter-Tag'] = 5*['2pt_K_vc_tw{0}.ll']
 Cp = collections.OrderedDict()
 Cp['conf']='Cp'
 Cp['label'] = 'Set 2'
-Cp['filename'] = 'Corrfits/Cprelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp6_sfac1.0_pfac1.0_Q1.00_chi0.358_smTrue_Stmin0_Vtmin0.pickle'
+Cp['filename'] = 'Corrfits/Cprelabelled_relabelled_DK-phys-coarse-alldata_allqsq-binned-985config0.64302.4053.6414.735BGBNGKGSV12151821unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.369_smTrue_Stmin0_Vtmin0.pickle'
 Cp['masses'] = ['0.643']# note m eta_c is not corect for this
 Cp['Zdisc'] = [0.99718]
 Cp['twists'] = ['0','2.405','3.641','4.735']
@@ -53,7 +53,8 @@ Cp['daughter-Tag'] = 5*['2pt_K_coarse_tw{0}.ll']
 Fp = collections.OrderedDict()
 Fp['conf']='Fp'
 Fp['label'] = 'Set 3'
-Fp['filename'] = 'Corrfits/Fpall_streams_500cfgs0.4330.6830.800.85632.9985.140BGBNGKGKNGSTV141720unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.158_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+Fp['filename'] = 'Corrfits/Fpall_streams_620cfgs0.4330.6830.800.85632.9985.140BGBNGKGKNGSTV141720unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.169_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+#Fp['filename'] ='Corrfits/Fpall_streams_620cfgs0.4330.6830.800.85632.9985.140BGBNGKGKNGSTV141720unchained_Nexp5_sfac0.5_pfac1.0_Q1.00_chi0.193_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
 Fp['masses'] = ['0.433','0.683','0.8']
 Fp['Zdisc'] = [0.99938,0.99648,0.99377]
 Fp['twists'] = ['0','0.8563','2.998','5.140']
@@ -88,7 +89,7 @@ VC['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 C = collections.OrderedDict()
 C['conf']='C'
 C['label'] = 'Set 5'
-C['filename'] = 'Corrfits/Cthreemass-KDscalarvectortensor_1053cfgs_neg0.6640.80.900.4411.3232.2052.646BGBNGKGKNGSTV12151821unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.150_smTrue_Stmin1_Ttmin1_Vtmin1.pickle'
+C['filename'] = 'Corrfits/Cthreemass-KDscalarvectortensor_1053cfgs_neg0.6640.80.900.4411.3232.2052.646BGBNGKGKNGSTV12151821unchained_Nexp5_sfac0.5_pfac1.0_Q1.00_chi0.178_smTrue_Stmin1_Ttmin1_Vtmin1.pickle'
 C['masses'] = ['0.664','0.8','0.9']# note m eta_c is not corect for this
 C['Zdisc'] = [0.99683,0.99377,0.99063]
 C['twists'] = ['0','0.441','1.323','2.205','2.646'] 
@@ -145,8 +146,8 @@ SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 UF = collections.OrderedDict()
 UF['conf']='UF'
 UF['label'] = 'Set 8'
-#UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_261cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV3340unchained_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.053_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
-UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_261cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV3340unchained_Nexp5_sfac0.1_pfac1.0_Q1.00_chi0.097_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+#UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_375cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV3340unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.105_smTrue_Stmin1_Ttmin1_Vtmin1.pickle'
+UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_375cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV243340unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.088_smTrue_Stmin1_Ttmin1_Vtmin1.pickle'
 UF['masses'] = ['0.194','0.45','0.6','0.8']
 UF['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UF['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -237,7 +238,7 @@ Twists = collections.OrderedDict()
 thpts = collections.OrderedDict()
 ############################################################################
 
-Fits = [VCp,Cp,Fp,VC,C,F,SF,UF,Fs,SFs,UFs] # choose what to fit make sure s not first
+Fits = [VCp,Cp,Fp,VC,C,F,SF,UF]#,Fs,SFs,UFs] # choose what to fit make sure s not first
 Masses['VCp'] = [0]                                     # Choose which masses to fit
 Twists['VCp'] = [0,1,2,3]
 thpts['VCp'] = ['S','V']
@@ -273,8 +274,8 @@ Twists['UFs'] = [0,1,2,3,4]
 thpts['UFs'] = ['S','V']
 addrho = True
 fpf0same = True
-constraint = False #add constraint the f0(0)=fp(0)
-constraint2 =False
+constraint = False#add constraint the f0(0)=fp(0)
+constraint2 =False # not working
 svdnoise = False
 priornoise = False
 FitNegQsq = True
@@ -291,7 +292,7 @@ Nijk = 3 #3
 Nm=0 #redundant atm 
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
-adddata = False #not working atm and only one thing can be included anyway
+adddata = False #This includes the Bs Etas data, should not be used in conjunction with Fs, SFs, UFs Doesn't work with const2
 ############################################################################
 if t_0 != '0':
     print('t_0 != 0, so fpf0same set to False')
@@ -308,45 +309,36 @@ for Fit in Fits:
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
     results_tables(fs_data[Fit['conf']],Fit)
 #check_poles(Fits) Not working atm
+
+
+
 #Z_V_plots(Fits,fs_data)
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 
 
 #speed_of_light(Fits)
-#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-
-#Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-###############
+#table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del)
+#DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
+#error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
 
-#HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0)
-#Hill_ratios_in_E(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same)
-#Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same)
-#Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same)
-#Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same)
-#eval_at_different_spacings_BsEtas([0,0.09,0.12],pfit,Fits,Del,fpf0same,Npow,Nijk,addrho)
-#f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0)
-#fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0)
-#f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.06)
-#fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.06)
-#f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.09)
-#fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.09)
-#f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.12)
-#fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,0.12)
-#error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same)
-#table_of_as(Fits,pfit,Nijk,Npow,fpf0same,addrho,Del)
