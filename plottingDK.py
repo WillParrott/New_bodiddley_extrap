@@ -52,35 +52,34 @@ capsize = 10*factor
 ####################################################################################################
 
 def plot_gold_non_split(Fits):
-    confs = ['VCp','Cp','Fp','VC','C','F','SF','UF']
-    sets = ['Set 1','Set 2','Set 3','Set 4','Set 5','Set 6','Set 7','Set 8']
-    ams = [0.8605,0.643,0.432,0.888,0.664,0.449,0.274,0.194]
-    splits = gv.gvar(['0.00596(77)','0.00195(37)','0.00035(71)','0.00514(79)','0.00213(22)','0.00100(37)','6(465)e-06','0.00109(69)']) 
     plt.figure(figsize=figsize)
+    i = 0
     for Fit in Fits:
-        i = confs.index(Fit['conf'])
-        x = float(ams[i])**2
-        y = (splits[i]/Fit['a']).mean
-        yerr = (splits[i]/Fit['a']).sdev
-        if confs[i][-1] == 'p':
-            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=sets[i],ms=ms,mfc='none')
-        else:
-            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=sets[i],ms=ms,mfc='none')
+        for mass in Fit['masses']:
+            y = 1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).mean
+            yerr = 1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).sdev
+            x = float(mass)**2
+            if Fit['conf'][-1] == 'p':
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['conf'],ms=ms,mfc='none')
+            else:
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['conf'],ms=ms,mfc='none')
+            i+=1
+   
     plt.plot([-0.1,0.9],[0,0],'k--')
     plt.xlim([0,0.85])
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
     plt.xlabel('$(am_c)^2$',fontsize=fontsizelab)
-    plt.ylabel('$(M_{D_{\mathrm{non-gold}}}-M_{D_{\mathrm{gold}}})[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.ylabel('$(M_{D_{\mathrm{non-gold}}}-M_{D_{\mathrm{gold}}})[\mathrm{MeV}]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.05))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(0.001))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(5))
     plt.tight_layout()
     plt.savefig('DKPlots/gold-non-split.pdf')            
     return()
@@ -226,11 +225,11 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     #    plt.errorbar(qsqmaxphysBK.mean, dataf0maxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=dataf0maxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
     #if dataf00BK != None and adddata:
     #    plt.errorbar(0, dataf00BK.mean, yerr=dataf00BK.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
-    plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
+    #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    #plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower right')
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$f_0(q^2)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -324,9 +323,9 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
 #    if datafpmaxBK != None and adddata:
 #        plt.errorbar(qsqmaxphysBK.mean, datafpmaxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=datafpmaxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
-    plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
-    plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
-    plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
+    #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
+    #plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
+    #plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2)
@@ -397,9 +396,9 @@ def f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,con
     #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     #plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
     #plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
-    plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'arXiv:1706.03017',lw=lw)
-    plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='s',color='r',ms=ms,mfc='none',label = r'arXiv:1706.03017',lw=lw)
-    plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='b',ms=ms,mfc='none',label = r'arXiv:1706.03017',lw=lw)
+    #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'arXiv:1706.03017',lw=lw)
+    #plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='s',color='r',ms=ms,mfc='none',label = r'arXiv:1706.03017',lw=lw)
+    #plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='b',ms=ms,mfc='none',label = r'arXiv:1706.03017',lw=lw)
     plt.legend(fontsize=fontsizeleg,frameon=False)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     #plt.ylabel(r'$f_+(q^2)$',fontsize=fontsizelab)
@@ -963,7 +962,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.xlim([0.90,1.01])
     plt.ylim([0.5,6.5])
     plt.gca().set_yticks([6,5,4,3,2,1])
-    plt.gca().set_yticklabels(['This work','This work','arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
+    plt.gca().set_yticklabels(['This work','This work','ETMC','ETMC','HPQCD','HPQCD'])#'arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
     plt.tight_layout()
@@ -1075,8 +1074,8 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,const2):
     #plt.gca().yaxis.set_ticks_position('both')
     ax1.xaxis.set_ticks_position('none')
     plt.setp(ax1.get_xticklabels(), visible=False)
-    ax1.yaxis.set_major_locator(MultipleLocator(0.2))
-    ax1.yaxis.set_minor_locator(MultipleLocator(0.1))
+    ax1.yaxis.set_major_locator(MultipleLocator(0.1))
+    ax1.yaxis.set_minor_locator(MultipleLocator(0.05))
     ax1.set_xlim([0,qsqmaxphysDK.mean])
     ####################################### right hand y axis ###
     ax1b.plot(qsqs,f0[1],color='r', ls='--',lw=2,label='Inputs')
