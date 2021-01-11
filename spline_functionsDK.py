@@ -330,6 +330,7 @@ def check_poles(Fits):
 ########################################################################################################
 
 def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint,w=1):
+    qsqs = []
     prior = gv.BufferDict()
     f = gv.BufferDict()
     prior['g'] = gv.gvar('0.570(6)')#1304.5009 pg 19 
@@ -369,6 +370,7 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
                 tag = '{0}_m{1}_tw{2}'.format(fit,mass,twist)
                 qsq = fs_data[fit]['qsq_m{0}_tw{1}'.format(mass,twist)]                    
                 prior['qsq_{0}'.format(tag)] = qsq
+                qsqs.append((qsq/Fit['a']**2).mean)
                 f['f0_{0}'.format(tag)] = fs_data[fit]['f0_m{0}_tw{1}'.format(mass,twist)]   # y values go in f   
                 f['fp_{0}'.format(tag)] = fs_data[fit]['fp_m{0}_tw{1}'.format(mass,twist)]
     if constraint:
@@ -379,31 +381,44 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
             keys.append(key)   #removes vector tw 0 etc
     for key in keys:
         del f[key]
-    if addrho:
-        prior['0rho'] =gv.gvar(Npow*[rhopri])*w
-        prior['prho'] =gv.gvar(Npow*[rhopri])*w
-    prior['0d'] = gv.gvar(Nijk*[Nijk*[Nijk*[Npow*[dpri]]]])*w
-    prior['0cs'] = gv.gvar(Npow*[cpri])*w
-    prior['0cl'] = gv.gvar(Npow*[cpri])*w
-    prior['0cc'] = gv.gvar(Npow*[cpri])*w
-    prior['0csval'] = gv.gvar(Npow*[cvalpri])*w
-    prior['0clval'] = gv.gvar(Npow*[cvalpri])*w
-    prior['pd'] = gv.gvar(Nijk*[Nijk*[Nijk*[Npow*[dpri]]]])*w
-    for i in range(Nijk):
-        if i != 0:
-            prior['0d'][i][0][0][0] = gv.gvar(di000pri)*w
-            prior['pd'][i][0][0][0] = gv.gvar(di000pri)*w
-            for n in range(Npow):
-                prior['0d'][i][1][0][n] = gv.gvar(di10npri)*w
-                prior['pd'][i][1][0][n] = gv.gvar(di10npri)*w
-                prior['0d'][0][0][0][n] = gv.gvar(d000npri)*w 
-                prior['pd'][0][0][0][n] = gv.gvar(d000npri)*w
-    prior['pcs'] = gv.gvar(Npow*[cpri])*w
-    prior['pcl'] = gv.gvar(Npow*[cpri])*w
-    prior['pcc'] = gv.gvar(Npow*[cpri])*w
-    prior['pcsval'] = gv.gvar(Npow*[cvalpri])*w
-    prior['pclval'] = gv.gvar(Npow*[cvalpri])*w
-    #print(prior)
+    knots = 4
+    #print(max(qsqs),min(qsqs))
+    firstknot = -3.25
+    lastknot = 2.0
+    mknot = [gv.gvar(firstknot,firstknot/1000)]
+    for kn in range(1,knots-1):
+        pos = firstknot + kn*(lastknot-firstknot)/(knots-1)
+        #pos = kn*(qsqmaxphysDK.mean)/(knots-1)
+        mknot.append(gv.gvar(pos,pos/1000))     #(qsqmaxphysDK.mean)/(2*(knots-1))))
+    mknot.append(gv.gvar(lastknot,lastknot/1000))
+    prior['mknot'] = mknot
+    prior['g00knot'] = gv.gvar(['0.0(1)']*knots)#0.70(5)
+    prior['g0pknot'] = gv.gvar(['0.0(1)']*knots)#0.80(5)
+    mistpri = '0.0(1.0)'
+    gmapri = '0.0(1.0)'
+    gcpri = '0.0(1.0)'
+    for j in range(1,Nijk):
+        for k in range(1):#Nijk):
+            prior['gma{0}{1}0knot'.format(j,k)] = gv.gvar([gmapri]*knots)
+            prior['gma{0}{1}pknot'.format(j,k)] = gv.gvar([gmapri]*knots)
+    prior['gsval0knot'] = gv.gvar([mistpri]*knots)
+    prior['glval0knot'] = gv.gvar([mistpri]*knots)
+    prior['gs0knot'] = gv.gvar([mistpri]*knots)
+    prior['gl0knot'] = gv.gvar([mistpri]*knots)
+    prior['gc0knot'] = gv.gvar([gcpri]*knots)
+    prior['gsvalpknot'] = gv.gvar([mistpri]*knots)
+    prior['glvalpknot'] = gv.gvar([mistpri]*knots)
+    prior['gspknot'] = gv.gvar([mistpri]*knots)
+    prior['glpknot'] = gv.gvar([mistpri]*knots)
+    prior['gcpknot'] = gv.gvar([gcpri]*knots)
+    prior['A0'] = gv.gvar('0.75(5)')
+    prior['Ap'] = gv.gvar('0.75(5)')
+    prior['B0'] = gv.gvar('-0.050(25)')
+    prior['Bp'] = gv.gvar('0.050(25)')
+    prior['C0'] = gv.gvar('0.0(1)')
+    prior['Cp'] = gv.gvar('0.0(1)')
+    #prior['g0pknot'][0] = prior['g00knot'][0] + prior['A0']  - prior['Ap']# constraint
+    f['sp_const'] = gv.gvar(0,1e-8)
     print(w)
     return(prior,f)
                 
@@ -445,7 +460,7 @@ def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,mass,amh,fpf0same,newdata=False,const=
                         print('Added external data in a{0}'.format(n),'need to edit this to work properly')
                         an += p['{0}d'.format(tagsamed)][i][j][k][n] * (0)**int(i) * (0)**int(2*j) * (0)**int(2*k)
                     elif newdata == False and const == False and const2 == False:
-                        an += (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)]+2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)]+p['{0}clval'.format(tag)][n]*p['deltalval_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)])  + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (0)**int(i) * (amh/np.pi)**int(2*j) * (0*LQCD*p['a_{0}'.format(fit)]/np.pi)**int(2*k)
+                        an += (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)]+2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)]+p['{0}clval'.format(tag)][n]*p['deltalval_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)])  + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][n] * (0)**int(i) * (amh/np.pi)**int(2*j) * (LQCD*p['a_{0}'.format(fit)]/np.pi)**int(2*k)
                     else:
                         print('Error in make_an_BK(): newdata = {0}, const = {1}, const2 = {2}'.format(newdata,const,const2))
                     
@@ -458,9 +473,9 @@ def make_logs(p,Fit):
     return(logs)
 
 ########################################################################################################
-def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False):
+def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,gs=None):
     fit = Fit['conf']
-    f0 = 0
+    #f0 = 0
     logs = make_logs(p,Fit)
     Del =  p['MDs0phys']- p['MDphys']
     if p['a_{0}'.format(fit)] != 0:
@@ -469,68 +484,83 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
         MHs0 = p['MH_{0}_m{1}'.format(fit,mass)] + Del
     pole = 1-(qsq/MHs0**2)
     f0pole0 = 1.0 
-    z  = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])# need to change this for B to K
-    z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
-    if newdata:
-        logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
-    if const:
-        logsBK = 1 - ( (9/8) * p['g']**2 * 1/(10*p['slratio']) * ( gv.log(1/(10*p['slratio'])) ) )
-        z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
-    for n in range(Npow):
-        if const:
-            an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,const=const)
-            f0 += (logsBK/f0pole0) * an * z0const**n
-        elif newdata:
-            an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,newdata=newdata)
-            f0 += logsBsEtas/(1-qsq/(p['MBs0phys']**2)) * an * z**n
-        elif newdata == False and const == False:
-            an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same)
-            f0 += (logs/pole) * an * z**n
-        else:
-            print('Error in make_f0_BK(): newdata = {0}'.format(newdata))
+    #z  = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])# need to change this for B to K
+    #z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
+    #if newdata:
+    #    logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
+    #if const:
+    #    logsBK = 1 - ( (9/8) * p['g']**2 * 1/(10*p['slratio']) * ( gv.log(1/(10*p['slratio'])) ) )
+    #    z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
+    #for n in range(Npow):
+    #    if const and gs ==None:
+    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,const=const)
+    #        f0 += (logsBK/f0pole0) * an * z0const**n
+    #    elif newdata and gs ==None:
+    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,newdata=newdata)
+    #        f0 += logsBsEtas/(1-qsq/(p['MBs0phys']**2)) * an * z**n
+    #    elif newdata == False and const == False and gs ==None:
+    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same)
+    #        f0 += (logs/pole) * an * z**n
+    #    elif gs ==None:
+    #        print('Error in make_f0_BK(): newdata = {0}'.format(newdata))
+    if gs != None:
+        qsq = qsq/p['a_{0}'.format(fit)]**2
+        f0 = 0
+        N = (gs['gsval0'](qsq)*p['deltasval_{0}'.format(fit)] + gs['glval0'](qsq)*p['deltalval_{0}'.format(fit)] + gs['gs0'](qsq)*p['deltas_{0}'.format(fit)] + gs['gl0'](qsq)*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + gs['gc0'](qsq) * (p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys']
+        f0 = (logs/pole) * ( p['A0'] + p['B0']*qsq  + gs['g00'](qsq) + N + p['C0']*qsq**2)
+        for j in range(1,Nijk):
+            for k in range(1):#Nijk):
+                f0 += (logs/pole) * gs['gma{0}{1}0'.format(j,k)](qsq) * (amh/np.pi)**int(2*j)  * (LQCD*p['a_{0}'.format(fit)]/np.pi)**int(2*k) 
     return(f0)
 
 ########################################################################################################
 
-def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,const2=False):
+def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,const2=False,gs=None):
     fit = Fit['conf']
-    fp = 0
-    fp0 = 0
-    f00 = 0
+    #fp = 0
+    #fp0 = 0
+    #f00 = 0
     logs = make_logs(p,Fit)
     MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p,p['a_{0}'.format(fit)])
-    z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
-    z = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
+    #z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
+    #z = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
     pole = 1-(qsq/MHsstar**2)
-    fppole0 = 1.0
-    f0pole0 = 1.0
-    if newdata:
-        logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
-    if const or const2:
-        logsBK = 1 - ( (9/8) * p['g']**2 * 1/(10*p['slratio']) * ( gv.log(1/(10*p['slratio'])) ) )
-    if const:
-        z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
-    for n in range(Npow):
-        if const==True and const2 ==False and newdata ==False:
-            an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,const=const)
-            fp += (logsBK/fppole0) * an  * (z0const**n - (n/Npow) * (-1)**(n-Npow) *  z0const**Npow)
-        elif newdata == True and const ==False and const2 ==False:
-            an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,newdata=newdata)
-            fp += logsBsEtas/(1-qsq/(p['MBsstarphys']**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
-        elif const2==True and const ==False and newdata==False:
-            an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same)
-            fp += (logs/pole) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
-            anp0 = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,const2=const2)
-            fp0 += (logsBK/fppole0) * anp0  * (z0**n - (n/Npow) * (-1)**(n-Npow) *  z0**Npow)
-            an00 = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,const2=const2)
-            f00 += (logsBK/f0pole0) * an00 * z0**n
-        elif newdata == False and const2 ==False and const ==False:
-            an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same)
-            fp += (logs/pole) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
-        else:
-            print('Error in make_fp_BK(): newdata = {0} const = {1} const2 = {2}'.format(newdata,const,const2))
-    fp = fp + f00 - fp0
-    #print(fp0/f00)
+    #fppole0 = 1.0
+    #f0pole0 = 1.0
+    #if newdata:
+    #    logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
+    #if const or const2:
+    #    logsBK = 1 - ( (9/8) * p['g']**2 * 1/(10*p['slratio']) * ( gv.log(1/(10*p['slratio'])) ) )
+    #if const:
+    #    z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
+    #for n in range(Npow):
+    #    if const==True and const2 ==False and newdata ==False and gs ==None:
+    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,const=const)
+    #        fp += (logsBK/fppole0) * an  * (z0const**n - (n/Npow) * (-1)**(n-Npow) *  z0const**Npow)
+    #    elif newdata == True and const ==False and const2 ==False and gs ==None:
+    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,newdata=newdata)
+    #        fp += logsBsEtas/(1-qsq/(p['MBsstarphys']**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
+    #    elif const2==True and const ==False and newdata==False and gs ==None:
+    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same)
+    #        fp += (logs/pole) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
+    #        anp0 = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,const2=const2)
+    ##        fp0 += (logsBK/fppole0) * anp0  * (z0**n - (n/Npow) * (-1)**(n-Npow) *  z0**Npow)
+     #       an00 = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,const2=const2)
+     #       f00 += (logsBK/f0pole0) * an00 * z0**n
+     #   elif newdata == False and const2 ==False and const ==False and gs ==None:
+     #       an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same)
+     #       fp += (logs/pole) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
+     #   elif gs ==None:
+     #       print('Error in make_fp_BK(): newdata = {0} const = {1} const2 = {2}'.format(newdata,const,const2))
+    #fp = fp + f00 - fp0
+    if gs != None:
+        qsq = qsq/p['a_{0}'.format(fit)]**2
+        fp = 0 
+        N = (gs['gsvalp'](qsq)*p['deltasval_{0}'.format(fit)] + gs['glvalp'](qsq)*p['deltalval_{0}'.format(fit)] + gs['gsp'](qsq)*p['deltas_{0}'.format(fit)] + gs['glp'](qsq)*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + gs['gcp'](qsq) * (p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys']
+        fp = (logs/pole) * ( p['Ap'] + p['Bp']*qsq + gs['g0p'](qsq) + N  + p['Cp']*qsq**2)
+        for j in range(1,Nijk):
+            for k in range(1):#Nijk):
+                fp += (logs/pole) * gs['gma{0}{1}p'.format(j,k)](qsq) * (amh/np.pi)**int(2*j)  * (LQCD*p['a_{0}'.format(fit)]/np.pi)**int(2*k)
     return(fp)
 
 #########################################################################################################
@@ -555,6 +585,23 @@ def make_fT_BK(Nijk,Npow,Nm,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh,newdata=Fa
 
 def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,const2):
     def fcn(p):
+        gs = collections.OrderedDict()
+        gs['g00'] = gv.cspline.CSpline(p['mknot'], p['g00knot'])
+        gs['g0p'] = gv.cspline.CSpline(p['mknot'], p['g0pknot'])
+        for j in range(1,Nijk):
+            for k in range(1):#Nijk):
+                gs['gma{0}{1}0'.format(j,k)] = gv.cspline.CSpline(p['mknot'], p['gma{0}{1}0knot'.format(j,k)])
+                gs['gma{0}{1}p'.format(j,k)] = gv.cspline.CSpline(p['mknot'], p['gma{0}{1}pknot'.format(j,k)])
+        gs['gsval0'] = gv.cspline.CSpline(p['mknot'], p['gsval0knot'])
+        gs['glval0'] = gv.cspline.CSpline(p['mknot'], p['glval0knot'])
+        gs['gs0'] = gv.cspline.CSpline(p['mknot'], p['gs0knot'])
+        gs['gl0'] = gv.cspline.CSpline(p['mknot'], p['gl0knot'])
+        gs['gc0'] = gv.cspline.CSpline(p['mknot'], p['gc0knot'])
+        gs['gsvalp'] = gv.cspline.CSpline(p['mknot'], p['gsvalpknot'])
+        gs['glvalp'] = gv.cspline.CSpline(p['mknot'], p['glvalpknot'])
+        gs['gsp'] = gv.cspline.CSpline(p['mknot'], p['gspknot'])
+        gs['glp'] = gv.cspline.CSpline(p['mknot'], p['glpknot'])
+        gs['gcp'] = gv.cspline.CSpline(p['mknot'], p['gcpknot'])
         models = gv.BufferDict()
         if 'constraint' in f:
             models['constraint'] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const=True)- make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const=True)  
@@ -563,10 +610,10 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
                 for twist in Fit['twists']:
                     tag = '{0}_m{1}_tw{2}'.format(Fit['conf'],mass,twist)
                     if 'f0_{0}'.format(tag) in f:
-                        models['f0_{0}'.format(tag)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,p['qsq_{0}'.format(tag)],t_0,mass,fpf0same,float(mass)) #second mass is amh
+                        models['f0_{0}'.format(tag)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,p['qsq_{0}'.format(tag)],t_0,mass,fpf0same,float(mass),gs=gs) #second mass is amh
                     if 'fp_{0}'.format(tag) in f:
-                        models['fp_{0}'.format(tag)] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,p['qsq_{0}'.format(tag)],t_0,mass,fpf0same,float(mass),const2=const2) #second mass is amh
-                    
+                        models['fp_{0}'.format(tag)] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,p['qsq_{0}'.format(tag)],t_0,mass,fpf0same,float(mass),const2=const2,gs=gs) #second mass is amh
+        models['sp_const'] = gs['g00'](0) - gs['g0p'](0)  + p['A0']  - p['Ap']
                         
         return(models)
     #################################################
@@ -578,7 +625,7 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
     #if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
     #    p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     p0 = None    
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-12 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),debug=True,fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, svdcut=1e-3, fcn=fcn,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=5000, tol=(1e-6,0.0,0.0),debug=True,fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
     #fit2, w = lsqfit.empbayes_fit(1.1, fitargs)
@@ -642,15 +689,25 @@ def make_p_Mh_BK(pfit,Fits,MH):
 
 ######################################################################################################
 
+def make_spline_f0_fp_physpoint(p,Fit,qsq):
+    g00 = gv.cspline.CSpline(p['mknot'], p['g00knot'])(qsq)
+    g0p = gv.cspline.CSpline(p['mknot'], p['g0pknot'])(qsq)
+    pole0 = 1 - qsq/(p['MDs0phys']**2)
+    polep = 1 - qsq/(p['MDsstarphys']**2)
+    logs = make_logs(p,Fit)
+    f0 = (logs/pole0) * ( p['A0'] + p['B0']*qsq + g00 + p['C0']*qsq**2   )
+    fp = (logs/polep) * ( p['Ap'] + p['Bp']*qsq + g0p + p['Cp']*qsq**2   )
+    return(f0,fp)
+    
+
+######################################################################################################
 
 def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_DK(pfit,Fits)
     qsq0 = 0
-    f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0)
-    fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    f00,fp0 = make_spline_f0_fp_physpoint(p,Fits[0],qsq0) 
     qsq = qsqmaxphysDK.mean
-    f0max = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
-    fpmax = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    f0max,fpmax = make_spline_f0_fp_physpoint(p,Fits[0],qsq)
     print('f_+(0)/f_0(0) = {0}'.format(fp0/f00))
     print('f_0(0) = {0}  error: {1:.2%}'.format(f00,f00.sdev/f00.mean))
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
@@ -669,8 +726,12 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 def integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     p = make_p_physical_point_DK(pfit,Fits)
     def integrand(qsq):
-        p3 = ((qsq-p['MKphys']**2-p['MDphys']**2)**2/(4*p['MDphys']**2)-p['MKphys']**2)**(3/2)
-        fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        p2 = (qsq-p['MKphys']**2-p['MDphys']**2)**2/(4*p['MDphys']**2)-p['MKphys']**2
+        if p2.mean <0:
+            p2 = 0
+        p3 = (p2)**(3/2)
+        #fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        f0,fp = make_spline_f0_fp_physpoint(p,Fits[0],qsq) 
         integrand = p3 * fp**2
         return(integrand)
     iters = 100
@@ -946,8 +1007,51 @@ def output_error_DK(pfit,prior,Fits,Nijk,Npow,Nm,f,qsqs,t_0,addrho,fpf0same,cons
 
 #######################################################################################################
 
+def spline_fit(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,const2):
+    nopts = 20
+    prior = gv.BufferDict()
+    data = gv.BufferDict()
+    knots = 4
+    mknot = gv.gvar(['0.00(1)'])
+    fpknot = gv.gvar(['1.0(1.0)']*knots)
+    f0knot = gv.gvar(['1.0(1.0)']*knots)
+    f0knot[0] = fpknot[0]
+    for kn in range(1,knots-1):
+        pos = kn*qsqmaxphysDK.mean/(knots-1)
+        mknot.append(gv.gvar(pos,pos/100))
+    mknot.append(qsqmaxphysDK)
+    prior['mknot'] = mknot
+    prior['fpknot'] = fpknot
+    prior['f0knot'] = f0knot
+    ###### get the original fit in terms of q^2 ###############################
+    p = make_p_physical_point_DK(pfit,Fits)
+    q2 = []
+    fp = []
+    f0 = []
+    for qsq in np.linspace(0,qsqmaxphysDK.mean,nopts):
+        f0pole = 1 #- qsq/p['MDsstarphys']**2
+        fppole = 1 #- qsq/p['MDs0phys']**2
+        fp.append(fppole*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2))
+        q2.append(qsq)
+        f0.append(f0pole*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0))
+    data['fp'] = fp
+    data['f0'] = f0 
+        ##################### make prior ############################################
+    def fcn(p):
+        ans = {}
+        fp = gv.cspline.CSpline(p['mknot'], p['fpknot'])
+        ans['fp'] = fp(q2)
+        f0 = gv.cspline.CSpline(p['mknot'], p['f0knot'])
+        ans['f0'] = f0(q2)
+        return(ans)
+    p0 = None
+    fit = lsqfit.nonlinear_fit(data=data, prior=prior, p0=p0, fcn=fcn, svdcut=1e-2 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
+    print(fit.format(maxline=True))
+    fitf0 = gv.cspline.CSpline(fit.p['mknot'], fit.p['f0knot'])
+    fitfp = gv.cspline.CSpline(fit.p['mknot'], fit.p['fpknot'])
+    return(p,fitf0,fitfp)
 
-
+############################################################################################################
 
 
 

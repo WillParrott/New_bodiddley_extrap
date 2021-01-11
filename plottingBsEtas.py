@@ -50,6 +50,112 @@ minor = 8*factor
 capsize = 10*factor
 
 ####################################################################################################
+def sort_for_bar(data,spacing):
+    y = []
+    x = []
+    i = 0
+    while i+spacing <= 1:
+        y.append(len(list(x for x in data if i <= x < i + spacing)))
+        x.append(i+spacing/2)
+        i += spacing
+    return(x,y)
+
+def mass_corr_plots(Fit,fs,thpts):
+    corrs = collections.OrderedDict()
+    corrs['f0'] = []
+    corrs['fp'] = []
+    corrs['S'] = []
+    corrs['V'] = []
+    for i,mass in enumerate(Fit['masses']):
+        for j in range(i+1,len(Fit['masses'])):
+            mass2 = Fit['masses'][j]
+            for k,twist in enumerate(Fit['twists']):
+                for l in range(k,len(Fit['twists'])):
+                    twist2 = Fit['twists'][l]
+                    f0 = fs['f0_m{0}_tw{1}'.format(mass,twist)]
+                    fp = fs['fp_m{0}_tw{1}'.format(mass,twist)]
+
+                    f02 = fs['f0_m{0}_tw{1}'.format(mass2,twist2)]
+                    fp2 = fs['fp_m{0}_tw{1}'.format(mass2,twist2)]
+                    corrs['f0'].append(gv.evalcorr([f0,f02])[0][1])
+                    if fp != None:
+                        corrs['fp'].append(gv.evalcorr([fp,fp2])[0][1])
+                    for thpt in thpts[Fit['conf']]:
+                        if twist != '0' or thpt != 'T':
+                            V = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)]
+                            V2 = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass2,twist2)]
+                            correlation = gv.evalcorr([V,V2])[0][1]
+                            #if correlation > 0.5:
+                            #    print(Fit['conf'],thpt,mass,twist,mass2,twist2, correlation)
+                            corrs[thpt].append(correlation)
+    for tag in ['f0','fp','S','V']:
+        data = corrs[tag]
+        x,y = sort_for_bar(data,0.025)
+        plt.figure(figsize=figsize)
+        plt.bar(x,y,width=0.025)
+        plt.xlabel('correlation',fontsize=fontsizelab)
+        plt.ylabel(r'Frequency',fontsize=fontsizelab)
+        plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+        plt.axes().tick_params(which='major',length=major)
+        plt.axes().tick_params(which='minor',length=minor)
+        plt.axes().yaxis.set_ticks_position('both')
+        #plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
+        #plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+        #plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+        #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
+        plt.tight_layout()
+        plt.savefig('MassCorrs/Bsetas{0}corrs{1}.pdf'.format(Fit['conf'],tag))
+        plt.close()
+
+def twist_corr_plots(Fit,fs,thpts):
+    corrs = collections.OrderedDict()
+    corrs['f0'] = []
+    corrs['fp'] = []
+    corrs['S'] = []
+    corrs['V'] = []
+    for i,twist in enumerate(Fit['twists']):
+        for j in range(i+1,len(Fit['twists'])):
+            twist2 = Fit['twists'][j]
+            for k,mass in enumerate(Fit['masses']):
+                for l in range(k,len(Fit['masses'])):
+                    mass2 = Fit['masses'][l]
+                    f0 = fs['f0_m{0}_tw{1}'.format(mass,twist)]
+                    fp = fs['fp_m{0}_tw{1}'.format(mass,twist)]
+
+                    f02 = fs['f0_m{0}_tw{1}'.format(mass2,twist2)]
+                    fp2 = fs['fp_m{0}_tw{1}'.format(mass2,twist2)]
+                    corrs['f0'].append(gv.evalcorr([f0,f02])[0][1])
+                    if fp != None:
+                        corrs['fp'].append(gv.evalcorr([fp,fp2])[0][1])
+                    for thpt in thpts[Fit['conf']]:
+                        if twist != '0' or thpt != 'T':
+                            V = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)]
+                            V2 = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass2,twist2)]
+                            correlation = gv.evalcorr([V,V2])[0][1]
+                            #if correlation > 0.5:
+                                #print(Fit['conf'],thpt,mass,twist,mass2,twist2, correlation)
+                            corrs[thpt].append(correlation)
+    for tag in ['f0','fp','S','V']:
+        data = corrs[tag]
+        x,y = sort_for_bar(data,0.025)
+        plt.figure(figsize=figsize)
+        plt.bar(x,y,width=0.025)
+        plt.xlabel('correlation',fontsize=fontsizelab)
+        plt.ylabel(r'Frequency',fontsize=fontsizelab)
+        plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+        plt.axes().tick_params(which='major',length=major)
+        plt.axes().tick_params(which='minor',length=minor)
+        plt.axes().yaxis.set_ticks_position('both')
+        #plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
+        #plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+        #plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+        #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
+        plt.tight_layout()
+        plt.savefig('TwistCorrs/Bsetas{0}corrs{1}.pdf'.format(Fit['conf'],tag))
+        plt.close()
+    return()
+
+####################################################################################################
 
 def speed_of_light(Fits):
     plt.figure(1,figsize=figsize)
@@ -81,7 +187,7 @@ def speed_of_light(Fits):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
     plt.tight_layout()
-    plt.savefig('Plots/speedoflight.pdf')
+    plt.savefig('BsetasPlots/speedoflight.pdf')
     plt.show()
     return()
 
@@ -147,7 +253,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0poleinqsq.pdf')
+    plt.savefig('BsetasPlots/f0poleinqsq.pdf')
     plt.close()
     
     plt.figure(3,figsize=figsize)
@@ -171,7 +277,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0poleinz.pdf')
+    plt.savefig('BsetasPlots/f0poleinz.pdf')
     plt.close()
     return()
 
@@ -236,7 +342,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
     plt.tight_layout()
-    plt.savefig('Plots/fppoleinqsq.pdf')
+    plt.savefig('BsetasPlots/fppoleinqsq.pdf')
     plt.close()
     
     plt.figure(5,figsize=figsize)
@@ -258,7 +364,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,adddata):
     plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
     plt.tight_layout()
-    plt.savefig('Plots/fppoleinz.pdf')
+    plt.savefig('BsetasPlots/fppoleinz.pdf')
     plt.close()
     return()
 
@@ -330,7 +436,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0nopoleinqsq.pdf')
+    plt.savefig('BsetasPlots/f0nopoleinqsq.pdf')
     plt.close()
     
     plt.figure(7,figsize=figsize)
@@ -355,7 +461,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0nopoleinz.pdf')
+    plt.savefig('BsetasPlots/f0nopoleinz.pdf')
     plt.close()
     return()
 
@@ -423,7 +529,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/fpnopoleinqsq.pdf')
+    plt.savefig('BsetasPlots/fpnopoleinqsq.pdf')
     plt.close()
     
     plt.figure(9,figsize=figsize)
@@ -445,7 +551,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,addd
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
-    plt.savefig('Plots/fpnopoleinz.pdf')
+    plt.savefig('BsetasPlots/fpnopoleinz.pdf')
     plt.close()
     return()
 
@@ -489,7 +595,7 @@ def f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/f0fpinqsq.pdf')
+    plt.savefig('BsetasPlots/f0fpinqsq.pdf')
     plt.close()
     return()
 
@@ -562,7 +668,7 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     ##################################
     plt.axes().set_ylim([0,3.45])
     plt.tight_layout()
-    plt.savefig('Plots/f0f0fpinmh.pdf')
+    plt.savefig('BsetasPlots/f0f0fpinmh.pdf')
     plt.close()
     return()
 
@@ -621,7 +727,7 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
    # plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper center',ncol=2)
     ##################################
     plt.tight_layout()
-    plt.savefig('Plots/betadeltainmh.pdf')
+    plt.savefig('BsetasPlots/betadeltainmh.pdf')
     plt.close()
     return()
 
@@ -663,7 +769,7 @@ def HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
     plt.axes().set_ylim([0.8,2.8])
     plt.axes().set_xlim([0,(MBsphys**2).mean])
     plt.tight_layout()
-    plt.savefig('Plots/HQETrat.pdf')
+    plt.savefig('BsetasPlots/HQETrat.pdf')
     plt.close()
     return()
 
@@ -715,7 +821,7 @@ def Hill_ratios_in_E(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().set_xlim([Emin.mean,Emax.mean])
     plt.tight_layout()
-    plt.savefig('Plots/HillratinE.pdf')
+    plt.savefig('BsetasPlots/HillratinE.pdf')
     plt.close()
     return()
 
@@ -765,7 +871,7 @@ def Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().set_xlim([Emin.mean,Emax.mean])
     plt.tight_layout()
-    plt.savefig('Plots/HillratinlowE.pdf')
+    plt.savefig('BsetasPlots/HillratinlowE.pdf')
     plt.close()
     return()
 
@@ -821,7 +927,7 @@ def Hill_ratios_in_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().set_xlim([MDsphys.mean,MBsphys.mean])
     plt.tight_layout()
-    plt.savefig('Plots/Hillratinmh_E{0}.pdf'.format(E))
+    plt.savefig('BsetasPlots/Hillratinmh_E{0}.pdf'.format(E))
     plt.close()
     return()
 
@@ -882,7 +988,7 @@ def Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().set_xlim([0,1/MDsphys.mean])
     plt.axes().set_ylim([0,2.2])
     plt.tight_layout()
-    plt.savefig('Plots/Hillratininvmh_E{0}.pdf'.format(E))
+    plt.savefig('BsetasPlots/Hillratininvmh_E{0}.pdf'.format(E))
     plt.close()
     return()
 #####################################################################################################
@@ -949,7 +1055,7 @@ def both_Hill_ratios_in_inv_mh(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().set_xlim([0.02,1/MDsphys.mean])
     plt.axes().set_ylim([0,2.0])
     plt.tight_layout()
-    plt.savefig('Plots/BothHillratininvmh.pdf')
+    plt.savefig('BsetasPlots/BothHillratininvmh.pdf')
     plt.close()
     return()
 
@@ -1000,7 +1106,7 @@ def Hill_ratio_log(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().set_xlim([-1.05,0.05])
     plt.axes().set_ylim([-1.05,0.05])
     plt.tight_layout()
-    plt.savefig('Plots/Hillratlog.pdf')
+    plt.savefig('BsetasPlots/Hillratlog.pdf')
     plt.close()
     return()
 
@@ -1057,7 +1163,7 @@ def f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0poleinza{0}.pdf'.format(afm))
+    plt.savefig('BsetasPlots/f0poleinza{0}.pdf'.format(afm))
     plt.close()
     return()
 
@@ -1117,7 +1223,7 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
     plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
     plt.tight_layout()
-    plt.savefig('Plots/fppoleinza{0}.pdf'.format(afm))
+    plt.savefig('BsetasPlots/fppoleinza{0}.pdf'.format(afm))
     plt.close()
     return()
 
@@ -1223,7 +1329,7 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     ax2b.set_yticks(points)
     ax2b.set_yticklabels(rootpoints)
     plt.tight_layout()
-    plt.savefig('Plots/f0fpluserr.pdf')
+    plt.savefig('BsetasPlots/f0fpluserr.pdf')
     plt.close()
     return()
 
@@ -1236,7 +1342,7 @@ def table_of_as(Fits,pfit,Nijk,Npow,fpf0same,addrho,Del):
     mass = Fit['masses'][0]
     fit = Fit['conf']
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
-    atab = open('Tables/tablesofas.txt','w')
+    atab = open('BsetasTables/tablesofas.txt','w')
     for n in range(Npow):
         if n == 0:
             atab.write('      {0}&'.format(make_an_BsEtas(n,Nijk,addrho,p,'0',Fit,0,mass,0,fpf0same)))
@@ -1269,7 +1375,7 @@ def table_of_as(Fits,pfit,Nijk,Npow,fpf0same,addrho,Del):
 ##################################################################################################
 
 def results_tables(fs_data,Fit):
-    table = open('Tables/{0}table.txt'.format(Fit['conf']),'w')
+    table = open('BsetasTables/{0}table.txt'.format(Fit['conf']),'w')
     for mass in Fit['masses']:
         table.write('      \hline \n')
         table.write('      &{0}'.format(mass))

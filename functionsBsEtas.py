@@ -124,7 +124,8 @@ def get_results(Fit,thpts):
         for m, mass in enumerate(Fit['masses']):
             for thpt in thpts[Fit['conf']]:
                 if twist != '0' or thpt != 'T':   #This second 2 is should be in the data remember for BK
-                    Fit['{0}_m{1}_tw{2}'.format(thpt,mass,twist)] = 2 * 2 * Fit['Zdisc'][m] * gv.sqrt(Fit['M_parent_m{0}'.format(mass)]*Fit['E_daughter_tw{0}_theory'.format(twist)]) * p['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)][0][0]
+                    Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)] = p['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)][0][0]
+                    Fit['{0}_m{1}_tw{2}'.format(thpt,mass,twist)] = 2 * 2 * Fit['Zdisc'][m] * gv.sqrt(Fit['M_parent_m{0}'.format(mass)]*Fit['E_daughter_tw{0}_theory'.format(twist)]) * Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)]
                     #check zdisc is correctly implemented here
     return()
 ####################################################################################################
@@ -351,6 +352,8 @@ def do_fit_BsEtas(Fits,f,Nijk,Npow,addrho,svdnoise,priornoise,prior,fpf0same):
             for mass in Fit['masses']:
                 for twist in Fit['twists']:
                     tag = '{0}_m{1}_tw{2}'.format(Fit['conf'],mass,twist)
+                    #tag2 = '{0}_m{1}_tw{2}'.format(Fit['conf'],Fit['masses'][0],Fit['twists'][0])
+                    #print(gv.evalcorr([f['f0_{0}'.format(tag)],f['f0_{0}'.format(tag2)]])[0][1])
                     if 'f0_{0}'.format(tag) in f:
                         models['f0_{0}'.format(tag)] = make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,Fit['a'].mean,p['qsq_{0}'.format(tag)],p['z_{0}'.format(tag)],mass,fpf0same,float(mass)) #second mass is amh
                     if 'fp_{0}'.format(tag) in f:
