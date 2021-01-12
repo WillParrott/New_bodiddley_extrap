@@ -68,7 +68,9 @@ deltaFVUF = gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
 deltaFVFs = deltaFVF#gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVSFs = deltaFVSF#gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVUFs = deltaFVUF#gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
-
+etaEW2 = gv.gvar('1.009(2)')**2
+deltaEMD02 = gv.gvar('1.00(1)')
+deltaEMDpm2 = gv.gvar('1.000(5)')
 #x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2 
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
@@ -392,10 +394,10 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         mknot.append(gv.gvar(pos,pos/1000))     #(qsqmaxphysDK.mean)/(2*(knots-1))))
     mknot.append(gv.gvar(lastknot,lastknot/1000))
     prior['mknot'] = mknot
-    prior['g00knot'] = gv.gvar(['0.0(1)']*knots)#0.70(5)
-    prior['g0pknot'] = gv.gvar(['0.0(1)']*knots)#0.80(5)
-    mistpri = '0.0(1.0)'
-    gmapri = '0.0(1.0)'
+    prior['g00knot'] = gv.gvar(['0.75(15)']*knots)#0.70(5)
+    prior['g0pknot'] = gv.gvar(['0.75(15)']*knots)#0.80(5)
+    mistpri = '0.0(0.5)'
+    gmapri = '0.0(0.5)'
     gcpri = '0.0(1.0)'
     for j in range(1,Nijk):
         for k in range(1):#Nijk):
@@ -411,14 +413,14 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
     prior['gspknot'] = gv.gvar([mistpri]*knots)
     prior['glpknot'] = gv.gvar([mistpri]*knots)
     prior['gcpknot'] = gv.gvar([gcpri]*knots)
-    prior['A0'] = gv.gvar('0.75(5)')
-    prior['Ap'] = gv.gvar('0.75(5)')
-    prior['B0'] = gv.gvar('-0.050(25)')
-    prior['Bp'] = gv.gvar('0.050(25)')
-    prior['C0'] = gv.gvar('0.0(1)')
-    prior['Cp'] = gv.gvar('0.0(1)')
+    #prior['A0'] = gv.gvar('0.75(5)')
+    #prior['Ap'] = gv.gvar('0.75(5)')
+    #prior['B0'] = gv.gvar('-0.050(25)')
+    #prior['Bp'] = gv.gvar('0.050(25)')
+    #prior['C0'] = gv.gvar('0.0(1)')
+    #prior['Cp'] = gv.gvar('0.0(1)')
     #prior['g0pknot'][0] = prior['g00knot'][0] + prior['A0']  - prior['Ap']# constraint
-    f['sp_const'] = gv.gvar(0,1e-8)
+    f['sp_const'] = gv.gvar(0,1e-6)
     print(w)
     return(prior,f)
                 
@@ -475,7 +477,6 @@ def make_logs(p,Fit):
 ########################################################################################################
 def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,gs=None):
     fit = Fit['conf']
-    #f0 = 0
     logs = make_logs(p,Fit)
     Del =  p['MDs0phys']- p['MDphys']
     if p['a_{0}'.format(fit)] != 0:
@@ -484,30 +485,11 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
         MHs0 = p['MH_{0}_m{1}'.format(fit,mass)] + Del
     pole = 1-(qsq/MHs0**2)
     f0pole0 = 1.0 
-    #z  = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])# need to change this for B to K
-    #z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
-    #if newdata:
-    #    logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
-    #if const:
-    #    logsBK = 1 - ( (9/8) * p['g']**2 * 1/(10*p['slratio']) * ( gv.log(1/(10*p['slratio'])) ) )
-    #    z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
-    #for n in range(Npow):
-    #    if const and gs ==None:
-    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,const=const)
-    #        f0 += (logsBK/f0pole0) * an * z0const**n
-    #    elif newdata and gs ==None:
-    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,newdata=newdata)
-    #        f0 += logsBsEtas/(1-qsq/(p['MBs0phys']**2)) * an * z**n
-    #    elif newdata == False and const == False and gs ==None:
-    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same)
-    #        f0 += (logs/pole) * an * z**n
-    #    elif gs ==None:
-    #        print('Error in make_f0_BK(): newdata = {0}'.format(newdata))
     if gs != None:
         qsq = qsq/p['a_{0}'.format(fit)]**2
         f0 = 0
         N = (gs['gsval0'](qsq)*p['deltasval_{0}'.format(fit)] + gs['glval0'](qsq)*p['deltalval_{0}'.format(fit)] + gs['gs0'](qsq)*p['deltas_{0}'.format(fit)] + gs['gl0'](qsq)*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + gs['gc0'](qsq) * (p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys']
-        f0 = (logs/pole) * ( p['A0'] + p['B0']*qsq  + gs['g00'](qsq) + N + p['C0']*qsq**2)
+        f0 = (logs/pole) * (gs['g00'](qsq)+ N)#( p['A0'] + p['B0']*qsq  + gs['g00'](qsq) + N )#+ p['C0']*qsq**2)
         for j in range(1,Nijk):
             for k in range(1):#Nijk):
                 f0 += (logs/pole) * gs['gma{0}{1}0'.format(j,k)](qsq) * (amh/np.pi)**int(2*j)  * (LQCD*p['a_{0}'.format(fit)]/np.pi)**int(2*k) 
@@ -517,47 +499,14 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
 
 def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,const2=False,gs=None):
     fit = Fit['conf']
-    #fp = 0
-    #fp0 = 0
-    #f00 = 0
     logs = make_logs(p,Fit)
     MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p,p['a_{0}'.format(fit)])
-    #z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
-    #z = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)])
     pole = 1-(qsq/MHsstar**2)
-    #fppole0 = 1.0
-    #f0pole0 = 1.0
-    #if newdata:
-    #    logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
-    #if const or const2:
-    #    logsBK = 1 - ( (9/8) * p['g']**2 * 1/(10*p['slratio']) * ( gv.log(1/(10*p['slratio'])) ) )
-    #if const:
-    #    z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
-    #for n in range(Npow):
-    #    if const==True and const2 ==False and newdata ==False and gs ==None:
-    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,const=const)
-    #        fp += (logsBK/fppole0) * an  * (z0const**n - (n/Npow) * (-1)**(n-Npow) *  z0const**Npow)
-    #    elif newdata == True and const ==False and const2 ==False and gs ==None:
-    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,newdata=newdata)
-    #        fp += logsBsEtas/(1-qsq/(p['MBsstarphys']**2)) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
-    #    elif const2==True and const ==False and newdata==False and gs ==None:
-    #        an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same)
-    #        fp += (logs/pole) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
-    #        anp0 = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,const2=const2)
-    ##        fp0 += (logsBK/fppole0) * anp0  * (z0**n - (n/Npow) * (-1)**(n-Npow) *  z0**Npow)
-     #       an00 = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,const2=const2)
-     #       f00 += (logsBK/f0pole0) * an00 * z0**n
-     #   elif newdata == False and const2 ==False and const ==False and gs ==None:
-     #       an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same)
-     #       fp += (logs/pole) * an  * (z**n - (n/Npow) * (-1)**(n-Npow) *  z**Npow)
-     #   elif gs ==None:
-     #       print('Error in make_fp_BK(): newdata = {0} const = {1} const2 = {2}'.format(newdata,const,const2))
-    #fp = fp + f00 - fp0
     if gs != None:
         qsq = qsq/p['a_{0}'.format(fit)]**2
         fp = 0 
         N = (gs['gsvalp'](qsq)*p['deltasval_{0}'.format(fit)] + gs['glvalp'](qsq)*p['deltalval_{0}'.format(fit)] + gs['gsp'](qsq)*p['deltas_{0}'.format(fit)] + gs['glp'](qsq)*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + gs['gcp'](qsq) * (p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys']
-        fp = (logs/pole) * ( p['Ap'] + p['Bp']*qsq + gs['g0p'](qsq) + N  + p['Cp']*qsq**2)
+        fp = (logs/pole) *  (gs['g0p'](qsq) + N) #( p['Ap'] + p['Bp']*qsq + gs['g0p'](qsq) + N)#  + p['Cp']*qsq**2)
         for j in range(1,Nijk):
             for k in range(1):#Nijk):
                 fp += (logs/pole) * gs['gma{0}{1}p'.format(j,k)](qsq) * (amh/np.pi)**int(2*j)  * (LQCD*p['a_{0}'.format(fit)]/np.pi)**int(2*k)
@@ -613,7 +562,7 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
                         models['f0_{0}'.format(tag)] = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,p['qsq_{0}'.format(tag)],t_0,mass,fpf0same,float(mass),gs=gs) #second mass is amh
                     if 'fp_{0}'.format(tag) in f:
                         models['fp_{0}'.format(tag)] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,p['qsq_{0}'.format(tag)],t_0,mass,fpf0same,float(mass),const2=const2,gs=gs) #second mass is amh
-        models['sp_const'] = gs['g00'](0) - gs['g0p'](0)  + p['A0']  - p['Ap']
+        models['sp_const'] = gs['g00'](0) - gs['g0p'](0)#  + p['A0']  - p['Ap']
                         
         return(models)
     #################################################
@@ -625,7 +574,7 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
     #if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
     #    p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     p0 = None    
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, svdcut=1e-3, fcn=fcn,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=5000, tol=(1e-6,0.0,0.0),debug=True,fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, svdcut=1e-3, fcn=fcn,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=5000, tol=(1e-8,0.0,0.0),debug=True,fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
     #fit2, w = lsqfit.empbayes_fit(1.1, fitargs)
@@ -695,8 +644,8 @@ def make_spline_f0_fp_physpoint(p,Fit,qsq):
     pole0 = 1 - qsq/(p['MDs0phys']**2)
     polep = 1 - qsq/(p['MDsstarphys']**2)
     logs = make_logs(p,Fit)
-    f0 = (logs/pole0) * ( p['A0'] + p['B0']*qsq + g00 + p['C0']*qsq**2   )
-    fp = (logs/polep) * ( p['Ap'] + p['Bp']*qsq + g0p + p['Cp']*qsq**2   )
+    f0 = (logs/pole0) * g00#( p['A0'] + p['B0']*qsq + g00)# + p['C0']*qsq**2   )
+    fp = (logs/polep) * g0p#( p['Ap'] + p['Bp']*qsq + g0p)# + p['Cp']*qsq**2   )
     return(f0,fp)
     
 
@@ -714,11 +663,13 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
     HFLAV= gv.gvar('0.7180(33)')# from #1909.12524 p318
-    Vcsq20 = HFLAV/fp0
+    correction =  gv.sqrt(deltaEMD02*etaEW2)
+    Vcsq20 = HFLAV/(fp0*correction)
     terr = Vcsq20.partialsdev(fp0)
     eerr = Vcsq20.partialsdev(HFLAV)
+    cerr = Vcsq20.partialsdev(correction)
     print('Vcs at q^2=0 = {0}'.format(Vcsq20))
-    print('Theory error = {0:.4f} Exp error = {1:.4f} Total = {2:.4f}'.format(terr,eerr,np.sqrt(eerr**2+terr**2)))
+    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction errror = {2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
     return()
 
 ######################################################################################################
@@ -830,10 +781,14 @@ def comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
 
 def total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BESpars,BaBarpars):
     total = []
-    total.extend(Cleo1V2)
-    total.extend(Cleo2V2)
-    total.extend(BESV2)
-    total.extend(BaBarV2)
+    Dpm = deltaEMDpm2*etaEW2
+    D0 = deltaEMD02*etaEW2
+    total.extend(np.array(Cleo1V2)/D0)
+    total.extend(np.array(Cleo2V2)/Dpm)
+    total.extend(np.array(BESV2)/D0)
+    total.extend(np.array(BaBarV2)/D0)
+    wfit = lsqfit.wavg(total)
+    print('chi^2 for average:{0:.2f}'.format(wfit.chi2/wfit.dof))
     av = gv.sqrt(lsqfit.wavg(total))
     print('Average V_cs = ', av)
     ints = []
@@ -847,7 +802,8 @@ def total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BE
     pars.extend(BaBarpars)
     terr = av.partialsdev(tuple(ints))
     eerr = av.partialsdev(tuple(pars))
-    print('Theory error = {0:.4f} Exp error = {1:.4f} Total = {2:.4f}'.format(terr,eerr,np.sqrt(eerr**2+terr**2)))
+    cerr = av.partialsdev(tuple([Dpm,D0]))
+    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction error ={2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
     return(av)
 
 ##################################################################################################
