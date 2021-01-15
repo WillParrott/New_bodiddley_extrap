@@ -6,6 +6,7 @@ import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
 from functionsDK import *
 from plottingDK import *
+#matplotlib.use('Agg')
 plt.rc("font",**{"size":18})
 import collections
 import copy
@@ -220,7 +221,7 @@ cvalpri ='0.0(1.0)'#1.0
 rhopri ='0.0(1.0)'#1.0
 DoFit = True
 Npow = 3 #3
-Nijk = 3 #3
+Nijk = 2 #3
 Nm = 0 # no longer in use
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
@@ -250,8 +251,8 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
 plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)

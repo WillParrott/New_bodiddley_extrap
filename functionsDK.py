@@ -4,7 +4,7 @@ import lsqfit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
-
+#matplotlib.use('Agg')
 plt.rc("font",**{"size":18})
 import collections
 import copy
@@ -68,7 +68,9 @@ deltaFVUF = gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
 deltaFVFs = deltaFVF#gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVSFs = deltaFVSF#gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVUFs = deltaFVUF#gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
-
+etaEW2 = gv.gvar('1.009(2)')**2
+deltaEMD02 = gv.gvar('1.00(1)')
+deltaEMDpm2 = gv.gvar('1.000(5)')
 #x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2 
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
@@ -581,6 +583,7 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
     fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-12 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),debug=True,fitter='gsl_multifit', alg='subspace2D', solver='cholesky' )
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
+    print('chi^2/dof = {0:.3f} Q = {1:.3f} logGBF = {2:.2f}'.format(fit.chi2/fit.dof,fit.Q,fit.logGBF))
     #fit2, w = lsqfit.empbayes_fit(1.1, fitargs)
     #print(fit2.format(True))
     #print(w)
@@ -657,11 +660,13 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
     HFLAV= gv.gvar('0.7180(33)')# from #1909.12524 p318
-    Vcsq20 = HFLAV/fp0
+    correction =  gv.sqrt(deltaEMD02*etaEW2)
+    Vcsq20 = HFLAV/(fp0*correction)
     terr = Vcsq20.partialsdev(fp0)
     eerr = Vcsq20.partialsdev(HFLAV)
+    cerr = Vcsq20.partialsdev(correction)
     print('Vcs at q^2=0 = {0}'.format(Vcsq20))
-    print('Theory error = {0:.4f} Exp error = {1:.4f} Total = {2:.4f}'.format(terr,eerr,np.sqrt(eerr**2+terr**2)))
+    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction error = {2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
     return()
 
 ######################################################################################################
@@ -769,10 +774,12 @@ def comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
 
 def total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BESpars,BaBarpars):
     total = []
-    total.extend(Cleo1V2)
-    total.extend(Cleo2V2)
-    total.extend(BESV2)
-    total.extend(BaBarV2)
+    Dpm = deltaEMDpm2*etaEW2
+    D0 = deltaEMD02*etaEW2
+    total.extend(np.array(Cleo1V2)/D0)
+    total.extend(np.array(Cleo2V2)/Dpm)
+    total.extend(np.array(BESV2)/D0)
+    total.extend(np.array(BaBarV2)/D0)
     av = gv.sqrt(lsqfit.wavg(total))
     print('Average V_cs = ', av)
     ints = []
@@ -786,7 +793,8 @@ def total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BE
     pars.extend(BaBarpars)
     terr = av.partialsdev(tuple(ints))
     eerr = av.partialsdev(tuple(pars))
-    print('Theory error = {0:.4f} Exp error = {1:.4f} Total = {2:.4f}'.format(terr,eerr,np.sqrt(eerr**2+terr**2)))
+    cerr = av.partialsdev(tuple([Dpm,D0]))
+    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction error ={2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
     return(av)
 
 ##################################################################################################
@@ -798,10 +806,10 @@ def comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     Cleo2av = lsqfit.wavg(Cleo2V2)
     BESav = lsqfit.wavg(BESV2)
     BaBarav = lsqfit.wavg(BaBarV2)
-    print('Cleo |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(Cleo1av))
-    print('Cleo |V_cs|^2 D^+ to K^0 sqrt(weighted average) = ',gv.sqrt(Cleo2av))
-    print('BES |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BESav))
-    print('BaBar |V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BaBarav))
+    print('Cleo correction*|V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(Cleo1av))
+    print('Cleo correction*|V_cs|^2 D^+ to K^0 sqrt(weighted average) = ',gv.sqrt(Cleo2av))
+    print('BES correction*|V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BESav))
+    print('BaBar correction*|V_cs|^2 D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BaBarav))
     av = total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BESpars,BaBarpars)
     d = collections.OrderedDict()
     d['Cleo1V2'] = Cleo1V2
