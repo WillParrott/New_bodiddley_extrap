@@ -207,21 +207,22 @@ thpts['UF'] = ['S','V']
 #thpts['UFs'] = ['S','V']
 addrho = False #like this for DK
 fpf0same = True
-constraint = False#True #add constraint the f0(0)=fp(0)
+constraint = False #add constraint the f0(0)=fp(0)
 constraint2 = False
 svdnoise = False
 priornoise = False
 FitNegQsq = True
-dpri = '0.0(1.0)'#1.0
-d000npri = '0.0(2.0)'# backbone of a without disc effects
-di000pri = '0.0(1.0)'#1.0'0.0(5.0)'very small because no real mass dependence
-di10npri = '0.0(1.0)' # 0.5 as expect to be smaller
+prifac = 1.0
+dpri = '0.0({0})'.format(1.0*prifac)#1.0
+d000npri = '0.0({0})'.format(2.0*prifac)# backbone of a without disc effects
+di000pri = '0.0({0})'.format(1.0*prifac)#1.0'0.0(5.0)'very small because no real mass dependence
+di10npri = '0.0({0})'.format(1.0*prifac) # 0.5 as expect to be smaller
 cpri = '0.0(0.5)' #0.3
 cvalpri ='0.0(1.0)'#1.0
 rhopri ='0.0(1.0)'#1.0
 DoFit = True
 Npow = 3 #3
-Nijk = 2 #3
+Nijk = 3 #3
 Nm = 0 # no longer in use
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
@@ -249,7 +250,9 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Z_V_plots(Fits,fs_data)
 #plot_gold_non_split(Fits)
 #plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
-plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+#plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+#plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+#R_mu_e_integrals(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #speed_of_light(Fits)
 #f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)

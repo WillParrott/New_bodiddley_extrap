@@ -30,15 +30,15 @@ Metas_UF = gv.gvar('0.154107(88)') #from new BsEast fit
 Metas_Fs = Metas_F#gv.gvar('0.314015(89)') #from BsEtas fits
 Metas_SFs = Metas_SF#gv.gvar('0.207021(65)')#from new BsEtas fit
 Metas_UFs = Metas_UF#gv.gvar('0.154107(88)') #from new BsEast fit
-MKphys = gv.gvar('0.497611(13)') #PDG K^0 doing B0 to K0 
-#MKphys = gv.gvar('0.493677(13)') #PDG K+-
+MKphys0 = gv.gvar('0.497611(13)') #PDG K^0 doing B0 to K0 
+MKphys = gv.gvar('0.493677(13)') #PDG K+-
 MBsphys = gv.gvar('5.36688(17)') # PDG
 MDsphys = gv.gvar('1.968340(70)')  #PDG
 MDsstarphys = gv.gvar('2.1122(4)')  #PDG 
-MBphys = gv.gvar('5.27965(12)') # PDG this is B0
-#MBphys = gv.gvar('5.27934(12)') #PDG B+-
-#MDphys = gv.gvar('1.86965(5)')  #PDG D+-
-MDphys = gv.gvar('1.86483(5)')  #PDG D0 
+MBphys0 = gv.gvar('5.27965(12)') # PDG this is B0
+MBphys = gv.gvar('5.27934(12)') #PDG B+-
+MDphys = gv.gvar('1.86965(5)')  #PDG D+-
+MDphys0 = gv.gvar('1.86483(5)')  #PDG D0 
 Mpiphys = gv.gvar('0.1349770(5)')  #PDG
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
 #tensornorm = gv.gvar('1.09024(56)') # from Dan
@@ -71,7 +71,13 @@ deltaFVUFs = deltaFVUF#gv.gvar('0.027538708(37)')#753275(1)') #from code Chris s
 ginf = gv.gvar('0.48(11)') #0310050
 gB = (gv.gvar('0.56(8)') + gv.gvar('0.449(51)') + gv.gvar('0.492(29)'))/3# 0.56(8) 1506.06413, 0.449(51) 1109.2480  0.492(29) 1404.6951
 gD = gv.gvar('0.570(6)') # 1304.5009
-#x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2 
+#x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2
+tauB0GeV = gv.gvar('1.519(4)')/(6.582119569*1e-13)#1909.12524
+tauBpmGeV = gv.gvar('1.638(4)')/(6.582119569*1e-13)#1909.12524
+m_e = gv.gvar('0.5109989461(31)*1e-3').mean#GeV
+m_mu = gv.gvar('105.6583745(24)*1e-3').mean#GeV
+m_tau = gv.gvar('1.77686(12)')
+m_tau = gv.gvar('1.77686(12)').mean
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
@@ -665,10 +671,11 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
     p0 = None
     if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
         p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
-    #p0 = None    
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-5 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
+    #p0 = None
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-12 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
+    print('chi^2/dof = {0:.3f} Q = {1:.3f} logGBF = {2:.2f}'.format(fit.chi2/fit.dof,fit.Q,fit.logGBF))
     #fit2, w = lsqfit.empbayes_fit(1.1, fitargs)
     #print(fit2.format(True))
     #print("w = ",w)
@@ -676,14 +683,18 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
 
 ######################################################################################################
 
-def make_p_physical_point_BK(pfit,Fits):
+def make_p_physical_point_BK(pfit,Fits,B0=False):
     #only need to evaluate at one Fit one mass but change all anyway
     # everything should now be in GeV
     p = gv.BufferDict()
     for Fit in Fits:
         fit = Fit['conf']
         p['a_{0}'.format(fit)] = 0
-        p['MK_{0}'.format(fit)] = pfit['MKphys']
+        if B0:
+            p['MK_{0}'.format(fit)] = MKphys0
+            p['MKphys'] = MKphys0
+        else:
+            p['MK_{0}'.format(fit)] = pfit['MKphys']
         p['LQCD_{0}'.format(fit)] = LQCD
         p['Metac_{0}'.format(fit)] = pfit['Metacphys']
         p['Metas_{0}'.format(fit)] = Metasphys
@@ -695,7 +706,11 @@ def make_p_physical_point_BK(pfit,Fits):
         p['deltaFV_{0}'.format(fit)] = 0
         p['MD_{0}'.format(fit)] = pfit['MDphys']
         for mass in Fit['masses']:
-            p['MH_{0}_m{1}'.format(fit,mass)] = pfit['MBphys']
+            if B0:
+                p['MH_{0}_m{1}'.format(fit,mass)] = MBphys0
+                p['MBphys'] = MBphys0
+            else:
+                p['MH_{0}_m{1}'.format(fit,mass)] = pfit['MBphys']
     for key in pfit:
         if key not in p:
             p[key] = pfit[key]
@@ -829,7 +844,7 @@ def make_h(qsq,m):
 
 
 ##############################################################################################################
-alphaEW = 1/gv.gvar('128.957(20)')
+alphaEW = 1/gv.gvar('128.957(20)')  #1/0.027515±0.000149 0807.4206
 VtbVts = gv.gvar('0.04086(76)')#CKMfitter
 m_c = gv.gvar('1.27(2)')#pdg
 m_b = gv.gvar('4.18(3)')#pdg
@@ -875,12 +890,29 @@ def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     return(al,cl)
 
 #####################################################################
+def check_gaps(qsq,gaps):
+    gap1 = [8.68,10.11]
+    gap2 = [12.86,14.18]
+    if gaps:
+        zero = False
+        if gap1[0] <= qsq < gap1[1]:
+            zero = True
+        if gap2[0] <= qsq < gap2[1]:
+            zero = True
+    elif gaps == False:
+        zero = False
+    return(zero)
+    
 
-def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    iters = 25
+def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=25,gaps=False):
+    iters = iters
     def integrand(qsq):
         al,cl = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
         integrand = 2*al + 2*cl/3
+        if np.isnan(integrand.mean):
+            integrand = 0
+        if check_gaps(qsq,gaps):
+            integrand = 0
         return(integrand)
     del_qsq =  (qsq_max-qsq_min) /iters
     funcs = integrand(qsq_min) + integrand(qsq_max)
@@ -915,13 +947,6 @@ def integrate_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,con
 
 def test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits)
-    m_e = 0.510998950 * 1e-3 
-    m_mu = 105.6583755 * 1e-3
-    m_tau = 1.77866
-    tauB0 = gv.gvar('1.519(4)') #1e-12s # HFLAV 
-    tauBpm = gv.gvar('1.638(4)') #1e-12s # HFLAV 
-    tauB0GeV = tauB0/(6.582119569*1e-13)
-    tauBpmGeV = tauBpm/(6.582119569*1e-13)
     qsq_max = qsqmaxphysBK.mean
     #for qsq in np.linspace(((2*m_l)**2).mean,qsqmaxphysBK.mean,100):
     ########## B ########################################
@@ -951,13 +976,6 @@ def test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 def comp_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits)
-    m_e = 0.510998950 * 1e-3 
-    m_mu = 105.6583755 * 1e-3
-    m_tau = 1.77866
-    tauB0 = gv.gvar('1.519(4)') #1e-12s # HFLAV 
-    tauBpm = gv.gvar('1.638(4)') #1e-12s # HFLAV 
-    tauB0GeV = tauB0/(6.582119569*1e-13)
-    tauBpmGeV = tauBpm/(6.582119569*1e-13)
     bin_starts = [1,4.3,10.09,14.18,16,16]
     bin_ends = [6,8.68,12.86,16,18,qsqmaxphysBK.mean]
     B = []
@@ -990,11 +1008,6 @@ def comp_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 def comp_by_bin2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #results from 1403.8044 
     p = make_p_physical_point_BK(pfit,Fits) 
-    m_mu = 105.6583755 * 1e-3
-    tauB0 = gv.gvar('1.519(4)') #1e-12s # HFLAV 
-    tauBpm = gv.gvar('1.638(4)') #1e-12s # HFLAV 
-    tauB0GeV = tauB0/(6.582119569*1e-13)
-    tauBpmGeV = tauBpm/(6.582119569*1e-13)
     bin_starts_p = [0.1,1.1,2,3,4,5,6,7,11,11.8,15,16,17,18,19,20,21,1.1,15]
     bin_ends_p =   [0.98,2,3,4,5,6,7,8,11.8,12.5,16,17,18,19,20,21,22,6,22]
     bin_starts_0 = [0.1,2,4,6,11,15,17,1.1,15]
@@ -1019,13 +1032,6 @@ def comp_by_bin2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 def comp_by_bin3(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits)
-    m_e = 0.510998950 * 1e-3 
-    m_mu = 105.6583755 * 1e-3
-    m_tau = 1.77866
-    tauB0 = gv.gvar('1.519(4)') #1e-12s # HFLAV 
-    tauBpm = gv.gvar('1.638(4)') #1e-12s # HFLAV 
-    tauB0GeV = tauB0/(6.582119569*1e-13)
-    tauBpmGeV = tauBpm/(6.582119569*1e-13)
     bin_starts = [14.18,14.18,16,16]
     bin_ends = [qsqmaxphysBK.mean,16,18,qsqmaxphysBK.mean]
     Rtaumu = []

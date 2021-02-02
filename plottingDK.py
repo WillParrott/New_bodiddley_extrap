@@ -756,31 +756,31 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     y = []
     for i in range(len(d['Cleo1V2'])):
         x.append((d['Cleobins'][i]+d['Cleobins'][i+1])/2)
-        y.append(gv.sqrt(d['Cleo1V2'][i]))
+        y.append(gv.sqrt(d['Cleo1V2'][i]/cor2))
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ko' ,mfc='none',label='CLEO0',alpha=0.8)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ko' ,mfc='none',label="CLEO '09 ($D^0$)",alpha=0.8)
     x = []
     y = []
     for i in range(len(d['Cleo2V2'])):
         x.append((d['Cleobins'][i]+d['Cleobins'][i+1])/2)
-        y.append(gv.sqrt(d['Cleo2V2'][i]))
+        y.append(gv.sqrt(d['Cleo2V2'][i]/cor2))
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='rs' ,mfc='none',label='CLEO+',alpha=0.8)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='rs' ,mfc='none',label="CLEO '09 ($D^+$)",alpha=0.8)
     x = []
     y = []
     for i in range(len(d['BESV2'])):
         x.append((d['BESbins'][i]+d['BESbins'][i+1])/2)
-        y.append(gv.sqrt(d['BESV2'][i]))
+        y.append(gv.sqrt(d['BESV2'][i]/cor2))
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='b^' ,mfc='none',label='BES',alpha=0.8)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='b^' ,mfc='none',label="BES '15A",alpha=0.8)
     x = []
     y = []
     for i in range(len(d['BaBarV2'])):
         x.append((d['BaBarbins'][i]+d['BaBarbins'][i+1])/2)
-        y.append(gv.sqrt(d['BaBarV2'][i]))
+        y.append(gv.sqrt(d['BaBarV2'][i]*Banorm/cor2))
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='gd' ,mfc='none',label='BaBar',alpha=0.8)
-    av = (d['average'])
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='gd' ,mfc='none',label="BaBar '06",alpha=0.8)
+    av = d['average']
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], linestyle ='-',color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
@@ -810,7 +810,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         terr.append(d['Cleo1terr'][i])
         eerr.append(d['Cleo1eerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ko' ,mfc='k',label='ClEO0',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ko' ,mfc='k',label="CLEO '09 ($D^0$)",alpha=0.8,capsize=capsize,lw=lw)
     plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
     plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
     
@@ -819,13 +819,13 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
-    plt.ylabel(r'$\eta^2_{\mathrm{EW}}\delta^2_{\mathrm{EM}}|V_{cs}|^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$',fontsize=fontsizelab)#r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$'
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.77,1.21])
+    plt.ylim([0.74,1.23])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
@@ -845,7 +845,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         terr.append(d['Cleo2terr'][i])
         eerr.append(d['Cleo2eerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ks' ,mfc='k',label='CLEO+',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ks' ,mfc='k',label="CLEO '09 ($D^+$)",alpha=0.8,capsize=capsize,lw=lw)
     plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
     plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
     av = d['Cleo2av']
@@ -853,13 +853,13 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
-    plt.ylabel(r'$\eta^2_{\mathrm{EW}}\delta^2_{\mathrm{EM}}|V_{cs}|^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.77,1.21])
+    plt.ylim([0.74,1.23])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
@@ -879,7 +879,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         terr.append(d['BESterr'][i])
         eerr.append(d['BESeerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='k^' ,mfc='k',label='BES',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='k^' ,mfc='k',label="BES '15A",alpha=0.8,capsize=capsize,lw=lw)
     plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
     plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
     av = d['BESav']
@@ -887,19 +887,53 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
-    plt.ylabel(r'$\eta^2_{\mathrm{EW}}\delta^2_{\mathrm{EM}}|V_{cs}|^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.77,1.21])
+    plt.ylim([0.74,1.23])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
     plt.tight_layout()
     plt.savefig('DKPlots/BESVcsbybin.pdf')
+    plt.close()
+    #############################################################################################
+    plt.figure(figsize=figsize)
+    x = []
+    y = []
+    terr = []
+    eerr = []
+    for i in range(len(d['BESDpV2'])):
+        x.append((d['BESDpbins'][i]+d['BESDpbins'][i+1])/2)
+        y.append((d['BESDpV2'][i]))
+        terr.append(d['BESDpterr'][i])
+        eerr.append(d['BESDpeerr'][i])
+    ymean,yerr = unmake_gvar_vec(y)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='k^' ,mfc='k',label="BES '17",alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    av = d['BESDpav']
+    plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
+    plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel(r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.xlim([0,qsqmaxphysDK.mean])
+    plt.ylim([0.74,1.23])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.tight_layout()
+    plt.savefig('DKPlots/BESDpVcsbybin.pdf')
     plt.close()
     ###########################################################################################
     plt.figure(figsize=figsize)
@@ -909,11 +943,11 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     eerr = []
     for i in range(len(d['BaBarV2'])):
         x.append((d['BaBarbins'][i]+d['BaBarbins'][i+1])/2)
-        y.append((d['BaBarV2'][i]))
+        y.append((d['BaBarV2'][i]*Banorm))
         terr.append(d['BaBarterr'][i])
         eerr.append(d['BaBareerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='kd' ,mfc='k',label='BaBar',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='kd' ,mfc='k',label="BaBar '06",alpha=0.8,capsize=capsize,lw=lw)
     plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
     plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
     av = d['BaBarav']
@@ -921,13 +955,13 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
-    plt.ylabel(r'$\eta^2_{\mathrm{EW}}\delta^2_{\mathrm{EM}}|V_{cs}|^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.77,1.21])
+    plt.ylim([0.74,1.23])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
@@ -938,73 +972,191 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     ############################################################################################
     ##compare V_cs
     plt.figure(figsize=figsize)
+    VcsB = plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
     p = make_p_physical_point_DK(pfit,Fits)
     fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
     HFLAV= gv.gvar('0.7180(33)')# from #1909.12524 p318
-    D0 = deltaEMD02*etaEW2
-    Dpm = deltaEMDpm2*etaEW2
-    Vcsq20 = HFLAV/(fp0*gv.sqrt(D0))
-    av = (d['average'])
+    Vcsq20 = HFLAV/(fp0*gv.sqrt(cor2))
+    av = d['average']
     ETMC1 = gv.gvar('0.945(38)')#1706.03017
     ETMC2 = gv.gvar('0.970(33)')#1706.03657
     HPQCD1 = gv.gvar('0.961(26)')#1008.4562
     HPQCD2 = gv.gvar('0.963(15)')#1305.1462
     FERMI = gv.gvar('0.969(105)')#0408306
-    plt.errorbar(av.mean, 7, xerr=av.sdev,ms=ms,fmt='bd' ,capsize=capsize,lw=lw)
-    plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[8,8], color='b',alpha=alpha/2)
-    plt.errorbar(Vcsq20.mean, 6, xerr=Vcsq20.sdev,ms=ms,fmt='rd' ,capsize=capsize,lw=lw)
-    plt.errorbar(ETMC2.mean, 5, xerr=ETMC2.sdev,ms=ms,fmt='b*' ,capsize=capsize,lw=lw)
-    plt.errorbar(ETMC1.mean, 4, xerr=ETMC1.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
-    plt.plot([0.8,1.1],[3.5,3.5],color='k')
-    plt.errorbar(HPQCD2.mean, 3, xerr=HPQCD2.sdev,ms=ms,fmt='bs' ,capsize=capsize,lw=lw)
-    plt.errorbar(HPQCD1.mean, 2, xerr=HPQCD1.sdev,ms=ms,fmt='ro' ,capsize=capsize,lw=lw)
-    plt.errorbar(FERMI.mean, 1, xerr=FERMI.sdev,ms=ms,fmt='r^' ,capsize=capsize,lw=lw)
-    plt.text(0.87,2.0,'$N_f=2+1$',fontsize=fontsizelab)
-    plt.text(0.87,5.5,'$N_f=2+1+1$',fontsize=fontsizelab)
+    Vcssl = gv.gvar('0.939(38)') #Current PDG sl value
+    plt.errorbar(av.mean, 9, xerr=av.sdev,ms=ms,fmt='bd' ,capsize=capsize,lw=lw)
+    plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[10,10], color='b',alpha=alpha/2)
+    plt.errorbar(Vcsq20.mean, 8, xerr=Vcsq20.sdev,ms=ms,fmt='rd' ,capsize=capsize,lw=lw)
+    plt.errorbar(VcsB.mean, 7, xerr=VcsB.sdev,ms=ms,fmt='gd' ,capsize=capsize,lw=lw)
+    plt.errorbar(ETMC2.mean, 6, xerr=ETMC2.sdev,ms=ms,fmt='b*' ,capsize=capsize,lw=lw)
+    plt.errorbar(ETMC1.mean, 5, xerr=ETMC1.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
+    plt.plot([0.8,1.1],[4.5,4.5],color='k')
+    plt.errorbar(HPQCD2.mean, 4, xerr=HPQCD2.sdev,ms=ms,fmt='bs' ,capsize=capsize,lw=lw)
+    plt.errorbar(HPQCD1.mean, 3, xerr=HPQCD1.sdev,ms=ms,fmt='ro' ,capsize=capsize,lw=lw)
+    plt.errorbar(FERMI.mean, 2, xerr=FERMI.sdev,ms=ms,fmt='r^' ,capsize=capsize,lw=lw)
+    plt.plot([0.8,1.1],[1.5,1.5],color='k')
+    plt.errorbar(Vcssl.mean, 1, xerr=Vcssl.sdev,ms=ms,fmt='kh' ,capsize=capsize,lw=lw)
+    plt.text(0.87,3.0,'$N_f=2+1$',fontsize=fontsizelab, va='center')
+    plt.text(0.87,7.0,'$N_f=2+1+1$',fontsize=fontsizelab, va='center')
     plt.xlabel('$|V_{cs}|$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
     plt.xlim([0.85,1.085])
-    plt.ylim([0.5,7.5])
-    plt.gca().set_yticks([7,6,5,4,3,2,1])
-    plt.gca().set_yticklabels(['This work','This work',"ETMC '17","ETMC '17","HPQCD '13","HPQCD '10","Fermilab/MILC '04"])#'arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
+    plt.ylim([0.5,9.5])
+    plt.gca().set_yticks([9,8,7,6,5,4,3,2,1])
+    plt.gca().set_yticklabels(["HPQCD '21","HPQCD '21","HPQCD '21","ETMC '17","ETMC '17","HPQCD '13","HPQCD '10","Fermilab/MILC '04","PDG '20 SL av."])#'arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$\frac{d\Gamma}{dq^2}$'),Patch(facecolor='r', edgecolor='r',label=r'$|V_{cs}|f_+(0)$'),Patch(facecolor='g', edgecolor='g',label=r'$\Gamma$')]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
     plt.tight_layout()
     plt.savefig('DKPlots/Vcscomp.pdf')
     plt.close()
+
+############################################################################################
+
+    plt.figure(figsize=figsize)
+    Vcsl = gv.gvar('0.983(18)') #PDG on decay constants 0.992(12) is other PDG value
+    Vusl = gv.gvar('0.2252(5)') #PDG
+    Vussl = gv.gvar('0.2231(7)') #PDG
+    Vts = gv.gvar('0.04189(93)') #1907.01025
+    Vud = gv.gvar('0.97370(14)') #PDG 
+    stuff1 = [Vcsl]#,Vcssl]
+    stuff2 = [Vusl,Vussl]
+    cols = ['r','b']
+    unitx = []
+    unity = []
+    #hatches = ['*','\\','x'] # patterns = ('-', '+', 'x', '\\', '*', 'o', 'O', '.')
+    
+    for i in range(len(stuff1)):
+        x = stuff1[i]
+        plt.fill_between([0.1,0.3],[x.mean-x.sdev,x.mean-x.sdev],[x.mean+x.sdev,x.mean+x.sdev], color=cols[i],alpha=alpha)
+    for i in range(len(stuff2)):
+        x = stuff2[i]
+        plt.fill_between([x.mean-x.sdev,x.mean+x.sdev],[0.8,0.8],[1.05,1.05], color=cols[i],alpha=alpha)
+    x = av
+    matplotlib.rcParams['hatch.linewidth'] = 2
+    plt.fill_between([0.1,0.3],[x.mean-x.sdev,x.mean-x.sdev],[x.mean+x.sdev,x.mean+x.sdev],linewidth=3, fc='none' ,edgecolor='b',hatch='x')
+    for i in np.linspace(0.1,0.3,nopts):
+        unitx.append(i)
+        unity.append(gv.sqrt(1-i**2-Vts**2))
+    unitymean,unitysdev = unmake_gvar_vec(unity)
+    plt.plot([0.1,0.3],[Vud.mean,Vud.mean],color='g',lw=5)
+    plt.plot(unitx, unitymean, color='k',linestyle='--',lw=5)
+    plt.xlabel('$|V_{us}|$',fontsize=fontsizelab)
+    plt.ylabel(r'$|V_{cs}|$',fontsize=fontsizelab)#r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$'
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.ylim([0.89,1.01])
+    #plt.xlim([0.17,0.29])
+    perc = 6
+    meany  = (av.mean+Vcsl.mean)/2 # +Vcssl)/3
+    meanx = (Vusl.mean+Vussl.mean)/2
+    plt.ylim([meany*(1-perc/100),meany*(1+perc/100)])
+    plt.xlim([meanx*(1-perc/100),meanx*(1+perc/100)])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.005))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.001))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.02))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'SL',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'L',alpha=alpha),Line2D([0], [0], color='g', lw=5, label=r'$V_{ud}$'),Patch(facecolor='none', edgecolor='b',hatch='x',label=r"HPQCD '21"),Line2D([0], [0], color='k',linestyle='--', lw=5, label='Unitarity')]
+    plt.legend(handles=handles,fontsize=fontsizeleg*0.9,frameon=False,ncol=2,loc='lower right')
+    plt.tight_layout()
+    plt.savefig('DKPlots/Vcsus.pdf')
+    plt.close()
+
+    plt.figure(figsize=figsize)
+    Vcdl = gv.gvar(0.2173,np.sqrt(0.0051**2+0.0007**2)) #PDG
+    Vcdsl = gv.gvar(0.2330,np.sqrt(0.0029**2+0.0133**2)) #PDG
+    Vcb = gv.gvar('0.0410(14)') #PDG
+    Vud = gv.gvar('0.97370(14)') #PDG 
+    stuff1 = [Vcsl]#,Vcssl]
+    stuff2 = [Vcdl,Vcdsl]
+    cols = ['r','b']
+    unitx = []
+    unity = []
+    #hatches = ['*','\\','x'] # patterns = ('-', '+', 'x', '\\', '*', 'o', 'O', '.')
+    
+    for i in range(len(stuff1)):
+        x = stuff1[i]
+        plt.fill_between([0.1,0.3],[x.mean-x.sdev,x.mean-x.sdev],[x.mean+x.sdev,x.mean+x.sdev], color=cols[i],alpha=alpha)
+    for i in range(len(stuff2)):
+        x = stuff2[i]
+        plt.fill_between([x.mean-x.sdev,x.mean+x.sdev],[0.5,0.5],[1.5,1.5], color=cols[i],alpha=alpha)
+    x = av
+    matplotlib.rcParams['hatch.linewidth'] = 2
+    plt.fill_between([0.1,0.3],[x.mean-x.sdev,x.mean-x.sdev],[x.mean+x.sdev,x.mean+x.sdev],linewidth=3, fc='none' ,edgecolor='b',hatch='x')
+    for i in np.linspace(0.1,0.3,nopts):
+        unitx.append(i)
+        unity.append(gv.sqrt(1-i**2-Vcb**2))
+    unitymean,unitysdev = unmake_gvar_vec(unity)
+    plt.plot([0.1,0.3],[Vud.mean,Vud.mean],color='g',lw=5)
+    plt.plot(unitx, unitymean, color='k',linestyle='--',lw=5)
+    plt.xlabel('$|V_{cd}|$',fontsize=fontsizelab)
+    plt.ylabel(r'$|V_{cs}|$',fontsize=fontsizelab)#r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$'
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.ylim([0.89,1.01])
+    #plt.xlim([0.17,0.29])
+    perc = 15
+    meany  = (av.mean+Vcsl.mean)/2 # +Vcssl)/3
+    meanx = (Vcdl.mean+Vcdsl.mean)/2
+    plt.ylim([meany*(1-perc/100),meany*(1+perc/100)])
+    plt.xlim([meanx*(1-perc/100),meanx*(1+perc/100)])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.01))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.005))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'SL',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'L',alpha=alpha),Line2D([0], [0], color='g', lw=5, label=r'$V_{ud}$'),Patch(facecolor='none', edgecolor='b',hatch='x',label=r"HPQCD '21"),Line2D([0], [0], color='k',linestyle='--', lw=5, label='Unitarity')]
+    plt.legend(handles=handles,fontsize=fontsizeleg*0.9,frameon=False,ncol=1,loc='lower left')
+    plt.tight_layout()
+    plt.savefig('DKPlots/Vcscd.pdf')
+    plt.close()
+
 ############################################################################################
     ##compare exps
     plt.figure(figsize=figsize)
     #p = make_p_physical_point_DK(pfit,Fits)
     #f00,fp0 = make_spline_f0_fp_physpoint(p,Fits[0],0)
     
-    CLEO0 = gv.sqrt(d['Cleo1av']/D0)
-    CLEOp = gv.sqrt(d['Cleo1av']/Dpm)
-    BES =  gv.sqrt(d['BESav']/D0)
-    BABAR = gv.sqrt(d['BaBarav']/D0)
+    CLEO0 =  gv.sqrt(d['Cleo1av']/cor2)
+    CLEOp =  gv.sqrt(d['Cleo2av']/cor2)
+    BES =   gv.sqrt(d['BESav']/cor2)
+    BESDp =   gv.sqrt(d['BESDpav']/cor2)
+    BABAR =  gv.sqrt(d['BaBarav']/cor2)
+    #av2 = gv.sqrt(lsqfit.wavg([d['Cleo1av'],d['Cleo2av'],d['BESav'],d['BaBarav']])/cor2)
+    plt.errorbar(BESDp.mean, 5, xerr=BESDp.sdev,ms=ms,fmt='ro',mfc='none' ,capsize=capsize,lw=lw)
+    plt.plot([0.9275,1.1],[4.5,4.5],color='k',linestyle='--')
+    plt.plot([0.8,0.8825],[4.5,4.5],color='k',linestyle='--')
     plt.errorbar(CLEOp.mean, 4, xerr=CLEOp.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
     plt.plot([0.8,1.1],[3.5,3.5],color='k')
-    plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[8,8], color='purple',alpha=alpha/2)
-    plt.errorbar(CLEO0.mean, 3, xerr=CLEO0.sdev,ms=ms,fmt='b*' ,capsize=capsize,lw=lw)    
-    plt.errorbar(BES.mean, 2, xerr=BES.sdev,ms=ms,fmt='bo' ,capsize=capsize,lw=lw)
+    plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[4.5,4.5], color='purple',alpha=alpha/2)
+    #plt.fill_between([av2.mean-av2.sdev,av2.mean+av2.sdev],[0,0],[8,8], color='g',alpha=alpha/2)
+    plt.errorbar(BES.mean, 3, xerr=BES.sdev,ms=ms,fmt='bo' ,capsize=capsize,lw=lw)
+    plt.errorbar(CLEO0.mean, 2, xerr=CLEO0.sdev,ms=ms,fmt='b*' ,capsize=capsize,lw=lw)    
     plt.errorbar(BABAR.mean, 1, xerr=BABAR.sdev,ms=ms,fmt='b^' ,capsize=capsize,lw=lw)
-    plt.text(0.99,2.0,r'$D^0\to{}K^-e^+\nu_e$',fontsize=fontsizelab)
-    plt.text(0.99,4.0,r'$D^+\to\bar{K}^0e^+\nu_e$',fontsize=fontsizelab)
+    plt.text(0.905,2.0,r'$D^0\to{}K^-e^+\nu_e$',fontsize=fontsizelab, va='center',ha='center')
+    plt.text(0.905,4.5,r'$D^+\to\bar{K}^0e^+\nu_e$',fontsize=fontsizelab, va='center',ha='center')
     plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab,va='center',ha='center')
     plt.xlabel('$|V_{cs}|$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([0.95,1.01])
-    plt.ylim([0.5,4.5])
-    plt.gca().set_yticks([4,3,2,1])
-    plt.gca().set_yticklabels(['CLEO+','CLEO0',"BES","BaBar"])#'arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
+    plt.xlim([0.875,1.01])
+    plt.ylim([0.5,5.5])
+    plt.gca().set_yticks([5,4,3,2,1])
+    plt.gca().set_yticklabels(["BES '17","CLEO '09","BES '15A","CLEO '09","BaBar '06"])#'arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.02))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.text(1.01,5.5,r'$\frac{d\Gamma}{dq^2}$',fontsize=fontsizelab*1.9,va='top',ha='right')
+    plt.plot([0.998,1.1],[4.5,4.5],color='k')
+    plt.plot([0.998,0.998],[4.5,5.5],color='k')
     plt.tight_layout()
     plt.savefig('DKPlots/Vcsexpcomp.pdf')
     plt.close()
@@ -1014,25 +1166,29 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     #p = make_p_physical_point_DK(pfit,Fits)
     #f00,fp0 = make_spline_f0_fp_physpoint(p,Fits[0],0)
     av = Vcsq20
-    # all from HFLAV 19 
-    BELLE6 = 1/fp0 * gv.gvar(0.6762,np.sqrt(0.0068**2+0.0214**2))/gv.sqrt(D0) #D0 0604049 
-    BABAR6 = 1/fp0 * gv.gvar(0.7211,np.sqrt(0.0069**2+0.0085**2))/gv.sqrt(D0) #D0 0704.0020
-    CLEOC9 = 1/fp0 * gv.gvar(0.7189,np.sqrt(0.0064**2+0.0048**2))/gv.sqrt(D0) #both combined 0906.2983
-    BES15A = 1/fp0 * gv.gvar(0.7195,np.sqrt(0.0035**2+0.0041**2))/gv.sqrt(D0) #D0 1508.07560
-    BES15B = 1/fp0 * gv.gvar(0.7370,np.sqrt(0.0060**2+0.0090**2))/gv.sqrt(Dpm) #Dp 1510.00308 
-    BES17  = 1/fp0 * gv.gvar(0.6983,np.sqrt(0.0056**2+0.0112**2))/gv.sqrt(Dpm) #Dp 1703.09084
-    BES19  = 1/fp0 * gv.gvar(0.7133,np.sqrt(0.0038**2+0.0030**2))/gv.sqrt(D0) #D0 muon 1810.03127
+    # all from HFLAV 19
+    BELLE6 = 1/fp0 * gv.gvar(0.6762,np.sqrt(0.0068**2+0.0214**2))/gv.sqrt(cor2) #D0 0604049 
+    BABAR6 = 1/fp0 * gv.gvar(0.7211,np.sqrt(0.0069**2+0.0085**2))/gv.sqrt(cor2) #D0 0704.0020
+    CLEOC9 = 1/fp0 * gv.gvar(0.7189,np.sqrt(0.0064**2+0.0048**2))/gv.sqrt(cor2) #both combined 0906.2983
+    BES15A = 1/fp0 * gv.gvar(0.7195,np.sqrt(0.0035**2+0.0041**2))/gv.sqrt(cor2) #D0 1508.07560
+    BES19  = 1/fp0 * gv.gvar(0.7133,np.sqrt(0.0038**2+0.0030**2))/gv.sqrt(cor2) #D0 muon 1810.03127
+    p = make_p_physical_point_DK(pfit,Fits,Dplus=True)
+    fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    BES15B = 1/fp0 * gv.gvar(0.7370,np.sqrt(0.0060**2+0.0090**2))/gv.sqrt(cor2) #Dp 1510.00308 
+    BES17  = 1/fp0 * gv.gvar(0.6983,np.sqrt(0.0056**2+0.0112**2))/gv.sqrt(cor2) #Dp 1703.09084
     plt.errorbar(BES17.mean, 7, xerr=BES17.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
     plt.errorbar(BES15B.mean, 6, xerr=BES15B.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
     plt.plot([0.8,1.1],[5.5,5.5],color='k')
-    plt.errorbar(BES19.mean, 5, xerr=BES19.sdev,ms=ms,fmt='b*' ,capsize=capsize,lw=lw)
+    plt.errorbar(BES19.mean, 5, xerr=BES19.sdev,ms=ms,fmt='g*' ,capsize=capsize,lw=lw)
+    plt.plot([0.8,1.1],[4.5,4.5],color='k')
     plt.errorbar(BES15A.mean, 4, xerr=BES15A.sdev,ms=ms,fmt='b*' ,capsize=capsize,lw=lw)
     plt.errorbar(CLEOC9.mean, 3, xerr=CLEOC9.sdev,ms=ms,fmt='bo' ,capsize=capsize,lw=lw)    
     plt.errorbar(BABAR6.mean, 2, xerr=BABAR6.sdev,ms=ms,fmt='bs' ,capsize=capsize,lw=lw)
     plt.errorbar(BELLE6.mean, 1, xerr=BELLE6.sdev,ms=ms,fmt='b^' ,capsize=capsize,lw=lw)
     plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[8,8], color='purple',alpha=alpha/2)
-    plt.text(0.88,3.0,r'$D^0\to{}K^-e^+\nu_e$',fontsize=fontsizelab)
-    plt.text(0.88,6.5,r'$D^+\to\bar{K}^0e^+\nu_e$',fontsize=fontsizelab)
+    plt.text(0.88,2.5,r'$D^0\to{}K^-e^+\nu_e$',fontsize=fontsizelab, va='center')
+    plt.text(0.88,5,r'$D^0\to{}K^-\mu^+\nu_{\mu}$',fontsize=fontsizelab, va='center')
+    plt.text(0.88,6.5,r'$D^+\to\bar{K}^0e^+\nu_e$',fontsize=fontsizelab, va='center')
     plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab, va='center',ha='center')
     #plt.text(0.95,1.5,r'Wt. average',fontsize=fontsizelab)
     plt.xlabel('$|V_{cs}|$',fontsize=fontsizelab)
@@ -1040,17 +1196,186 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([0.87,1.015])
+    plt.xlim([0.875,1.01])
     plt.ylim([0.5,7.5])
     plt.gca().set_yticks([7,6,5,4,3,2,1])
     plt.gca().set_yticklabels(["BES '17","BES '15B","BES '19","BES '15A","CLEO '09","BaBar '06","BELLE '06"])#'arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.02))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.text(1.01,7.5,r'$|V_{cs}|f_+(0)$',fontsize=fontsizelab*1.25,va='top',ha='right')
+    plt.plot([0.979,1.1],[6.7,6.7],color='k')
+    plt.plot([0.979,0.979],[6.7,7.5],color='k')
     plt.tight_layout()
     plt.savefig('DKPlots/Vcsexpf0comp.pdf')
     plt.close()
     return()
 
+###################################################################################################
+
+def find_bin_centres(bins):
+    centres = []
+    for i in range(len(bins)-1):
+        centre =  (bins[i+1]+bins[i])/2
+        err = (bins[i+1]-bins[i])/2
+        centres.append(gv.gvar(centre,err))
+    return(centres)
+
+###################################################################################################
+
+def plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
+    p = make_p_physical_point_DK(pfit,Fits)
+    y = []
+    qsq = []
+    bins = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,qsqmaxphysDK.mean]
+    Rs = gv.gvar(['0.796(27)','0.973(26)','0.959(26)','0.974(37)','0.979(29)','1.057(34)','0.990(31)','1.012(39)','1.060(34)','1.026(35)','0.963(36)','1.076(68)','1.004(47)','1.065(57)','1.008(64)','0.979(67)','0.940(86)','1.318(217)'])#only stat error
+    A = 3/8 * p['MDphys']**2 * (1 - (p['MKphys']**2/p['MDphys']**2) )**2 
+    def ratio(qsq):
+        epse = M_e**2/qsq
+        epsmu = M_mu**2/qsq
+        p2 = (qsq-p['MKphys']**2-p['MDphys']**2)**2/(4*p['MDphys']**2)-p['MKphys']**2
+        if p2.mean < 0:
+            p2 = 0
+        p3 = (p2)**(3/2)
+        p1 = p2**(1/2)
+        fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+        integrand = (1-epsmu)**2 * (p3 * fp**2 * (1 + epsmu/2) + p1 * f0**2 * epsmu * A) /((1-epse)**2 * (p3 * fp**2 * (1 + epse/2) + p1 * f0**2 * epse * A))
+        if qsq == qsqmaxphysDK.mean:
+            integrand = epsmu*(1-epsmu)**2/(epse*(1-epse)**2)
+        return(integrand)
+    
+    for q2 in np.linspace((M_mu**2).mean,qsqmaxphysDK.mean-0.001,nopts):
+        y.append(ratio(q2))
+        qsq.append(q2)
+    ymean,yerr = unmake_gvar_vec(y)
+    Rmean,Rerr = unmake_gvar_vec(Rs)
+    yupp,ylow = make_upp_low(y)
+    binmean,binerr = unmake_gvar_vec(find_bin_centres(bins))  
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, ymean, color='k',label=r'$R_{\mu/e}$')
+    plt.fill_between(qsq,ylow,yupp, color='k',alpha=alpha)
+
+    plt.errorbar(binmean,Rmean, xerr=binerr, yerr=Rerr,fmt='s',color='purple',ms=ms,mfc='none',label = r"BES '19",lw=lw)
+    plt.legend(fontsize=fontsizeleg,frameon=False)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_+(q^2)$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.ylim([0.7,1.6])
+    plt.tight_layout()
+    plt.savefig('DKPlots/Rmue.pdf')
+    plt.close()
+        
+    return()
+####################################################################################################
+
+def partially_correlate_errors(data):
+    # takes a list of uncorrelated data points where we wish to 100% correlate some of the error
+    # each data point should take the form [mean,uncorr_err, corr_err] and will be returned as a list in the same order with    the error corr part correlated.
+    #We must add the covarience matricies. The uncorrelated matrix is just the error^2 along the diagonal. The correlated one is    sigma_i * sigma_j * 1 in all cases because the correlation matrix is just 1 everywhere  
+    result = []
+    correrr = []
+    uncorrerr = []
+    for element in data:
+        result.append(element[0])
+        uncorrerr.append(element[1])
+        correrr.append(element[2])
+    dim = len(result)
+    cov_mat = np.zeros(shape=(dim,dim))
+    for i in range(dim):
+        for j in range(dim):
+            if i == j:
+                cov_mat[i][j] = uncorrerr[i]*uncorrerr[j] + correrr[i]*correrr[j]
+            else:
+                cov_mat[i][j] = correrr[i]*correrr[j]
+    resultcorr = gv.gvar(result,cov_mat)
+    return(resultcorr)
+
+####################################################################################################
+
+def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
+    p = make_p_physical_point_DK(pfit,Fits)
+    integrale0 = integrate_fp(0,qsqmaxphysDK.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500)
+    integralep = integrate_fp(0,qsqmaxphysDK.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500,Dplus=True)
+    integralmu = integrate_fp(0,qsqmaxphysDK.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_mu,iters=500)
+    BbyVcsD0mu = GF**2/(24*np.pi**3*6.582119569*1e-16)*integralmu*tauD0
+    BbyVcsD0e = GF**2/(24*np.pi**3*6.582119569*1e-16)*integrale0*tauD0
+    BbyVcsDpme = GF**2/(24*np.pi**3*6.582119569*1e-16)*integralep*tauDpm
+    plt.figure(figsize=figsize)
+    # [mean, stat, syst]
+    Cleo0 = [0.0350,0.0003,0.0004]#gv.gvar(0.0350,np.sqrt(0.0003**2+0.0004**2)) # 0906.2983 CLEO '09
+    Cleop = [0.0883,0.0010,0.0020]#gv.gvar(0.0883,np.sqrt(0.0010**2+0.0020**2)) # 0906.2983 CLEO '09
+    [Cleo0,Cleop] = partially_correlate_errors([Cleo0,Cleop])
+    VCleo0 = gv.sqrt(Cleo0/(cor2*BbyVcsD0e))
+    VCleop = gv.sqrt(Cleop/(cor2*BbyVcsDpme))
+    
+    BESe = [0.03505,0.00014,0.00033]#gv.gvar(0.03505,np.sqrt(0.00014**2+0.00033**2)) # 1508.07560 BES 15'A
+    BESmu = [0.03413,0.00019,0.00035]#gv.gvar(0.03413,np.sqrt(0.00019**2+0.00035**2)) #1810.03127 BES '19
+    BES17 = [0.0860,0.0006,0.0015]#gv.gvar(0.0860,np.sqrt(0.0006**2+0.0015**2))#Dp 1703.09084 BES '17
+    [BESe,BESmu,BES17] = partially_correlate_errors([BESe,BESmu,BES17])
+    VBESe = gv.sqrt(BESe/(cor2*BbyVcsD0e))
+    VBESmu = gv.sqrt(BESmu/(cor2*BbyVcsD0mu))
+    VBES17 = gv.sqrt(BES17/(cor2*BbyVcsDpme))
+
+    BELLEe = [0.0345,0.0010,0.0019]#gv.gvar(0.0345,np.sqrt(0.0010**2+0.0019**2)) # hep-ex/0604049 Belle '06
+    BELLEmu = [0.0345,0.0010,0.0021] #gv.gvar(0.0345,np.sqrt(0.0010**2+0.0021**2)) #hep-ex/0604049 Belle '06
+    [BELLEe,BELLEmu] = partially_correlate_errors([BELLEe,BELLEmu])
+    VBELLEe = gv.sqrt(BELLEe/(cor2*BbyVcsD0e))
+    VBELLEmu = gv.sqrt(BELLEmu/(cor2*BbyVcsD0mu))
+    
+    BaBar = gv.gvar(0.927,np.sqrt(0.007**2+0.012**2)) * gv.gvar(0.03999,0.00044) #  0704.0020 BaBar '06
+    VBaBar = gv.sqrt(BaBar/(cor2*BbyVcsD0e))
+
+    
+    #BES15B = gv.gvar(0.04481,np.sqrt(0.00027**2+0.00103**2))#Dp 1510.00308 K_L ?? BES '15B
+    #VBES15B = gv.sqrt(BES15B/BbyVcsDpme)
+
+    av = gv.sqrt(lsqfit.wavg([Cleo0/BbyVcsD0e,Cleop/BbyVcsDpme,BESe/BbyVcsD0e,BESmu/BbyVcsD0mu,BES17/BbyVcsDpme,BELLEe/BbyVcsD0e,BELLEmu/BbyVcsD0mu,BaBar/BbyVcsD0e])/cor2)
+    terr = av.partialsdev(tuple([integrale0,integralep,integralmu]))
+    eerr = av.partialsdev(tuple([Cleo0,Cleop,BESe,BESmu,BES17,BELLEe,BELLEmu,BaBar,tauD0,tauDpm]))
+    cerr = av.partialsdev(cor2)
+    print('C) Average V_cs from branching = ', av)
+    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction error = {2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
+    plt.errorbar(VBES17.mean, 8, xerr=VBES17.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
+    plt.errorbar(VCleop.mean, 7, xerr=VCleop.sdev,ms=ms,fmt='ro' ,capsize=capsize,lw=lw)
+    plt.plot([0.8,1.1],[6.5,6.5],color='k')
+    plt.errorbar(VBESmu.mean, 6, xerr=VBESmu.sdev,ms=ms,fmt='g*' ,capsize=capsize,lw=lw)
+    plt.errorbar(VBELLEmu.mean, 5, xerr=VBELLEmu.sdev,ms=ms,fmt='g^' ,capsize=capsize,lw=lw)
+    plt.plot([0.8,1.1],[4.5,4.5],color='k')
+    plt.errorbar(VBESe.mean, 4, xerr=VBESe.sdev,ms=ms,fmt='b*' ,capsize=capsize,lw=lw)
+    plt.errorbar(VCleo0.mean, 3, xerr=VCleo0.sdev,ms=ms,fmt='bo' ,capsize=capsize,lw=lw)
+    plt.errorbar(VBaBar.mean, 2, xerr=VBaBar.sdev,ms=ms,fmt='bs' ,capsize=capsize,lw=lw)
+    plt.errorbar(VBELLEe.mean, 1, xerr=VBELLEe.sdev,ms=ms,fmt='b^' ,capsize=capsize,lw=lw)
+    #plt.errorbar(VBES15B.mean, 8, xerr=VBES15B.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
+    plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[9,9], color='purple',alpha=alpha/2)
+    plt.text(0.89,2.5,r'$D^0\to{}K^-e^+\nu_e$',fontsize=fontsizelab, va='center')
+    plt.text(0.89,5.5,r'$D^0\to{}K^-\mu^+\nu_{\mu}$',fontsize=fontsizelab, va='center')
+    plt.text(0.89,7.5,r'$D^+\to\bar{K}^0e^+\nu_e$',fontsize=fontsizelab, va='center')
+    plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab, va='center',ha='center')
+    plt.xlabel('$|V_{cs}|$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('none')
+    plt.xlim([0.875,1.01])
+    plt.ylim([0.5,8.5])
+    plt.gca().set_yticks([8,7,6,5,4,3,2,1])
+    plt.gca().set_yticklabels(["BES '17","CLEO '09","BES '19","BELLE '06","BES '15A","CLEO '09","BaBar '06","BELLE '06"])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.02))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.text(1.01,8.5,r'$\Gamma$',fontsize=fontsizelab*2,va='top',ha='right')
+    plt.plot([1,1.1],[7.5,7.5],color='k')
+    plt.plot([1,1],[7.5,8.5],color='k')
+    plt.tight_layout()
+    plt.savefig('DKPlots/VcsfromB.pdf')
+    plt.close()
+    return(av)
 
 ####################################################################################################
 

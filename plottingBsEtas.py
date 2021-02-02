@@ -5,6 +5,8 @@ import lsqfit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 plt.rc("font",**{"size":20})
 plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
@@ -30,7 +32,7 @@ from collections import defaultdict
 # ans and pole masses
 # dict of different lattice spacings #done 
 ################### global variables ##########################################
-factor = 1.0 #multiplies everything to make smaller for big plots etc usually 1
+factor = 0.5 #multiplies everything to make smaller for big plots etc usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor
@@ -647,24 +649,41 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     ############ add data ############
     plt.errorbar(MBsphys.mean,0.323, yerr=0.063,fmt='k*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBsphys.mean,0.819, yerr=0.021,fmt='b*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBsphys.mean,3.27, yerr=0.15,fmt='r*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBphys.mean-0.01,0.20, yerr=0.14,fmt='k^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBphys.mean,1.024, yerr=0.025,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBphys.mean-0.01,2.82, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBsphys.mean+0.02,0.819, yerr=0.021,fmt='b*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBsphys.mean+0.01,3.27, yerr=0.15,fmt='r*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
+    
+    plt.errorbar(MBsphys.mean-0.01,0.140, yerr=0.052,fmt='k^',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1901.02561',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBsphys.mean-0.02,0.794, yerr=0.015,fmt='b^',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1901.02561',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBsphys.mean-0.01,3.20, yerr=0.11,fmt='r^',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1901.02561',lw=lw)#,capsize=capsize)
+    
+    plt.errorbar(MBsphys.mean+0.01,0.158, yerr=0.059,fmt='kh',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1501.05373',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBsphys.mean,0.832, yerr=0.061,fmt='bh',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1501.05373',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBsphys.mean,3.05, yerr=0.15,fmt='rh',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1501.05373',lw=lw)#,capsize=capsize)
+    #plt.errorbar(MBphys.mean-0.01,0.20, yerr=0.14,fmt='k^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    #plt.errorbar(MBphys.mean,1.024, yerr=0.025,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    #plt.errorbar(MBphys.mean-0.01,2.82, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    
     plt.errorbar(MBphys.mean+0.01,0.319, yerr=0.066,fmt='ko',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBphys.mean,0.861, yerr=0.048,fmt='bo',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean+0.01,0.861, yerr=0.048,fmt='bo',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384',lw=lw)#,capsize=capsize)
     plt.errorbar(MBphys.mean+0.01,2.63, yerr=0.13,fmt='ro',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1306.2384',lw=lw)#,capsize=capsize)
+    
+    plt.errorbar(MBphys.mean-0.01,0.330, yerr=0.039,fmt='k>',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1509.06235',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean-0.01,0.849, yerr=0.021,fmt='b>',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1509.06235',lw=lw)#,capsize=capsize)
+    plt.errorbar(MBphys.mean-0.01,2.664, yerr=0.067,fmt='r>',ms=ms,mfc='none',label = r'$B\to{}K$ arXiv:1509.06235',lw=lw)#,capsize=capsize)
+    
     plt.errorbar(MDphys.mean,0.612, yerr=0.035,fmt='kd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,1.134, yerr=0.049,fmt='bd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,2.130, yerr=0.096,fmt='rd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    
     plt.errorbar(MDphys.mean+0.01,0.765, yerr=0.031,fmt='ks',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,0.979, yerr=0.019,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
     plt.errorbar(MDphys.mean,1.336, yerr=0.054,fmt='rs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    
     plt.errorbar(MDphys.mean-0.01,0.745, yerr=0.011,fmt='kD',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)#,capsize=capsize)
-    handles, labels = plt.gca().get_legend_handles_labels()
-    handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    handles = [ Line2D([0], [0], marker='*', color='w', markeredgecolor='purple', label=r'$B_s\to{}K$ arXiv:1406.2279',markerfacecolor='none', markersize=ms),Line2D([0], [0], marker='^', color='w', markeredgecolor='purple', label=r'$B_s\to{}K$ arXiv:1901.02561',markerfacecolor='none', markersize=ms),Line2D([0], [0], marker='h', color='w', markeredgecolor='purple', label=r'$B_s\to{}K$ arXiv:1501.05373',markerfacecolor='none', markersize=ms),Line2D([0], [0], marker='o', color='w', markeredgecolor='purple', label=r'$B\to{}K$ arXiv:1306.2384',markerfacecolor='none', markersize=ms),Line2D([0], [0], marker='>', color='w', markeredgecolor='purple', label=r'$B\to{}K$ arXiv:1509.06235',markerfacecolor='none', markersize=ms),Line2D([0], [0], marker='d', color='w', markeredgecolor='purple', label=r'$D\to{}\pi$ arXiv:1706.03017',markerfacecolor='none', markersize=ms),Line2D([0], [0], marker='s', color='w', markeredgecolor='purple', label=r'$D\to{}K$ arXiv:1706.03017',markerfacecolor='none', markersize=ms),Line2D([0], [0], marker='D', color='w', markeredgecolor='purple', label=r'$D\to{}K$ arXiv:1305.1462',markerfacecolor='none', markersize=ms)]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     ##################################
     plt.axes().set_ylim([0,3.45])
     plt.tight_layout()
