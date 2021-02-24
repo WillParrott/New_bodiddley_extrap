@@ -316,7 +316,7 @@ for Fit in Fits:
         
 for Fit in Fits:
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
-    results_tables(fs_data[Fit['conf']],Fit)
+    #results_tables(fs_data[Fit['conf']],Fit)
     #mass_corr_plots(Fit,fs_data[Fit['conf']],thpts,F,fs_data['F'])
 #check_poles(Fits) Not working atm
 
@@ -327,21 +327,39 @@ prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cv
 
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
-fs_at_lims_BK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+################
 #dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #dBdq2_emu(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the_0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#p_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Bnu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+###############################
 #speed_of_light(Fits)
 #f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
