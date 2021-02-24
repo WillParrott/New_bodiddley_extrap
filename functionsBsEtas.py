@@ -20,7 +20,7 @@ from collections import defaultdict
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.9766(12)')#gv.gvar('2.98390(50)')  # From Christine because not same as PDG
 MKphys = gv.gvar('0.497611(13)') #PD K^0
-MBsphys = gv.gvar('5.36688(17)') # PDG
+MBsphys = gv.gvar('5.36688(14)') # PDG #now changed 
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
 MDsphys = gv.gvar('1.968340(70)')  #PDG
 MDsstarphys = gv.gvar('2.1122(4)')  #PDG

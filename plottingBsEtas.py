@@ -68,11 +68,15 @@ def mass_corr_plots(Fit,fs,thpts):
     corrs['fp'] = []
     corrs['S'] = []
     corrs['V'] = []
-    for i,mass in enumerate(Fit['masses']):
-        for j in range(i+1,len(Fit['masses'])):
+    tw_len = len(Fit['twists'])
+    mass_len = len(Fit['masses'])
+    for i in range(mass_len):
+        for j in range(i+1,mass_len):
+            mass = Fit['masses'][i]
             mass2 = Fit['masses'][j]
-            for k,twist in enumerate(Fit['twists']):
-                for l in range(k,len(Fit['twists'])):
+            for k in range(tw_len):
+                for l in range(tw_len):
+                    twist = Fit['twists'][k]
                     twist2 = Fit['twists'][l]
                     f0 = fs['f0_m{0}_tw{1}'.format(mass,twist)]
                     fp = fs['fp_m{0}_tw{1}'.format(mass,twist)]
@@ -80,7 +84,7 @@ def mass_corr_plots(Fit,fs,thpts):
                     f02 = fs['f0_m{0}_tw{1}'.format(mass2,twist2)]
                     fp2 = fs['fp_m{0}_tw{1}'.format(mass2,twist2)]
                     corrs['f0'].append(gv.evalcorr([f0,f02])[0][1])
-                    if fp != None:
+                    if fp != None and fp2 != None:
                         corrs['fp'].append(gv.evalcorr([fp,fp2])[0][1])
                     for thpt in thpts[Fit['conf']]:
                         if twist != '0' or thpt != 'T':
@@ -106,7 +110,7 @@ def mass_corr_plots(Fit,fs,thpts):
         #plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
         #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
         plt.tight_layout()
-        plt.savefig('MassCorrs/Bsetas{0}corrs{1}.pdf'.format(Fit['conf'],tag))
+        plt.savefig('MassCorrs/Bsetas{0}corrs{1}_m.pdf'.format(Fit['conf'],tag))
         plt.close()
 
 def twist_corr_plots(Fit,fs,thpts):
@@ -119,7 +123,7 @@ def twist_corr_plots(Fit,fs,thpts):
         for j in range(i+1,len(Fit['twists'])):
             twist2 = Fit['twists'][j]
             for k,mass in enumerate(Fit['masses']):
-                for l in range(k,len(Fit['masses'])):
+                for l in range(len(Fit['masses'])):
                     mass2 = Fit['masses'][l]
                     f0 = fs['f0_m{0}_tw{1}'.format(mass,twist)]
                     fp = fs['fp_m{0}_tw{1}'.format(mass,twist)]
@@ -127,7 +131,7 @@ def twist_corr_plots(Fit,fs,thpts):
                     f02 = fs['f0_m{0}_tw{1}'.format(mass2,twist2)]
                     fp2 = fs['fp_m{0}_tw{1}'.format(mass2,twist2)]
                     corrs['f0'].append(gv.evalcorr([f0,f02])[0][1])
-                    if fp != None:
+                    if fp != None and fp2!= None:
                         corrs['fp'].append(gv.evalcorr([fp,fp2])[0][1])
                     for thpt in thpts[Fit['conf']]:
                         if twist != '0' or thpt != 'T':
@@ -153,7 +157,7 @@ def twist_corr_plots(Fit,fs,thpts):
         #plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
         #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
         plt.tight_layout()
-        plt.savefig('TwistCorrs/Bsetas{0}corrs{1}.pdf'.format(Fit['conf'],tag))
+        plt.savefig('TwistCorrs/Bsetas{0}corrs{1}_tw.pdf'.format(Fit['conf'],tag))
         plt.close()
     return()
 
