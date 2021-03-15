@@ -7,7 +7,7 @@ import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
-
+from mpl_toolkits import mplot3d
 plt.rc("font",**{"size":20})
 plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 plt.rc('text', usetex=True)
@@ -693,6 +693,71 @@ def f0_f0_fp_in_Mh(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     plt.tight_layout()
     plt.savefig('BsetasPlots/f0f0fpinmh.pdf')
     plt.close()
+    return()
+#####################################################################################################
+def f0_fp_in_Mh_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
+    # example  where we want A to be q^2 (varies for each values of M_h)
+    #A = [[1,2,3,4],[1,3,5,7],[1,4,7,10]]
+    #B = [[1,1,1,1],[2,2,2,2],[3,3,3,3]]
+    #C = [[2,5,10,17],[5,8,13,20],[10,13,18,25]]
+    #ax.contour3D(A,B,C,50,cmap='binary')
+    pts = 25
+    MHs = np.zeros((pts,pts))
+    qsqs = np.zeros((pts,pts))
+    f0s = np.zeros((pts,pts))
+    fps = np.zeros((pts,pts))
+    f0upps = np.zeros((pts,pts))
+    fpupps = np.zeros((pts,pts))
+    f0lows = np.zeros((pts,pts))
+    fplows = np.zeros((pts,pts))
+    for i,Mh in enumerate(np.linspace(MDsphys.mean,MBsphys.mean,pts)): #Mh now in GeV
+        p = make_p_Mh_BsEtas(pfit,Fits,Del,Mh)
+        for j,qsq in enumerate(np.linspace(0,((Mh-Metasphys)**2).mean,pts)): #qsq in GeV
+            z = make_z(qsq,t_0,Mh,Metasphys)
+            if qsq == 0:
+                z = 0
+            #MHs.append(Mh)
+            #qsqs.append(qsq)
+            f0 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+            fp = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,qsq,z,Fits[0]['masses'][0],fpf0same,0)
+            MHs[i][j] = Mh
+            qsqs[i][j] = qsq
+            f0s[i][j] = f0.mean
+            fps[i][j] = fp.mean
+            f0upps[i][j] = f0.mean + f0.sdev
+            fpupps[i][j] = fp.mean + fp.sdev
+            f0lows[i][j] = f0.mean - f0.sdev
+            fplows[i][j] = fp.mean - fp.sdev
+    sv_dat = gv.BufferDict()
+    sv_dat['MH'] = MHs
+    sv_dat['qsq'] = qsqs
+    sv_dat['f0upp'] = f0upps
+    sv_dat['f0low'] = f0lows
+    sv_dat['f0'] = f0s
+    sv_dat['fpupp'] = fpupps
+    sv_dat['fplow'] = fplows
+    sv_dat['fp'] = fps
+    gv.dump(sv_dat,'data3D.pickle')
+    #######simple 3D plot #####################
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')    
+    ax.plot_surface(MHs,qsqs,f0s,color='b')#or _wireframe
+    ax.plot_surface(MHs,qsqs,fps,color='r')
+    ax.set_xlabel('$M_{H_s}[\mathrm{GeV}]$')#,fontsize=fontsizelab)
+    ax.set_ylabel('$q^2[\mathrm{GeV}^2]$')#,fontsize=fontsizelab)
+    ax.set_zlabel('$f_{0/+}$')#,fontsize=fontsizelab)
+    plt.show()
+    ######### with errs  ################################
+    #fig = plt.figure()
+    #ax = plt.axes(projection='3d')    
+    #ax.plot_surface(MHs,qsqs,f0upps,color='b')#or _wireframe
+    #ax.plot_surface(MHs,qsqs,f0lows,color='b')
+    #ax.plot_surface(MHs,qsqs,fpupps,color='r')#or _wireframe
+    #ax.plot_surface(MHs,qsqs,fplows,color='r')
+    #ax.set_xlabel('$M_{H_s}[\mathrm{GeV}]$')#,fontsize=fontsizelab)
+    #ax.set_ylabel('$q^2[\mathrm{GeV}^2]$')#,fontsize=fontsizelab)
+    #ax.set_zlabel('$f_{0/+}$')#,fontsize=fontsizelab)
+    #plt.show()
     return()
 
 #####################################################################################################

@@ -127,7 +127,8 @@ F['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 SF = collections.OrderedDict()
 SF['conf']='SF'
 SF['label'] = 'Set 7' 
-SF['filename'] = 'Corrfits/SFBsandB_413cfg0.2740.450.60.801.2612.1082.9463.624BGBNGBsGBsNGKGKNGSSsTVVsetasG202530sep_mass_Nexp4_sfac0.8_pfac1.0_Q1.00_chi0.129_smTrue_Stmin2_Sstmin2_Ttmin2_Vtmin2_Vstmin2.pickle'
+#SF['filename'] = 'Corrfits/SFBsandB_413cfg0.2740.450.60.801.2612.1082.9463.624BGBNGBsGBsNGKGKNGSSsTVVsetasG202530sep_mass_Nexp4_sfac0.8_pfac1.0_Q1.00_chi0.129_smTrue_Stmin2_Sstmin2_Ttmin2_Vtmin2_Vstmin2.pickle'
+SF['filename'] = 'Corrfits/SFBsandBVx_413cfg0.2740.450.60.801.2612.1082.9463.624BGBNGBsGBsNGKGKNGSSsTVVsXetasG202530sep_mass_Nexp4_sfac0.8_pfac1.0_Q1.00_chi0.129_smTrue_Stmin2_Sstmin2_Ttmin2_Vtmin2_Vstmin2_Xtmin2.pickle'
 SF['masses'] = ['0.274','0.45','0.6','0.8']
 SF['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
 SF['twists'] = ['0','1.261','2.108','2.946','3.624']
@@ -141,7 +142,6 @@ SF['L'] = 48
 SF['w0/a'] = gv.gvar('2.896(6)')
 SF['parent-Tag'] = 'B_G5-G5_m{1}'
 SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
-
 
 ######################## UF PARAMETERS ####################################
 UF = collections.OrderedDict()
@@ -161,6 +161,12 @@ UF['L'] = 64
 UF['w0/a'] = gv.gvar('3.892(12)')
 UF['parent-Tag'] = 'B_G5-G5_m{1}'
 UF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
+UF['XVnn_m0.45_tw0.706'] = gv.gvar('0.159(12)')
+UF['XVnn_m0.45_tw1.529'] = gv.gvar('0.231(21)')
+UF['XVnn_m0.6_tw0.706'] = gv.gvar('0.166(14)')
+UF['XVnn_m0.6_tw1.529'] = gv.gvar('0.241(24)')
+UF['XVnn_m0.8_tw0.706'] = gv.gvar('0.173(15)')
+UF['XVnn_m0.8_tw1.529'] = gv.gvar('0.252(26)')
 ######################### BsEtas ########################################
 ################################## F PARAMETERS ##########################
 Fs = collections.OrderedDict()
@@ -261,10 +267,10 @@ Twists['F'] = [0,1,2,3,4]
 thpts['F'] = ['S','V','T']
 Masses['SF'] = [0,1,2,3]
 Twists['SF'] = [0,1,2,3,4]
-thpts['SF'] = ['S','V','T']
+thpts['SF'] = ['S','V','T','X'] # x is Vx
 Masses['UF'] = [0,1,2,3]
 Twists['UF'] = [0,1,2,3,4]
-thpts['UF'] = ['S','V','T']
+thpts['UF'] = ['S','V','T','X']
 Masses['Fs'] = [0,1,2,3]                                     # Choose which masses to fit
 Twists['Fs'] = [0,1,2,3,4]
 thpts['Fs'] = ['S','V']
@@ -288,9 +294,9 @@ di10npri = '0.0(1.0)'
 cpri = '0.0(0.5)'
 cvalpri ='0.0(2.0)'
 rhopri ='0.0(2.0)'
-DoFit = True
+Kwikfit = False
 Npow = 3 #3
-Nijk = 3 #3
+Nijk = [3,2,2,2] # i,j,k,l
 Nm=2
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
@@ -316,10 +322,10 @@ for Fit in Fits:
         
 for Fit in Fits:
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
-    #results_tables(fs_data[Fit['conf']],Fit)
+    results_tables(fs_data[Fit['conf']],Fit)
     #mass_corr_plots(Fit,fs_data[Fit['conf']],thpts,F,fs_data['F'])
 #check_poles(Fits) Not working atm
-
+plot_gold_non_split(Fits)
 
 
 #Z_V_plots(Fits,fs_data)
@@ -362,10 +368,10 @@ fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ###############################
 #speed_of_light(Fits)
 #f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
@@ -374,5 +380,5 @@ fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del)
 #DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
-#error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
+error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
 

@@ -82,7 +82,8 @@ def plot_gold_non_split(Fits):
     plt.axes().yaxis.set_major_locator(MultipleLocator(1))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(5))
     plt.tight_layout()
-    plt.savefig('DKPlots/gold-non-split.pdf')            
+    plt.savefig('DKPlots/gold-non-split.pdf')
+    plt.close()
     return()
 
 
@@ -125,6 +126,7 @@ def speed_of_light(Fits):
     plt.tight_layout()
     plt.savefig('DKPlots/speedoflight.pdf')
     #plt.show()
+    plt.close()
     return()
 
 #####################################################################################################
@@ -167,7 +169,8 @@ def Z_V_plots(Fits,fs_data):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.01))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
     plt.tight_layout()
-    plt.savefig('DKPlots/Z_Vinamhsq.pdf')            
+    plt.savefig('DKPlots/Z_Vinamhsq.pdf')
+    plt.close()
     return()
 
 #####################################################################################################

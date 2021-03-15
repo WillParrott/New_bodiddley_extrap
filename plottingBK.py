@@ -286,7 +286,7 @@ Bobeth07 = Theory(label="Bobeth et al. '07",arxiv='0709.4174', bins=[[1,6],[2,6]
 
 Bobeth11 = Theory(label="Bobeth '11",arxiv='1111.2558',Bemum=[1.04,0.6,0.27,0.04,0.02,0.03,0.03,0.04,0.07], Btaum=[1.26,0.4,0.21,0.04,0.03,0.02,0.02,0.05,0.09], FHmu=[7.50,2.85,2.61,0.04,0.1,0.1,0.1], FHtau=[0.890,0.033,0.045,0.001,0.002,0.002,0.002],               bins=[[1,6],[14.18,16],[16,qsqmaxphysBK.mean]], binBmu0=[[1.59,0.59,0.35],[0.34,0.18,0.09],[0.63,0.39,0.18]], binBmum=[[1.75,0.64,0.38],[0.37,0.2,0.09],[0.68,0.41,0.19]],sym='o')#B*1e7 FHmu*1e3 up and down errors for all cases, with both F_H from 14.18 upwards err on binBmu0 is just upp, down
 
-Bobeth16 = Theory(label="Bobeth et al. '12",arxiv='1212.2321', bins=[[4*m_mu**2,2],[2,4.3],[4.3,8.68],[1,6],[14.18,16],[16,18],[18,22],[16,qsqmaxphysBK.mean]], binBemu0=[[0.644,0.207,0.106],[0.75,0.256,0.125],[1.38,0.51,0.25],[1.63,0.56,0.27],[0.34,0.179,0.083],[0.309,0.176,0.081],[0.318,0.201,0.092],[0.634,0.382,0.175]], binBemum=[[0.692,0.222,0.113],[0.808,0.275,0.135],[1.48,0.55,0.27],[1.75,0.60,0.29],[0.365,0.192,0.089],[0.331,0.189,0.087],[0.341,0.216,0.098],[0.68,0.41,0.188]], binFHemu0=[[0.103,0.006,0.012],[0.0237,0.0018,0.0033],[0.0124,0.012,0.02],[0.0254,0.002,0.0036],[0.00704,0.00147,0.00196],[0.00693,0.00166,0.00209],[0.00817,0.00243,0.00284],[0.00775,0.0021,0.00254]], binFHemum=[[0.103,0.006,0.012],[0.0237,0.0018,0.0033],[0.0124,0.012,0.02],[0.0255,0.002,0.0036],[0.00704,0.00148,0.00197],[0.00693,0.00166,0.00209],[0.00818,0.00243,0.00284],[0.00775,0.0021,0.00255]],sym='o') #FH does not change
+Bobeth16 = Theory(label="Bobeth et al. '12",arxiv='1212.2321', bins=[[4*m_mu**2,2],[2,4.3],[4.3,8.68],[1,6],[14.18,16],[16,18],[18,22],[16,qsqmaxphysBK.mean]], binBemu0=[[0.644,0.207,0.106],[0.75,0.256,0.125],[1.38,0.51,0.25],[1.63,0.56,0.27],[0.34,0.179,0.083],[0.309,0.176,0.081],[0.318,0.201,0.092],[0.634,0.382,0.175]], binBemum=[[0.692,0.222,0.113],[0.808,0.275,0.135],[1.48,0.55,0.27],[1.75,0.60,0.29],[0.365,0.192,0.089],[0.331,0.189,0.087],[0.341,0.216,0.098],[0.68,0.41,0.188]], binFHmu0=[[0.103,0.006,0.012],[0.0237,0.0018,0.0033],[0.0124,0.012,0.02],[0.0254,0.002,0.0036],[0.00704,0.00147,0.00196],[0.00693,0.00166,0.00209],[0.00817,0.00243,0.00284],[0.00775,0.0021,0.00254]], binFHmum=[[0.103,0.006,0.012],[0.0237,0.0018,0.0033],[0.0124,0.012,0.02],[0.0255,0.002,0.0036],[0.00704,0.00148,0.00197],[0.00693,0.00166,0.00209],[0.00818,0.00243,0.00284],[0.00775,0.0021,0.00255]],sym='o') #FH does not change
 
 HPQCD14A = Theory(label="HPQCD '13",arxiv='1306.0434',Be=[6.14,1.33],Bmu=[6.12,1.32],Btau=[1.44,0.15],Rmue=[1.00023,0.00063],Rtaumu=[1.158,0.039],Rtaue=[1.161,0.04],Rtauemu=[1.159,0.040], FHtau=[0.8856,0.0037],bins=[[1,6],[4.3,8.68],[10.09,12.86],[14.18,16],[16,18],[16,qsqmaxphysBK.mean]], binBemu=[[1.81,0.61],[1.65,0.42],[0.87,0.13],[0.442,0.051],[0.391,0.042],[0.797,0.082]], binRmue=[[0.74,0.35],[0.89,0.25],[1.35,0.23],[1.98,0.22],[2.56,0.23],[3.86,0.29]], binFHe=[[0.577,0.01],[0.2722,0.0054],[0.1694,0.0053],[0.1506,0.0052],[0.1525,0.0055],[0.1766,0.0068]], binFHmu=[[2.441,0.043],[1.158,0.023],[0.722,0.022],[0.642,0.022],[0.649,0.023],[0.751,0.029]],sym='h')#errors just errors binRs are 10^3*(R-1) FHe 106 FHmu 10^2
 
@@ -345,6 +345,76 @@ def speed_of_light(Fits):
     plt.close()
     return()
 
+#####################################################################################################
+def plot_gold_non_split(Fits):
+    plt.figure(figsize=figsize)
+    i = 0
+    for Fit in Fits:
+        for mass in Fit['masses']:
+            y = 1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).mean
+            yerr = 1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).sdev
+            x = float(mass)**2
+            if Fit['conf'][-1] == 'p':
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['conf'],ms=ms,mfc='none')
+            elif Fit['conf'][-1] == 's':
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['conf'],ms=ms,mfc='none')
+            else:
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['conf'],ms=ms,mfc='none')
+        i+=1
+   
+    plt.plot([-0.1,0.9],[0,0],'k--')
+    plt.xlim([0,0.85])
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.xlabel('$(am_h)^2$',fontsize=fontsizelab)
+    plt.ylabel('$(M_{H_{\mathrm{non-gold}}}-M_{H_{\mathrm{gold}}})[\mathrm{MeV}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(1))
+    plt.tight_layout()
+    plt.savefig('Plots/Bgold-non-split.pdf')
+    plt.close()
+    
+    plt.figure(figsize=figsize)
+    i = 0
+    for Fit in Fits:
+        if Fit['conf'] not in ['VCp','Cp','SFs','Fs']:
+            y = 1000*(Fit['Ksplit']/Fit['a']).mean
+            yerr = 1000*(Fit['Ksplit']/Fit['a']).sdev
+            x = Fit['M_daughter'].mean**2
+            if Fit['conf'][-1] == 'p':
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['conf'],ms=ms,mfc='none')
+            elif Fit['conf'][-1] == 's':
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['conf'],ms=ms,mfc='none')
+            else:
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['conf'],ms=ms,mfc='none')
+        i+=1
+   
+    plt.plot([-0.1,0.9],[0,0],'k--')
+    plt.xlim([0,0.25])
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.xlabel('$(aM_K)^2$',fontsize=fontsizelab)
+    plt.ylabel('$(M_{K_{\mathrm{non-gold}}}-M_{K_{\mathrm{gold}}})[\mathrm{MeV}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(10))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(5))
+    plt.tight_layout()
+    plt.savefig('Plots/Kgold-non-split.pdf')
+    plt.close()
+    return()
 #####################################################################################################
 
 def Z_V_plots(Fits,fs_data):
@@ -515,7 +585,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     i = 0
     plotfits = []
     for Fit in Fits:
-        if Fit['conf'] not in ['UFs']:
+        if Fit['conf'] not in ['F','Fs','Fp','VC','C','VCp','Cp','SFs','UFs']:
             plotfits.append(Fit)
     for Fit in plotfits:
         if Fit['conf' ] == 'F':
@@ -530,6 +600,9 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
             y2 = []
             qsq2 = []
             z2 = []
+            y3 = []
+            qsq3 = []
+            z3 = []
             for twist in Fit['twists']:
                 if fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)] != None:
                     q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)] # lat units
@@ -541,6 +614,11 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
                     else:
                         z.append(make_z(q2,t_0,Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))
                     y.append(fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)])
+                if fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
+                    thing = fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)]
+                    y3.append(thing)
+                    z3.append(z[-1])
+                    qsq3.append(qsq[-1])
             q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][1])]
             q2min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
             for q2 in np.linspace(q2min.mean,q2max.mean,nopts):
@@ -555,14 +633,19 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
             qsq,qsqerr = unmake_gvar_vec(qsq)
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
+            qsq3,qsq3err = unmake_gvar_vec(qsq3)
+            z3,z3err = unmake_gvar_vec(z3)
+            y3,y3err = unmake_gvar_vec(y3)
             
             plt.figure(4,figsize=figsize)
             plt.plot(qsq2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.errorbar(qsq3, y3, xerr=qsq3err, yerr=y3err, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',capsize=capsize)
             
             plt.figure(5,figsize=figsize)
             plt.errorbar(z2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.errorbar(z3, y3, xerr=z3err, yerr=y3err, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',capsize=capsize)
             
             j += 1
         i += 1
@@ -888,6 +971,9 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
             y2 = []
             qsq2 = []
             z2 = []
+            y3 = []
+            qsq3 = []
+            z3 = []
             for twist in Fit['twists']:
                 if fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)] != None:
                     q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)] # lat units
@@ -903,6 +989,13 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
                         MHsstar = make_MHsstar(Fit['M_parent_m{0}'.format(mass)],pfit,Fit['a'])
                     pole = 1-(q2/MHsstar**2)
                     y.append(pole * fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)])
+                if fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
+                    #pole = 1-(qsq[-1]/MHsstar**2)
+                    thing = fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)]
+                    y3.append(pole*thing)
+                    z3.append(z[-1])
+                    qsq3.append(qsq[-1])
+                    
             q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][1])]
             q2min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
             if fit == 'Fs':
@@ -924,14 +1017,19 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
             qsq,qsqerr = unmake_gvar_vec(qsq)
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
+            qsq3,qsq3err = unmake_gvar_vec(qsq3)
+            z3,z3err = unmake_gvar_vec(z3)
+            y3,y3err = unmake_gvar_vec(y3)
             
             plt.figure(10,figsize=figsize)
             plt.plot(qsq2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.errorbar(qsq3, y3, xerr=qsq3err, yerr=y3err, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',capsize=capsize)
             
             plt.figure(11,figsize=figsize)
             plt.plot(z2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.errorbar(z3, y3, xerr=z3err, yerr=y3err, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',capsize=capsize)
             
             j += 1
         i += 1
@@ -1209,6 +1307,50 @@ def Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
 ################################################################################################
 
 def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    mpts = 15
+    qpts = 25
+    MHs = np.zeros((mpts,qpts))
+    qsqs = np.zeros((mpts,qpts))
+    f0s = np.zeros((mpts,qpts))
+    fps = np.zeros((mpts,qpts))
+    fTs = np.zeros((mpts,qpts))
+    f0upps = np.zeros((mpts,qpts))
+    fpupps = np.zeros((mpts,qpts))
+    fTupps = np.zeros((mpts,qpts))
+    f0lows = np.zeros((mpts,qpts))
+    fplows = np.zeros((mpts,qpts))
+    fTlows = np.zeros((mpts,qpts))
+    for i,Mh in enumerate(np.linspace(MDphys.mean,MBphys.mean,mpts)): #Mh now in GeV
+        p = make_p_Mh_BK(pfit,Fits,Mh)
+        for j,qsq in enumerate(np.linspace(0,((Mh-MKphys)**2).mean,qpts)): #qsq in GeV
+            f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+            fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+            fT = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+            MHs[i][j] = Mh
+            qsqs[i][j] = qsq
+            f0s[i][j] = f0.mean
+            fps[i][j] = fp.mean
+            fTs[i][j] = fT.mean
+            f0upps[i][j] = f0.mean + f0.sdev
+            fpupps[i][j] = fp.mean + fp.sdev
+            fTupps[i][j] = fT.mean + fT.sdev
+            f0lows[i][j] = f0.mean - f0.sdev
+            fplows[i][j] = fp.mean - fp.sdev
+            fTlows[i][j] = fT.mean - fT.sdev
+    sv_dat = gv.BufferDict()
+    sv_dat['MH'] = MHs
+    sv_dat['qsq'] = qsqs
+    sv_dat['f0upp'] = f0upps
+    sv_dat['f0low'] = f0lows
+    sv_dat['f0'] = f0s
+    sv_dat['fpupp'] = fpupps
+    sv_dat['fplow'] = fplows
+    sv_dat['fp'] = fps
+    sv_dat['fTupp'] = fTupps
+    sv_dat['fTlow'] = fTlows
+    sv_dat['fT'] = fTs
+    gv.dump(sv_dat,'BKdata3D.pickle')
+    ################################################################################
     MHs = []
     f00 = []
     f0max = []
@@ -1525,6 +1667,7 @@ def B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.tight_layout()
     plt.savefig('Plots/RandFbybin.pdf')
+    plt.close()
     return()
 
 ####################################### tau stuff ##########################################################
@@ -1600,6 +1743,7 @@ def tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.tight_layout()
     plt.savefig('Plots/Taustuffbybin.pdf')
+    plt.close()
     return()
 
 ################################################################################################################
@@ -3084,6 +3228,14 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     y = np.array(y)*0.1
     yerr = np.array(yerr)*0.1
     plt.errorbar(x[0],y[0], xerr=xerr[0],yerr=yerr[0], color='b',mfc='none', fmt=the.sym,ms=ms,label=(the.label),capsize=capsize)
+    the = Bobeth16
+    x,xerr = the.make_x()
+    y,yerr = the.add_up_down_errs(the.binFHmum)
+    y = np.array(y)*100
+    yerrd = np.array(yerr[0])*100
+    yerru = np.array(yerr[1])*100
+    yerr = [yerrd,yerru]
+    plt.errorbar(x,y, xerr=xerr,yerr=yerr, color='r',mfc='none', fmt=the.sym,ms=ms,label=(the.label),capsize=capsize)
 
     plt.fill_between([8.68,10.11],[-1,-1],[20,20], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-1,-1],[20,20], color='k',alpha=alpha)
@@ -3102,14 +3254,14 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
-    plt.axes().set_ylim([-0.01,10.5])
+    plt.axes().set_ylim([-0.01,11.0])
     plt.axes().set_xlim([-0.2,qsqmaxphysBK.mean+0.2])
     plt.tight_layout()
     plt.savefig('Plots/FHbybin_the_mu.pdf')
     plt.close()
 
     ############### emu ##############
-    #m_lep = m_mu 
+    '''#m_lep = m_mu 
     F = []
     qsq = []
     qsqerr = []
@@ -3169,7 +3321,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_xlim([-0.2,qsqmaxphysBK.mean+0.2])
     plt.tight_layout()
     plt.savefig('Plots/FHbybin_the_emu.pdf')
-    plt.close()
+    plt.close()'''
 
     ####################### tau ################################################
     m_lep = m_tau 
@@ -3315,27 +3467,47 @@ def DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho):
 ################################################################################################################
 def results_tables(fs_data,Fit):
     table = open('Tables/{0}table.txt'.format(Fit['conf']),'w')
+    lines = collections.OrderedDict()
     for mass in Fit['masses']:
         table.write('      \hline \n')
-        table.write('      &{0}'.format(mass))
+        #table.write('      &{0}'.format(mass))
+        #lines[0] = '      \multirow\\{{3}\\}\\{\\}\\{{0}\\}&\multirow{{3}}{}{{1}}&\multirow{{3}}{}{{2}}'.format(Fit['label'].split(' ')[1],mass,Fit['M_parent_m{0}'.format(mass)],len(Fit['twists'])+1)
+        lines[0] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + Fit['label'].split(' ')[1] + '}'
+        lines[1] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + str(mass) + '}'
+        lines[2] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + str(Fit['M_parent_m{0}'.format(mass)]) + '}'
+        for i in range(3,len(Fit['twists'])):
+            lines[i] = '      '
         for tw,twist in enumerate(Fit['twists']):
-            if tw == 0:
-                table.write('&{0}&{1}&{2}&{3}&{4}&-'.format(Fit['M_parent_m{0}'.format(mass)],fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)]))
-            elif 'T_m{0}_tw{1}'.format(mass,twist) in Fit:
-                table.write('      &&&{0}&{1}&{2}&{3}&{4}'.format(fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)],Fit['T_m{0}_tw{1}'.format(mass,twist)]))
+            lines[tw] = '{0}&{1}&{2}&{3}&{4}'.format(lines[tw],fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)])
+            if 'X_m{0}_tw{1}'.format(mass,twist) in Fit:
+                lines[tw] = '{0}&{1}'.format(lines[tw],Fit['X_m{0}_tw{1}'.format(mass,twist)])
             else:
-                table.write('      &&&{0}&{1}&{2}&{3}&-'.format(fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)]))
+                lines[tw] = '{0}&-'.format(lines[tw])
+            if 'T_m{0}_tw{1}'.format(mass,twist) in Fit:
+                lines[tw] = '{0}&{1}'.format(lines[tw],Fit['T_m{0}_tw{1}'.format(mass,twist)])
+            else:
+                lines[tw] = '{0}&-'.format(lines[tw])
+            lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['f0_m{0}_tw{1}'.format(mass,twist)])
             if fs_data['fp_m{0}_tw{1}'.format(mass,twist)] != None:
-                if fs_data['fT_m{0}_tw{1}'.format(mass,twist)] != None:
-                    table.write('&{0}&{1}&{2}\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)],fs_data['fp_m{0}_tw{1}'.format(mass,twist)],fs_data['fT_m{0}_tw{1}'.format(mass,twist)]))
-                else:
-                    table.write('&{0}&{1}&-\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)],fs_data['fp_m{0}_tw{1}'.format(mass,twist)]))
+                lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fp_m{0}_tw{1}'.format(mass,twist)])
             else:
-                table.write('&{0}&-&-\\\\ [1ex]\n'.format(fs_data['f0_m{0}_tw{1}'.format(mass,twist)]))
-
-        
+                lines[tw] = '{0}&-'.format(lines[tw])
+            if fs_data['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
+                lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fp2_m{0}_tw{1}'.format(mass,twist)])
+            else:
+                lines[tw] = '{0}&-'.format(lines[tw])
+            if fs_data['fT_m{0}_tw{1}'.format(mass,twist)] != None:
+                lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fT_m{0}_tw{1}'.format(mass,twist)])
+            else:
+                lines[tw] = '{0}&-'.format(lines[tw])
+            lines[tw] = '{0}\\\\ [1ex]\n'.format(lines[tw])
+            table.write(lines[tw])
+                
+       
     table.close()
     return()
+
+
 
 ###########################################################################################################################
 
@@ -3404,7 +3576,7 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,const2):
     ax2.tick_params(which='minor',length=minor)
     ax2.xaxis.set_ticks_position('none')
     plt.setp(ax2.get_xticklabels(), visible=False)
-    ax2.yaxis.set_major_locator(MultipleLocator(50))
+    ax2.yaxis.set_major_locator(MultipleLocator(5))
     #ax2.yaxis.set_minor_locator(MultipleLocator(0.1))
     ax2.set_xlim([0,qsqmaxphysBK.mean])
     #plt.axes().set_ylim([-0.8,2.5])
@@ -3432,7 +3604,7 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,const2):
                 rootpoints.append('{0}'.format(i))
             else:
                 rootpoints.append('')
-            i+=4.0
+            i+=0.5
         else:
             i ='stop'
     ax2b.set_yticks(points)
