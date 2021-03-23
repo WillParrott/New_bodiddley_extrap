@@ -173,13 +173,6 @@ def get_results(Fit_in,thpts,Fit_s=None):
     else:
         fits = [Fit_in]
     p = gv.load(Fit_in['filename'],method='pickle')
-    if Fit_in['conf'] == 'UF':
-        p['XVnn_m0.45_tw0.706'] = [[Fit_in['XVnn_m0.45_tw0.706']]]
-        p['XVnn_m0.45_tw1.529'] = [[Fit_in['XVnn_m0.45_tw1.529']]]
-        p['XVnn_m0.6_tw0.706'] = [[Fit_in['XVnn_m0.6_tw0.706']]]
-        p['XVnn_m0.6_tw1.529'] = [[Fit_in['XVnn_m0.6_tw1.529']]]
-        p['XVnn_m0.8_tw0.706'] = [[Fit_in['XVnn_m0.8_tw0.706']]]
-        p['XVnn_m0.8_tw1.529'] = [[Fit_in['XVnn_m0.8_tw1.529']]]
     for Fit in fits:
         # We should only need goldstone masses and energies here
         Fit['M_parent_m{0}'.format(Fit['m_c'])] = p['dE:{0}'.format(Fit['parent-Tag'].format(Fit['m_s'],Fit['m_c']))][0]
@@ -426,7 +419,7 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         prior['MD_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units think about this for s
         prior['deltas_{0}'.format(fit)] = ms0-prior['mstuned_{0}'.format(fit)]     
         prior['deltasval_{0}'.format(fit)] = ms0val-prior['mstuned_{0}'.format(fit)]
-        prior['deltalval_{0}'.format(fit)] = ml0val-prior['mltuned_{0}'.format(fit)]
+        #prior['deltalval_{0}'.format(fit)] = ml0val-prior['mltuned_{0}'.format(fit)]
         prior['deltal_{0}'.format(fit)] = ml0-prior['mltuned_{0}'.format(fit)]
         prior['MK_{0}'.format(fit)] = Fit['M_daughter']
         #if fit in ['Fs','SFs','UFs']:
@@ -472,6 +465,7 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
             keys.append(key)   #removes vector tw 0 etc
     for key in keys:
         del f[key]
+    fpdisc = 1.41 # for increasing disc effects in f_+
     prior['0mom'] =gv.gvar(Npow*['0(1)'])*w
     prior['pmom'] =gv.gvar(Npow*['0(1)'])*w
     prior['Tmom'] =gv.gvar(Npow*['0(1)'])*w
@@ -484,14 +478,14 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
     prior['0cl'] = gv.gvar(Npow*[cpri])*w
     prior['0cc'] = gv.gvar(Npow*[cpri])*w
     prior['0csval'] = gv.gvar(Npow*[cvalpri])*w
-    prior['0clval'] = gv.gvar(Nm*[Npow*[cvalpri]])*w
+    #prior['0clval'] = gv.gvar(Nm*[Npow*[cvalpri]])*w
     prior['Td'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*[dpri]]]]])*w
     prior['Tcs'] = gv.gvar(Npow*[cpri])*w
     prior['Tcl'] = gv.gvar(Npow*[cpri])*w
     prior['Tcc'] = gv.gvar(Npow*[cpri])*w
     prior['Tcsval'] = gv.gvar(Npow*[cvalpri])*w
-    prior['Tclval'] = gv.gvar(Nm*[Npow*[cvalpri]])*w
-    prior['pd'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*[dpri]]]]])*w
+    #prior['Tclval'] = gv.gvar(Nm*[Npow*[cvalpri]])*w
+    prior['pd'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*['0.0({0})'.format(gv.gvar(dpri).sdev*fpdisc)]]]]])*w
     for i in range(Nijk[0]):
         if i != 0:
             prior['0d'][i][0][0][0][0] = gv.gvar(di000pri)*w
@@ -508,7 +502,7 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
     prior['pcl'] = gv.gvar(Npow*[cpri])*w
     prior['pcc'] = gv.gvar(Npow*[cpri])*w
     prior['pcsval'] = gv.gvar(Npow*[cvalpri])*w
-    prior['pclval'] = gv.gvar(Nm*[Npow*[cvalpri]])*w
+    #prior['pclval'] = gv.gvar(Nm*[Npow*[cvalpri]])*w
     #if Kwikfit == True:
     #    kwikp = gv.load('Fits/kwikfitp.pickle')
     #    prior['0d'] = kwikp['0d']
@@ -522,11 +516,11 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
 def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,mass,amh,fpf0same,newdata=False,const=False,const2=False): # tag is 0,p,T in this way, we can set fp(0)=f0(0) by just putting 0 for n=0 alat is lattice spacing (mean) so we can use this to evaluate at different lattice spacings p is dict containing all values (prior or posterior or anything) # need to edit l valence mistuning
     fit = Fit['conf']
     an = 0
-    lvalbit = p['deltalval_{0}'.format(fit)]/(10*p['mstuned_{0}'.format(fit)])
-    lvalerr = p['{0}clval'.format(tag)][0][n] * lvalbit
+    #lvalbit = p['deltalval_{0}'.format(fit)]/(10*p['mstuned_{0}'.format(fit)])
+    lvalerr = 0#p['{0}clval'.format(tag)][0][n] * lvalbit
     xpi = p['ml10ms_{0}'.format(fit)]
-    for nm in range(1,Nm):
-        lvalerr +=  p['{0}clval'.format(tag)][nm][n] * lvalbit**(nm+1)
+    #for nm in range(1,Nm):
+    #    lvalerr +=  p['{0}clval'.format(tag)][nm][n] * lvalbit**(nm+1)
     
     for i in range(Nijk[0]):
         for j in range(Nijk[1]):
@@ -729,14 +723,14 @@ def make_fT_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
 
 #######################################################################################################
 
-def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,const2):
+def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,const2):
     
     def fcn(p):
         models = gv.BufferDict()
         if 'constraint' in f:
             if const2:
                 print('Error, const and const2')
-            #models['constraint'] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const=True)- make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const=True)
+            models['constraint'] = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const=True)- make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const=True)
             #pconst = make_p_physical_point_BK(p,Fits)
             #models['constraint'] = make_fp_BK(Nijk,Npow,Nm,addrho,pconst,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0) - make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
         if 'f0_qsq{0}'.format(qsqmaxphys) in f:
@@ -781,24 +775,13 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise
     if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
         p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     #p0 = None
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn, svdcut=1e-12 ,add_svdnoise=svdnoise, add_priornoise=priornoise, maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn,svdcut=1e-12 ,noise=noise,  maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
     print(fit.format(maxline=True))
     print('chi^2/dof = {0:.3f} Q = {1:.3f} logGBF = {2:.2f}'.format(fit.chi2/fit.dof,fit.Q,fit.logGBF))
     #fit2, w = lsqfit.empbayes_fit(1.1, fitargs)
     #print(fit2.format(True))
     #print("w = ",w)
-    #smallp = copy.deepcopy(prior)
-    #for key in ['0d','pd','Td']:
-    #    shape = np.shape(fit.p[key])
-    #    for i in range(shape[0]):
-    #        for j in range(shape[1]):
-    #            for k in range(shape[2]):
-    #                for l in range(shape[3]):
-    #                    for n in range(shape[4]):
-    #                        if fit.p[key][i][j][k][l][n] < 0.01:
-    #                            smallp[key][i][j][k][l][n] = gv.gvar('0.0(0.00000001)')
-    #gv.dump(smallp,'Fits/kwikfitp.pickle')
     return(fit.p)
 
 #####################################################################################################
@@ -1347,24 +1330,24 @@ def output_error_BK(pfit,prior,Fits,Nijk,Npow,Nm,f,qsqs,t_0,addrho,fpf0same,cons
         qmislist.append(prior['0cs'][n])
         qmislist.append(prior['0cc'][n])
         qmislist.append(prior['0csval'][n])
-        for nm in range(Nm):
-            qmislist.append(prior['0clval'][nm][n])
+        #for nm in range(Nm):
+        #    qmislist.append(prior['0clval'][nm][n])
         if addrho:
             heavylist.append(prior['prho'][n])
         qmislist.append(prior['pcl'][n])
         qmislist.append(prior['pcs'][n])
         qmislist.append(prior['pcc'][n])
         qmislist.append(prior['pcsval'][n])
-        for nm in range(Nm):
-            qmislist.append(prior['pclval'][nm][n])
+        #for nm in range(Nm):
+        #    qmislist.append(prior['pclval'][nm][n])
         if addrho:
             heavylist.append(prior['Trho'][n])
         qmislist.append(prior['Tcl'][n])
         qmislist.append(prior['Tcs'][n])
         qmislist.append(prior['Tcc'][n])
         qmislist.append(prior['Tcsval'][n])
-        for nm in range(Nm):
-            qmislist.append(prior['Tclval'][nm][n])
+        #for nm in range(Nm):
+        #    qmislist.append(prior['Tclval'][nm][n])
         
         for i in range(Nijk[0]):
             for j in range(Nijk[1]):

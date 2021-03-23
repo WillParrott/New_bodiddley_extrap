@@ -83,14 +83,14 @@ def mass_corr_plots(Fit,fs,thpts):
 
                     f02 = fs['f0_m{0}_tw{1}'.format(mass2,twist2)]
                     fp2 = fs['fp_m{0}_tw{1}'.format(mass2,twist2)]
-                    corrs['f0'].append(gv.evalcorr([f0,f02])[0][1])
+                    corrs['f0'].append(abs(gv.evalcorr([f0,f02])[0][1]))
                     if fp != None and fp2 != None:
-                        corrs['fp'].append(gv.evalcorr([fp,fp2])[0][1])
+                        corrs['fp'].append(abs(gv.evalcorr([fp,fp2])[0][1]))
                     for thpt in thpts[Fit['conf']]:
                         if twist != '0' or thpt != 'T':
                             V = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)]
                             V2 = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass2,twist2)]
-                            correlation = gv.evalcorr([V,V2])[0][1]
+                            correlation = abs(gv.evalcorr([V,V2])[0][1])
                             #if correlation > 0.5:
                             #    print(Fit['conf'],thpt,mass,twist,mass2,twist2, correlation)
                             corrs[thpt].append(correlation)
@@ -130,14 +130,14 @@ def twist_corr_plots(Fit,fs,thpts):
 
                     f02 = fs['f0_m{0}_tw{1}'.format(mass2,twist2)]
                     fp2 = fs['fp_m{0}_tw{1}'.format(mass2,twist2)]
-                    corrs['f0'].append(gv.evalcorr([f0,f02])[0][1])
+                    corrs['f0'].append(abs(gv.evalcorr([f0,f02])[0][1]))
                     if fp != None and fp2!= None:
-                        corrs['fp'].append(gv.evalcorr([fp,fp2])[0][1])
+                        corrs['fp'].append(abs(gv.evalcorr([fp,fp2])[0][1]))
                     for thpt in thpts[Fit['conf']]:
                         if twist != '0' or thpt != 'T':
                             V = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)]
                             V2 = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass2,twist2)]
-                            correlation = gv.evalcorr([V,V2])[0][1]
+                            correlation = abs(gv.evalcorr([V,V2])[0][1])
                             #if correlation > 0.5:
                                 #print(Fit['conf'],thpt,mass,twist,mass2,twist2, correlation)
                             corrs[thpt].append(correlation)

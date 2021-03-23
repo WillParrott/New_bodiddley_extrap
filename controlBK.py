@@ -147,7 +147,8 @@ SF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
 UF = collections.OrderedDict()
 UF['conf']='UF'
 UF['label'] = 'Set 8'
-UF['filename'] = 'Corrfits/UFunbinned-run-KBscalarvectortensor_375cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV243340sep_mass_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.143_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+#UF['filename'] = 'Corrfits/UFunbinned-run-KBscalarvectortensor_375cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV243340sep_mass_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.143_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
+UF['filename'] = 'Corrfits/UFnewVx_unbinned0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTVX243340sep_mass_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.140_smTrue_Stmin2_Ttmin2_Vtmin2_Xtmin2.pickle'
 UF['masses'] = ['0.194','0.45','0.6','0.8']
 UF['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UF['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -161,12 +162,12 @@ UF['L'] = 64
 UF['w0/a'] = gv.gvar('3.892(12)')
 UF['parent-Tag'] = 'B_G5-G5_m{1}'
 UF['daughter-Tag'] = 5*['K_G5-G5_tw{0}']
-UF['XVnn_m0.45_tw0.706'] = gv.gvar('0.159(12)')
-UF['XVnn_m0.45_tw1.529'] = gv.gvar('0.231(21)')
-UF['XVnn_m0.6_tw0.706'] = gv.gvar('0.166(14)')
-UF['XVnn_m0.6_tw1.529'] = gv.gvar('0.241(24)')
-UF['XVnn_m0.8_tw0.706'] = gv.gvar('0.173(15)')
-UF['XVnn_m0.8_tw1.529'] = gv.gvar('0.252(26)')
+#UF['XVnn_m0.45_tw0.706'] = gv.gvar('0.159(12)')
+#UF['XVnn_m0.45_tw1.529'] = gv.gvar('0.231(21)')
+#UF['XVnn_m0.6_tw0.706'] = gv.gvar('0.166(14)')
+#UF['XVnn_m0.6_tw1.529'] = gv.gvar('0.241(24)')
+#UF['XVnn_m0.8_tw0.706'] = gv.gvar('0.173(15)')
+#UF['XVnn_m0.8_tw1.529'] = gv.gvar('0.252(26)')
 ######################### BsEtas ########################################
 ################################## F PARAMETERS ##########################
 Fs = collections.OrderedDict()
@@ -284,20 +285,20 @@ addrho = True
 fpf0same = True
 constraint = False#add constraint the f0(0)=fp(0)
 constraint2 =False # not working
-svdnoise = False
-priornoise = False
+noise = False
 FitNegQsq = True
-dpri = '0.0(1.0)'
-d000npri = '0.0(2.0)'# backbone of a without disc effects
-di000pri = '0.0(2.0)'#'0.0(5.0)' for no rho
-di10npri = '0.0(1.0)'
+prifac = 1.0
+dpri = '0.0({0})'.format(1.0*prifac)#1.0
+d000npri = '0.0({0})'.format(2.0*prifac)# backbone of a without disc effects
+di000pri = '0.0({0})'.format(2.0*prifac)#1.0'0.0(5.0)'very small because no real mass dependence
+di10npri = '0.0({0})'.format(1.0*prifac) # 0.5 as expect to be smaller
 cpri = '0.0(0.5)'
-cvalpri ='0.0(2.0)'
+cvalpri ='0.0(1.0)'
 rhopri ='0.0(2.0)'
 Kwikfit = False
 Npow = 3 #3
-Nijk = [3,2,2,2] # i,j,k,l
-Nm=2
+Nijk = [3,2,2,3] # i,j,k,l
+Nm=0
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
 adddata = False #This includes the Bs Etas data, should not be used in conjunction with Fs, SFs, UFs Doesn't work with const2
@@ -322,16 +323,16 @@ for Fit in Fits:
         
 for Fit in Fits:
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
-    results_tables(fs_data[Fit['conf']],Fit)
+    #results_tables(fs_data[Fit['conf']],Fit)
     #mass_corr_plots(Fit,fs_data[Fit['conf']],thpts,F,fs_data['F'])
 #check_poles(Fits) Not working atm
-plot_gold_non_split(Fits)
+#plot_gold_non_split(Fits)
 
 
 #Z_V_plots(Fits,fs_data)
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 
-pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
@@ -368,17 +369,17 @@ fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ###############################
 #speed_of_light(Fits)
 #f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del)
-#DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
-error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
+table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del)
+DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
+#error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
 

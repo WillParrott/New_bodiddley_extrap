@@ -51,7 +51,72 @@ minor = 8*factor
 capsize = 10*factor
 
 ####################################################################################################
+def sort_for_bar(data,spacing):
+    y = []
+    x = []
+    i = 0
+    while i+spacing <= 1:
+        y.append(len(list(x for x in data if i <= x < i + spacing)))
+        x.append(i+spacing/2)
+        i += spacing
+    return(x,y)
 
+
+def twist_corr_plots(Fit,fs,thpts):
+    corrs = collections.OrderedDict()
+    corrs['f0'] = []
+    corrs['fp'] = []
+    corrs['S'] = []
+    corrs['V'] = []
+    for i,twist in enumerate(Fit['twists']):
+        for j in range(i+1,len(Fit['twists'])):
+            twist2 = Fit['twists'][j]
+            for k,mass in enumerate(Fit['masses']):
+                for l in range(len(Fit['masses'])):
+                    mass2 = Fit['masses'][l]
+                    f0 = fs['f0_m{0}_tw{1}'.format(mass,twist)]
+                    fp = fs['fp_m{0}_tw{1}'.format(mass,twist)]
+                    
+                    f02 = fs['f0_m{0}_tw{1}'.format(mass2,twist2)]
+                    fp2 = fs['fp_m{0}_tw{1}'.format(mass2,twist2)]
+                    corrs['f0'].append(abs(gv.evalcorr([f0,f02])[0][1]))
+                    if fp != None and fp2!= None:
+                        corrs['fp'].append(abs(gv.evalcorr([fp,fp2])[0][1]))
+                    for thpt in thpts[Fit['conf']]:
+                        if twist != '0' or thpt != 'T':
+                            V = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass,twist)]
+                            V2 = Fit['{0}Vnn_m{1}_tw{2}'.format(thpt,mass2,twist2)]
+                            correlation = abs(gv.evalcorr([V,V2])[0][1])
+                            #if correlation > 0.5:
+                            #print(Fit['conf'],thpt,mass,twist,mass2,twist2, correlation)
+                            corrs[thpt].append(correlation)
+    for tag in ['f0','fp','S','V']:
+        data = corrs[tag]
+        x,y = sort_for_bar(data,0.025)
+        plt.figure(figsize=figsize)
+        plt.bar(x,y,width=0.025)
+        plt.xlabel('correlation',fontsize=fontsizelab)
+        plt.ylabel(r'Frequency',fontsize=fontsizelab)
+        plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+        plt.axes().tick_params(which='major',length=major)
+        plt.axes().tick_params(which='minor',length=minor)
+        plt.axes().yaxis.set_ticks_position('both')
+        #plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
+        #plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+        #plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+        #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
+        plt.tight_layout()
+        plt.savefig('TwistCorrs/DK{0}corrs{1}_tw.pdf'.format(Fit['conf'],tag))
+        plt.close()
+    for twist in Fit['twists'][1:]:
+        f0 = fs['f0_m{0}_tw{1}'.format(mass,twist)]
+        fp = fs['fp_m{0}_tw{1}'.format(mass,twist)]
+        print(Fit['conf'],'tw = ', twist, 'f0 fp corr = ', gv.evalcorr([f0,fp])[0][1])
+    return()
+
+
+
+######################################################################################################
 def plot_gold_non_split(Fits):
     plt.figure(figsize=figsize)
     i = 0
@@ -61,9 +126,9 @@ def plot_gold_non_split(Fits):
             yerr = 1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).sdev
             x = float(mass)**2
             if Fit['conf'][-1] == 'p':
-                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['conf'],ms=ms,mfc='none')
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['label'],ms=ms,mfc='none')
             else:
-                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['conf'],ms=ms,mfc='none')
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['label'],ms=ms,mfc='none')
             i+=1
    
     plt.plot([-0.1,0.9],[0,0],'k--')
@@ -198,11 +263,11 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
             
             plt.figure(2,figsize=figsize)
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(3,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
         i += 1
@@ -300,11 +365,11 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
             
             plt.figure(4,figsize=figsize)
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(5,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
         i += 1
@@ -470,16 +535,16 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
             yp,yperr = unmake_gvar_vec(yp)            
             plt.figure(108,figsize=figsize)
             plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
-            legend_elements.append(Line2D([0], [0],color='k',linestyle='None', marker=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass))))
+            plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
+            legend_elements.append(Line2D([0], [0],color='k',linestyle='None', marker=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label']))))
             plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(109,figsize=figsize)
             plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
         i += 1
@@ -577,11 +642,11 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
             
             plt.figure(6,figsize=figsize)
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(7,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
         i += 1
@@ -680,11 +745,11 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
             
             plt.figure(8,figsize=figsize)
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(9,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),alpha=alpha)
+            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
         i += 1
@@ -1791,11 +1856,11 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
             
             plt.figure(4,figsize=figsize)
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])))
             
             plt.figure(5,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])))
             
             j += 1
         i += 1
@@ -2325,7 +2390,7 @@ def f0_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
             
             plt.figure(16,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])))
             
             j += 1
         i += 1
@@ -2384,7 +2449,7 @@ def fp_different_a_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same,afm)
             
             plt.figure(17,figsize=figsize)
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i])
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])))
             
             j += 1
         i += 1

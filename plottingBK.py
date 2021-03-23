@@ -32,7 +32,7 @@ from collections import defaultdict
 # ans and pole masses
 # dict of different lattice spacings #done 
 ################### global variables ##########################################
-factor = 0.5 #multiplies everything to make smaller for big plots (0.5) usually 1
+factor = 1.0 #multiplies everything to make smaller for big plots (0.5) usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor

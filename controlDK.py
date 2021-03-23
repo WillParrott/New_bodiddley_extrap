@@ -209,8 +209,7 @@ addrho = False #like this for DK
 fpf0same = True
 constraint = False #add constraint the f0(0)=fp(0)
 constraint2 = False
-svdnoise = False
-priornoise = False
+noise = False
 FitNegQsq = True
 prifac = 1.0
 dpri = '0.0({0})'.format(1.0*prifac)#1.0
@@ -222,7 +221,7 @@ cvalpri ='0.0(1.0)'#1.0
 rhopri ='0.0(1.0)'#1.0
 DoFit = True
 Npow = 3 #3
-Nijk = 3 #3
+Nijk = [1,2,1] #2
 Nm = 0 # no longer in use
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
@@ -241,15 +240,16 @@ for Fit in Fits:
     get_results(Fit,thpts)
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
     #results_tables(fs_data[Fit['conf']],Fit)
+    #twist_corr_plots(Fit,fs_data[Fit['conf']],thpts)
 #check_poles(Fits) Doesn't work atm 
 
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
-pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Z_V_plots(Fits,fs_data)
 #plot_gold_non_split(Fits)
-#plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
+#plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,noise,constraint2)
 #plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #R_mu_e_integrals(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
