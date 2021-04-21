@@ -221,7 +221,7 @@ cvalpri ='0.0(1.0)'#1.0
 rhopri ='0.0(1.0)'#1.0
 DoFit = True
 Npow = 3 #3
-Nijk = [1,2,1] #2
+Nijk = [1,3,1] #[1,3,1]
 Nm = 0 # no longer in use
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
@@ -246,13 +246,16 @@ for Fit in Fits:
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
+
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#ff_comp(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #Z_V_plots(Fits,fs_data)
 #plot_gold_non_split(Fits)
 #plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,noise,constraint2)
-#plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
-#plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
-#R_mu_e_integrals(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+plot_AFB(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
+R_mu_e_integrals(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #speed_of_light(Fits)
 #f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)

@@ -32,24 +32,24 @@ Metas_UF = gv.gvar('0.154107(88)') #from new BsEast fit
 Metas_Fs = Metas_F#gv.gvar('0.314015(89)') #from BsEtas fits
 Metas_SFs = Metas_SF#gv.gvar('0.207021(65)')#from new BsEtas fit
 Metas_UFs = Metas_UF#gv.gvar('0.154107(88)') #from new BsEast fit
-#MKphys = gv.gvar('0.497611(13)') #PD K^0
 MKphys0 = gv.gvar('0.497611(13)') #PD K^0
-MKphys = gv.gvar('0.493677(13)')#PD K^pm  we are doing D_0 to K^pm 
+MKphyspm = gv.gvar('0.493677(13)')#PD K^pm  we are doing D_0 to K^pm
+#MKphys = (MKphys0 + MKphyspm)/2
 MBsphys = gv.gvar('5.36688(14)') # PDG 
 MDsphys = gv.gvar('1.968340(70)')  #PDG
 MDs0phys = gv.gvar('2.3178(5)')
 MDsstarphys = gv.gvar('2.1122(4)')  #PDG 
 MBphys = gv.gvar('5.27965(12)') # PDG B0  
-#MDphys = gv.gvar('1.86965(5)')  #PDG Dpm
 MDphyspm = gv.gvar('1.86965(5)')  #PDG Dpm
-MDphys = gv.gvar('1.86483(5)')  #PDG D0 
+MDphys0 = gv.gvar('1.86483(5)')  #PDG D0
+#MDphys = (MDphys0+MDphyspm)/2
 Mpiphys = gv.gvar('0.1349770(5)')  #PDG
 MBsstarphys = gv.gvar('5.4158(15)') #PDG
 #tensornorm = gv.gvar('1.09024(56)') # from Dan
 w0 = gv.gvar('0.1715(9)')  #fm
 hbar = gv.gvar('6.58211928(15)') # x 10^-25 GeV s
 clight = 2.99792458 #*10^23 fm/s
-slratio = gv.gvar('27.18(10)')
+slratio = gv.gvar('27.18(10)') 
 MetacC = gv.gvar('1.876536(48)') #2005.01845
 MetacVC = gv.gvar('2.331899(72)') # correct mass 2005.01845
 MetacVCp = gv.gvar('2.283452(45)')# from Bp's data 
@@ -73,21 +73,32 @@ deltaFVFs = deltaFVF#gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVSFs = deltaFVSF#gv.gvar('0.020801419(21)')#80812089(1)')
 deltaFVUFs = deltaFVUF#gv.gvar('0.027538708(37)')#753275(1)') #from code Chris sent
 etaEW2 = gv.gvar('1.009(2)')**2
-deltaEM2 = gv.gvar('1.00(1)')
-cor2 = etaEW2*deltaEM2
+deltaEM20 = gv.gvar('1.00(1)')#charged kaon (D0)
+deltaEM20mu = gv.gvar('1.00(1)')#charged kaon (D0) mu for 1810.03127
+deltaEM2p = gv.gvar('1.000(5)')# neutral kaon(Dp)
+deltaEM2pmu = gv.gvar('1.000(5)')# neutral kaon(Dp) mu
+mumdcorrection = gv.gvar('1.0000(15)')
+cor2p = etaEW2*deltaEM2p
+cor20 = etaEW2*deltaEM20
+cor2pmu = etaEW2*deltaEM2pmu
+cor20mu = etaEW2*deltaEM20mu
 #deltaEMDpm2 = gv.gvar('1.000(5)')
 tauD0 = gv.gvar('410.1(1.5)e-6')#ns # PDG
 tauDpm = gv.gvar('1040(7)e-6')#ns # PDG 1040(7)*1e-15s
-B = gv.gvar('0.03999(44)') #HFLAV pg 340
-Banorm = B/tauD0
+#B = gv.gvar('0.03999(44)') #HFLAV pg 340
+BforBaBar = gv.gvar('0.03950(31)') #PDG
+Banorm = BforBaBar/tauD0
 #x =  MBsphys*(MBsstarphys-MBsphys)  #GeV^2 
 LQCD = 0.5
 mbphys = gv.gvar('4.18(04)') # b mass GeV
 qsqmaxphys = (MBsphys-Metasphys)**2
-qsqmaxphysBK = (MBphys-MKphys)**2
-qsqmaxphysDK = (MDphys-MKphys)**2
+#qsqmaxphysBK = (MBphys-MKphys)**2
+qsqmaxphysDK0 = (MDphys0-MKphyspm)**2 
+qsqmaxphysDKp = (MDphyspm-MKphys0)**2 
+qsqmaxphysDK = (MDphys0+MDphyspm-MKphys0-MKphyspm)**2/4
 #Dels = (MDs0phys-MDphys).mean # 0.4 +0.1 in control too
 mlmsfac = 5.63  #gives ml/(mlmsfac*ms) 10 originally, now 5.63
+print('q^2 D^0,D^+:',(MDphys0-MKphyspm)**2,(MDphyspm-MKphys0)**2)
 #####################################################################################################
 ############################### Other data #########################################################
 dataf0maxBK = None  #only works for BsEtas for now
@@ -276,9 +287,13 @@ def make_z(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None): # this is give M_H and
         M_daughter = M_K
     t_plus = make_t_plus(M_H,M_K)
     t_0 = make_t_0(t0,M_H,M_K,M_parent,M_daughter)
-    z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))
-    if z.mean == 0 and z.sdev == 0:
-        z = 0 #gv.gvar(0,1e-8) # ensures not 0(0)
+    if qsq == t_0:
+        z = 0         
+    else:
+        z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))
+    if isinstance(z,gv._gvarcore.GVar) and z.sdev == 0:
+        z = z.mean #gv.gvar(0,1e-8) # ensures not 0(0)
+    
     #print(qsq,z,M_H,M_K,M_parent,M_daughter,t0,t_0,t_plus)
     return(z)
 ###################################################################################################
@@ -350,8 +365,10 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
     f = gv.BufferDict()
     prior['g'] = gv.gvar('0.570(6)')#1304.5009 pg 19 
     prior['Metacphys'] = Metacphys
-    prior['MDphys'] = MDphys
-    prior['MKphys'] = MKphys
+    prior['MDphys0'] = MDphys0
+    prior['MKphys0'] = MKphys0
+    prior['MDphyspm'] = MDphyspm
+    prior['MKphyspm'] = MKphyspm
     prior['MDsstarphys'] =  MDsstarphys
     prior['MDs0phys'] = MDs0phys
     #prior['MBphys'] = MBphys
@@ -477,15 +494,17 @@ def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,mass,amh,fpf0same,newdata=False,const=
 
 def make_logs(p,Fit):
     logs = 1 - ( (9/8) * p['g']**2 * p['ml10ms_{0}'.format(Fit['conf'])] * ( gv.log(p['ml10ms_{0}'.format(Fit['conf'])]) + p['deltaFV_{0}'.format(Fit['conf'])]))
-    logs = 1
+    #logs = 1
     return(logs)
 
 ########################################################################################################
 def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False):
+    MDphysav = (p['MDphys0'] + p['MDphyspm'])/2
+    MKphysav = (p['MKphys0'] + p['MKphyspm'])/2
     fit = Fit['conf']
     f0 = 0
     logs = make_logs(p,Fit)
-    Del =  p['MDs0phys']- p['MDphys']
+    Del =  p['MDs0phys']- MDphysav
     if p['a_{0}'.format(fit)] != 0:
         MHs0 = p['MH_{0}_m{1}'.format(fit,mass)] + p['a_{0}'.format(fit)]*Del
     else:
@@ -497,8 +516,8 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
     if newdata:
         logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
     if const:
-        logsBK = 1 - ( (9/8) * p['g']**2 * 1/(10*p['slratio']) * ( gv.log(1/(10*p['slratio'])) ) )
-        z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
+        logsBK = 1 - ( (9/8) * p['g']**2 * 1/(mlmsfac*p['slratio']) * ( gv.log(1/(mlmsfac*p['slratio'])) ) )
+        z0const = make_z(0,t_0,MDphysav,MKphysav)
     for n in range(Npow):
         if const:
             an = make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,amh,fpf0same,const=const)
@@ -516,13 +535,15 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
 ########################################################################################################
 
 def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,const2=False):
+    MDphysav = (p['MDphys0'] + p['MDphyspm'])/2
+    MKphysav = (p['MKphys0'] + p['MKphyspm'])/2
     fit = Fit['conf']
     fp = 0
     fp0 = 0
     f00 = 0
     logs = make_logs(p,Fit)
     #MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p,p['a_{0}'.format(fit)])
-    Del = p['MDsstarphys'] - p['MDphys']
+    Del = p['MDsstarphys'] - MDphysav
     if p['a_{0}'.format(fit)] != 0:
         MHsstar = p['MH_{0}_m{1}'.format(fit,mass)] + p['a_{0}'.format(fit)]*Del
     else:
@@ -535,9 +556,9 @@ def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
     if newdata:
         logsBsEtas = 1 - ( (9/8) * p['g']**2 * 1/10 * ( gv.log(1/10) ) )
     if const or const2:
-        logsBK = 1 - ( (9/8) * p['g']**2 * 1/(10*p['slratio']) * ( gv.log(1/(10*p['slratio'])) ) )
+        logsBK = 1 - ( (9/8) * p['g']**2 * 1/(mlmsfac*p['slratio']) * ( gv.log(1/(mlmsfac*p['slratio'])) ) )
     if const:
-        z0const = make_z(0,t_0,p['MDphys'],p['MKphys'])
+        z0const = make_z(0,t_0,MDphysav,MKphysav)
     for n in range(Npow):
         if const==True and const2 ==False and newdata ==False:
             an = make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,amh,fpf0same,const=const)
@@ -613,22 +634,40 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0sam
     #fit2, w = lsqfit.empbayes_fit(1.1, fitargs)
     #print(fit2.format(True))
     #print(w)
-    return(fit.p)
+    p = fit.p
+    #MDphysav = (p['MDphys0'] + p['MDphyspm'])/2
+    #MKphysav = (p['MKphys0'] + p['MKphyspm'])/2
+    #global qsqmaxphysDK
+    #global qsqmaxphysDK0
+    #global qsqmaxphysDKp 
+    #qsqmaxphysDK = (MDphysav - MKphysav)**2
+    #qsqmaxphysDK0 = (MDphys0 - MKphyspm)**2
+    #qsqmaxphysDKp = (MDphyspm - MKphys0)**2
+    #print('Functions qsqmax after fit', qsqmaxphysDK0.mean,qsqmaxphysDKp.mean,qsqmaxphysDK.mean)
+    return(p)
 
 ######################################################################################################
 
-def make_p_physical_point_DK(pfit,Fits,Dplus=False):
+def make_p_physical_point_DK(pfit,Fits,D=False):
     #only need to evaluate at one Fit one mass but change all anyway
     # everything should now be in GeV
     p = gv.BufferDict()
+    MDphysav = (pfit['MDphys0'] + pfit['MDphyspm'])/2
+    MKphysav = (pfit['MKphys0'] + pfit['MKphyspm'])/2
     for Fit in Fits:
         fit = Fit['conf']
+        p['MDphysav'] = MDphysav
+        p['MKphysav'] = MKphysav
         p['a_{0}'.format(fit)] = 0
-        if Dplus:
-            p['MK_{0}'.format(fit)] = MKphys0
-            p['MKphys'] = MKphys0
-        else:
-            p['MK_{0}'.format(fit)] = pfit['MKphys']
+        if D == 'p':
+            p['MK_{0}'.format(fit)] = MKphysav #MKphys0
+            p['MKphys'] = pfit['MKphys0']
+        elif D == '0':
+            p['MK_{0}'.format(fit)] = MKphysav #MKphyspm  only appears in f0 and fp
+            p['MKphys'] = pfit['MKphyspm']
+        elif D == False:
+            p['MK_{0}'.format(fit)] = MKphysav 
+            p['MKphys'] = MKphysav
         #p['LQCD_{0}'.format(fit)] = LQCD
         p['Metac_{0}'.format(fit)] = pfit['Metacphys']
         p['deltas_{0}'.format(fit)] = 0
@@ -638,11 +677,15 @@ def make_p_physical_point_DK(pfit,Fits,Dplus=False):
         p['ml10ms_{0}'.format(fit)] = 1/(mlmsfac*pfit['slratio'])
         p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
-            if Dplus:
-                p['MH_{0}_m{1}'.format(fit,mass)] = MDphyspm
-                p['MDphys'] = MDphyspm
-            else:
-                p['MH_{0}_m{1}'.format(fit,mass)] = pfit['MDphys']
+            if D == 'p':
+                p['MH_{0}_m{1}'.format(fit,mass)] = MDphysav #MDphyspm
+                p['MDphys'] = pfit['MDphyspm']
+            elif D == '0':
+                p['MH_{0}_m{1}'.format(fit,mass)] = MDphysav #MDphys0
+                p['MDphys'] = pfit['MDphys0']
+            elif D == False:
+                p['MH_{0}_m{1}'.format(fit,mass)] = MDphysav 
+                p['MDphys'] = MDphysav
             #p['MD_{0}'.format(fit)] = pfit['MDphys']
     for key in pfit:
         if key not in p:
@@ -693,30 +736,40 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
+    a0 = []
+    ap = []
+    for n in range(Npow):
+        a0.append(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fits[0],Fits[0]['masses'][0],0,fpf0same))
+        ap.append(make_an_BK(n,Nijk,Nm,addrho,p,'p',Fits[0],Fits[0]['masses'][0],0,fpf0same))
+    print('logs',make_logs(p,Fits[0]))
+    print('a_0',a0)
+    print('a_+',ap)
     HFLAV= gv.gvar('0.7180(33)')# from #1909.12524 p318
     BESmu = gv.gvar(0.7133,np.sqrt(0.0038**2+0.0030**2))#1810.03127
-    correction = gv.sqrt(cor2)
-    Vcsq20 = HFLAV/(fp0*correction)
+    correction = gv.sqrt(cor20)# deltaEM20 is larger
+    Vcsq20 = HFLAV/(mumdcorrection*fp0*correction)
     terr = Vcsq20.partialsdev(fp0)
     eerr = Vcsq20.partialsdev(HFLAV)
-    cerr = Vcsq20.partialsdev(correction)
+    cerrEW = Vcsq20.partialsdev(etaEW2)
+    cerrEM = Vcsq20.partialsdev(deltaEM20)
     print('A) HFLAV av. Vcs e at q^2=0 = {0}'.format(Vcsq20))
-    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction error = {2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
-    Vcsq20 = BESmu/(fp0*correction)
+    print('Theory error = {0:.4f} Exp error = {1:.4f} EM error = {2:.4f} EW error = {3:.4f} Total = {4:.4f}'.format(terr,eerr,cerrEM,cerrEW,np.sqrt(eerr**2+terr**2+cerrEW**2+cerrEM**2)))
+    Vcsq20 = BESmu/(mumdcorrection*fp0*correction)
     terr = Vcsq20.partialsdev(fp0)
     eerr = Vcsq20.partialsdev(BESmu)
-    cerr = Vcsq20.partialsdev(correction)
+    cerrEW = Vcsq20.partialsdev(etaEW2)
+    cerrEM = Vcsq20.partialsdev(deltaEM20)
     print('Vcs mu at q^2=0 = {0}'.format(Vcsq20))
-    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction error = {2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
+    print('Theory error = {0:.4f} Exp error = {1:.4f} EM error = {2:.4f} EW error = {3:.4f} Total = {4:.4f}'.format(terr,eerr,cerrEM,cerrEW,np.sqrt(eerr**2+terr**2+cerrEW**2+cerrEM**2)))
     return()
 
 ######################################################################################################
 
-def integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,m_lep,iters=100,Dplus=False):
+def integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,m_lep,iters=100,D=False,qmax=False):
     if qsq_min < (m_lep**2).mean:
         qsq_min = (m_lep**2).mean
-    p = make_p_physical_point_DK(pfit,Fits,Dplus=Dplus)
-    A = 3/8 * p['MDphys']**2 * (1 - (p['MKphys']**2/p['MDphys']**2) )**2 
+    p = make_p_physical_point_DK(pfit,Fits,D=D)
+    A = 3/8 * p['MDphys']**2 * (1 - (p['MKphys']**2/p['MDphys']**2) )**2
     def integrand(qsq):
         eps = m_lep**2/qsq
         p2 = (qsq-p['MKphys']**2-p['MDphys']**2)**2/(4*p['MDphys']**2)-p['MKphys']**2
@@ -729,17 +782,27 @@ def integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,cons
         integrand = (1-eps)**2 * (p3 * fp**2 * (1 + eps/2) + p1 * f0**2 * eps * A)
         return(integrand)
     del_qsq =  (qsq_max-qsq_min) /iters
-    funcs = integrand(qsq_min) + integrand(qsq_max)
+    if qmax:
+        funcs = integrand(qsq_min)
+    else:
+        funcs = integrand(qsq_min) + integrand(qsq_max)
     for i in range(1,iters):
         funcs += 2*integrand(qsq_min+del_qsq*i)
     result = del_qsq*funcs/2
-    return(result)
+    return(result*mumdcorrection)
 
 ################################################################################################
 
 
-def integrate_R_mu_e(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,iters=500):
-    p = make_p_physical_point_DK(pfit,Fits)
+def integrate_R_mu_e(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,iters=500,D=False):
+    #not called#
+    p = make_p_physical_point_DK(pfit,Fits,D=D)
+    if D == '0':
+        qsqmaxphys = qsqmaxphysDK0
+    elif D == 'p':
+        qsqmaxphys = qsqmaxphysDKp
+    elif D == False:
+        qsqmaxphys = qsqmaxphysDK
     A = 3/8 * p['MDphys']**2 * (1 - (p['MKphys']**2/p['MDphys']**2) )**2
     #qsq_max = ((p['MDphys']-p['MKphys'])**2).mean
     def integrand(qsq):
@@ -755,7 +818,7 @@ def integrate_R_mu_e(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,
         inte = (1-epse)**2 * (p3 * fp**2 * (1 + epse/2) + p1 * f0**2 * epse * A)
         intmu = (1-epsmu)**2 * (p3 * fp**2 * (1 + epsmu/2) + p1 * f0**2 * epsmu * A)
         integrand = intmu/inte
-        if qsq == qsqmaxphysDK.mean:
+        if qsq == qsqmaxphys.mean:
             integrand = epsmu*(1-epsmu)**2/(epse*(1-epse)**2)
         #print(qsq,p2,integrand)
         return(integrand)
@@ -764,18 +827,32 @@ def integrate_R_mu_e(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,
     for i in range(1,iters):
         funcs += 2*integrand(qsq_min+del_qsq*i)
     result = del_qsq*funcs/2
-    return(result)
+    #return(result) #uncomment to use
 
 #################################################################################################
 
 def R_mu_e_integrals(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     qsq_min = (M_mu**2).mean
     qsq_max = qsqmaxphysDK.mean
-    mu = integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_mu,iters=500)
+    mu = integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_mu,iters=500,qmax=True)
     qsq_min = (M_e**2).mean
-    e = integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500)
+    e = integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500,qmax=True)
     rat = mu/e
-    print('R_mu/e = ', rat)
+    print('R_mu/e av mass = ', rat)
+    qsq_min = (M_mu**2).mean
+    qsq_max = qsqmaxphysDK0.mean
+    mu = integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_mu,iters=500,D='0',qmax=True)
+    qsq_min = (M_e**2).mean
+    e = integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500,D='0',qmax=True)
+    rat = mu/e
+    print('R_mu/e D^0 = ', rat)
+    qsq_min = (M_mu**2).mean
+    qsq_max = qsqmaxphysDKp.mean
+    mu = integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_mu,iters=500,D='p',qmax=True)
+    qsq_min = (M_e**2).mean
+    e = integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500,D='p',qmax=True)
+    rat = mu/e
+    print('R_mu/e D^+ = ', rat)
     return()
 
 #################################################################################################
@@ -787,8 +864,12 @@ def comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     bins = [0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,qsqmaxphysDK.mean]
     partials = [17.82,15.83,13.91,11.69,9.36,7.08,5.34,3.09,1.28,17.79,15.62,14.02,12.28,8.92,8.17,4.96,2.67,1.19] ## D^0 to K^- followed by D^+ to K^0
     for i in range(len(bins)-1):
-        p3integrals0.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e))
-        p3integralsp.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,Dplus=True))
+        if bins[i+1] == qsqmaxphysDK.mean:
+            p3integrals0.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='0',qmax=True))
+            p3integralsp.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='p',qmax=True))
+        else:
+            p3integrals0.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='0'))
+            p3integralsp.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='p'))
     cov_mat = gv.load('covarience_matricies/CLEO.pickle')
     partials  = gv.gvar(partials,cov_mat)
     Vcss21 = []
@@ -819,9 +900,12 @@ def comp_cleo(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
 def comp_BES(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     #bins 0,0.2,0.4...1.6,inf
     p3integrals = []
-    bins = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,qsqmaxphysDK.mean]
+    bins = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,qsqmaxphysDK0.mean]
     for i in range(len(bins)-1):
-        p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e))
+        if bins[i+1] == qsqmaxphysDK0.mean:
+            p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='0',qmax=True))
+        else:
+            p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='0'))
     partials = [8.812,8.743,8.295,7.567,7.486,6.446,6.200,5.519,5.028,4.525,3.972,3.326,2.828,2.288,1.737,1.314,0.858,0.379] ## D^0 to K^-
     
     cov_mat = gv.load('covarience_matricies/BES.pickle')
@@ -843,9 +927,12 @@ def comp_BES(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
 def comp_BESDp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     #bins 0,0.2,0.4...1.6,inf
     p3integrals = []
-    bins = [0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,qsqmaxphysDK.mean]
+    bins = [0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,qsqmaxphysDKp.mean]
     for i in range(len(bins)-1):
-        p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,Dplus=True))
+        if bins[i+1] == qsqmaxphysDKp.mean:
+            p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='p',qmax=True))
+        else:
+            p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='p'))
     partials = [16.97, 15.29, 13.57, 11.65,  9.33,  7.06,  4.96,  2.97,  1.01]    
     cov_mat = gv.load('covarience_matricies/BESDp.pickle')
     partials  = gv.gvar(partials,cov_mat)
@@ -872,9 +959,12 @@ def comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     for i in range(len(bf)):
         partials.append(bf[i]*R)
     p3integrals = []
-    bins = [0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,qsqmaxphysDK.mean]
+    bins = [0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,qsqmaxphysDK0.mean]
     for i in range(len(bins)-1):
-        p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e))
+        if bins[i+1] == qsqmaxphysDK0.mean:
+            p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='0',qmax=True))
+        else:
+            p3integrals.append(integrate_fp(bins[i],bins[i+1],pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,D='0'))
     #gv.dump(p3integrals,'../Misc/data/fps.pickle')
     #partials = [18.15, 16.63, 14.75, 12.67, 10.14, 7.90, 5.44, 3.32, 1.320, 0.0633] ## D^0 to K^-
     #partials = [0.1861, 0.1705, 0.1513, 0.1300, 0.1040, 0.0810, 0.0558, 0.0340, 0.01353, 0.000649]
@@ -886,6 +976,9 @@ def comp_BaBar(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     terr = []
     eerr = []
     ints = []
+    bf = bf[:-1] #remove top bin
+    partials = partials[:-1]
+    p3integrals =p3integrals[:-1]
     for i in range(len(bf)):
         V2 = 24 * np.pi**3 * partials[i] * 6.582119569*1e-16 /(GF**2 * p3integrals[i])
         Vcss2.append(V2)
@@ -903,8 +996,38 @@ def total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BE
     total.extend(np.array(BESV2))
     total.extend(np.array(BaBarV2))
     #av = gv.sqrt(lsqfit.wavg(total)/cor2)
-    av = gv.sqrt(lsqfit.wavg([lsqfit.wavg(Cleo1V2),lsqfit.wavg(Cleo2V2),lsqfit.wavg(BESV2),lsqfit.wavg(BaBarV2)*Banorm])/cor2)
-    print('B) Average V_cs from q^2 bins = ', av)
+    av_thing0 =lsqfit.wavg([lsqfit.wavg(Cleo1V2),lsqfit.wavg(BESV2),lsqfit.wavg(BaBarV2)*Banorm])
+    av02 = av_thing0/cor20
+    av0 = gv.sqrt(av02)
+    
+    av_thingp = lsqfit.wavg(Cleo2V2)
+    avp2 = av_thingp/cor2p
+    avp = gv.sqrt(avp2)
+
+    old_av2 = lsqfit.wavg([lsqfit.wavg(Cleo1V2)/deltaEM20,lsqfit.wavg(Cleo2V2)/deltaEM2p,lsqfit.wavg(BESV2)/deltaEM20,lsqfit.wavg(BaBarV2)*Banorm/deltaEM20])
+    #av2 = lsqfit.wavg([av02,avp2])
+    old_av = gv.sqrt(old_av2/etaEW2)
+    ########################### Do fit ###################################
+    fit_data = [lsqfit.wavg(Cleo1V2),lsqfit.wavg(Cleo2V2),lsqfit.wavg(BESV2),lsqfit.wavg(BaBarV2)]
+    fit_prior = gv.BufferDict()
+    fit_prior['wavg'] = gv.gvar('0.95(10)')
+    fit_prior['deltaEM20'] = deltaEM20
+    fit_prior['deltaEM2p'] = deltaEM2p
+    fit_prior['etaEW2'] = etaEW2
+    fit_prior['Banorm'] = Banorm
+    def fcn(p):
+        e0 = p['wavg']**2 * p['deltaEM20'] * p['etaEW2']
+        ep = p['wavg']**2 * p['deltaEM2p'] * p['etaEW2']
+        e0BaBar = p['wavg']**2 * p['deltaEM20'] * p['etaEW2'] / p['Banorm']
+        return([e0,ep,e0,e0BaBar])
+    fit = lsqfit.nonlinear_fit(prior=fit_prior, fcn=fcn, data=fit_data)
+    print(fit)
+    av = fit.p['wavg']
+    ##############################################################
+    print('B) Average V_cs from q^2 bins fit = ',av,'chi^2 = {0:.3f} Q = {1:.3f}'.format(fit.chi2/fit.dof,fit.Q))
+    print('Average V_cs from q^2 bins wavg = ', old_av,'chi^2 = {0:.3f} Q = {1:.3f}'.format(old_av2.chi2/old_av2.dof,old_av2.Q))
+    print('D^0 Average V_cs from q^2 bins = ', av0,'chi^2 = {0:.3f} Q = {1:.3f}'.format(av_thing0.chi2/av_thing0.dof,av_thing0.Q))
+    print('D^+ Average V_cs from q^2 bins = ', avp)
     ints = []
     pars = []
     ints.extend(C1ints)
@@ -914,11 +1037,13 @@ def total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BE
     pars.extend(Cpars)
     pars.extend(BESpars)
     pars.extend(BaBarpars)
-    pars.append(Banorm)
+    pars.append(fit_prior['Banorm'])
     terr = av.partialsdev(tuple(ints))
     eerr = av.partialsdev(tuple(pars))
-    cerr = av.partialsdev(cor2)
-    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction error = {2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
+    cerrEW = av.partialsdev(fit_prior['etaEW2'])
+    cerrEM = av.partialsdev(tuple([fit_prior['deltaEM20'],fit_prior['deltaEM2p']]))
+    
+    print('Theory error = {0:.4f} Exp error = {1:.4f} EM error = {2:.4f} EW error = {3:.4f} Total = {4:.4f}'.format(terr,eerr,cerrEM,cerrEW,np.sqrt(eerr**2+terr**2+cerrEW**2+cerrEM**2)))
     return(av)
 
 ##################################################################################################
@@ -931,7 +1056,11 @@ def comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     Cleo2av = lsqfit.wavg(Cleo2V2)
     BESav = lsqfit.wavg(BESV2)
     BESDpav = lsqfit.wavg(BESDpV2)
-    BaBarav = lsqfit.wavg(BaBarV2,svdcut=0.01)*Banorm
+    #BaBarav = lsqfit.wavg(BaBarV2,svdcut=0.01)*Banorm
+    BaBarav = lsqfit.wavg(BaBarV2)*Banorm
+    #BaBarchi = lsqfit.wavg(BaBarV2,svdcut=0.01) # for chi^2 only
+    BaBarchi = lsqfit.wavg(BaBarV2) # for chi^2 only
+    
     #avtest0 = lsqfit.wavg(BaBarV2,svdcut=0.01)
     #avtest999 = lsqfit.wavg(BaBarV2,svdcut=0.1)
     #avtest1 = lsqfit.wavg(BaBarV2)*Banorm
@@ -943,11 +1072,11 @@ def comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     #plt.clf()
     #avtest999.fit.qqplot_residuals().savefig('DKPlots/QQplot_svd1.pdf')
     #print(avtest1,avtest2,avtest3,avtest4,avtest5)
-    print('Cleo |V_cs| D^0 to K^- sqrt(weighted average) = ',gv.sqrt(Cleo1av/cor2))
-    print('Cleo |V_cs| D^+ to K^0 sqrt(weighted average) = ',gv.sqrt(Cleo2av/cor2))
-    print('BES |V_cs| D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BESav/cor2))
-    print('BES |V_cs| D^+ to K^-0 sqrt(weighted average) = ',gv.sqrt(BESDpav/cor2))
-    print('BaBar |V_cs| D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BaBarav/cor2))
+    print('Cleo |V_cs| D^0 to K^- sqrt(weighted average) = ',gv.sqrt(Cleo1av/cor20),'chi^2 = {0:.3f} Q = {1:.3f}'.format(Cleo1av.chi2/Cleo1av.dof,Cleo1av.Q))
+    print('Cleo |V_cs| D^+ to K^0 sqrt(weighted average) = ',gv.sqrt(Cleo2av/cor2p),'chi^2 = {0:.3f} Q = {1:.3f}'.format(Cleo2av.chi2/Cleo2av.dof,Cleo2av.Q))
+    print('BES |V_cs| D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BESav/cor20),'chi^2 = {0:.3f} Q = {1:.3f}'.format(BESav.chi2/BESav.dof,BESav.Q))
+    print('BES |V_cs| D^+ to K^-0 sqrt(weighted average) = ',gv.sqrt(BESDpav/cor2p),'chi^2 = {0:.3f} Q = {1:.3f}'.format(BESDpav.chi2/BESDpav.dof,BESDpav.Q))
+    print('BaBar |V_cs| D^0 to K^- sqrt(weighted average) = ',gv.sqrt(BaBarav/cor20),'chi^2 = {0:.3f} Q = {1:.3f}'.format(BaBarchi.chi2/BaBarchi.dof,BaBarchi.Q))
     av = total(Cleo1V2,Cleo2V2,BESV2,BaBarV2,C1ints,C2ints,BESints,BaBarints,Cpars,BESpars,BaBarpars)
     d = collections.OrderedDict()
     d['Cleo1V2'] = Cleo1V2
@@ -1033,7 +1162,7 @@ def output_error_DK(pfit,prior,Fits,Nijk,Npow,Nm,f,qsqs,t_0,addrho,fpf0same,cons
     qmislist = []
     #heavylist = []
     dat = []
-    extinputs = [prior['g'],prior['Metacphys'],prior['MDphys'],prior['MKphys'],prior['MDsstarphys'],prior['MDs0phys'],prior['slratio']]
+    extinputs = [prior['g'],prior['Metacphys'],prior['MDphys0'],prior['MDphyspm'],prior['MKphys0'],prior['MKphyspm'],prior['MDsstarphys'],prior['MDs0phys'],prior['slratio']]
     for Fit in Fits:
         extinputs.append(prior['Metac_{0}'.format(Fit['conf'])])
     for n in range(Npow):

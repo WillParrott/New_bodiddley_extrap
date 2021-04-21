@@ -137,7 +137,7 @@ def plot_gold_non_split(Fits):
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
     plt.xlabel('$(am_c)^2$',fontsize=fontsizelab)
-    plt.ylabel('$(M_{D_{\mathrm{non-gold}}}-M_{D_{\mathrm{gold}}})[\mathrm{MeV}]$',fontsize=fontsizelab)
+    plt.ylabel('$(M_{\hat{D}}-M_{D})[\mathrm{MeV}]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
@@ -171,8 +171,17 @@ def speed_of_light(Fits):
         y,yerr = unmake_gvar_vec(y)
         plt.errorbar(x,y,yerr=yerr,fmt=points[i],label=Fit['label'],ms=ms,mfc='none')
         i += 1
-    plt.plot([0,0.6],[1,1],'k--',lw=3)
-    plt.xlim((-0.02,0.5))
+    x2 = []
+    y2upp = []
+    y2low = []
+    for ap2 in  np.linspace(0,0.5,5):
+        x2.append(ap2)
+        y2upp.append(1+ap2/(np.pi**2))
+        y2low.append(1-ap2/(np.pi**2))
+    plt.plot([-0.5,0.6],[1,1],'k--',lw=3)
+    plt.xlim([-0.02,0.5])
+    plt.ylim([0.97,1.03])
+    plt.fill_between(x2,y2low,y2upp, color='purple',alpha=alpha/2)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(loc='upper right',handles=handles,labels=labels,ncol=2,fontsize=fontsizeleg,frameon=False)
@@ -252,6 +261,9 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
             qsq = []
             z = []
             y = []
+            y2 = []
+            qsq2 = []
+            z2 = []
             for twist in Fit['twists']:
                 q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)] # lat units
                 qsq.append(q2/Fit['a']**2) #want qsq for the x value in GeV
@@ -261,12 +273,21 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
             
+            q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][0])]
+            q2min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
+            for q2 in np.linspace(q2min.mean,q2max.mean,nopts):
+                y2.append(make_f0_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass)).mean)
+                qsq2.append((q2/Fit['a']**2).mean)
+                z2.append(make_z(q2,t_0,pfit['MH_{0}_m{1}'.format(Fit['conf'],mass)],pfit['MK_{0}'.format(Fit['conf'])]).mean)
+                
             plt.figure(2,figsize=figsize)
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            #plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(qsq2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(3,figsize=figsize)
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            #plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(z2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
@@ -277,7 +298,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     p = make_p_physical_point_DK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
-        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphysav'],p['MKphysav']) #all GeV dimensions
         if zed == 0:
             z.append(zed)
         else:
@@ -291,12 +312,6 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     plt.figure(2,figsize=figsize)
     plt.plot(qsq, ymean, color='b')
     plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
-    #if dataf0maxBK != None and adddata:
-    #    plt.errorbar(qsqmaxphysBK.mean, dataf0maxBK.mean, xerr=qsqmaxphysBK.sdev, yerr=dataf0maxBK.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
-    #if dataf00BK != None and adddata:
-    #    plt.errorbar(0, dataf00BK.mean, yerr=dataf00BK.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
-    #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    #plt.errorbar(qsqmaxphysDK.mean,0.979, yerr=0.019,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
@@ -353,22 +368,34 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
             qsq = []
             z = []
             y = []
+            y2 = []
+            qsq2 = []
+            z2 = []
             for twist in Fit['twists']:
                 if fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)] != None:
                     q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)] # lat units
                     qsq.append(q2/Fit['a']**2) #want qsq for the x value in GeV
                     z.append(make_z(q2,t_0,Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))#all lat units
                     y.append(fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)])
+            q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][1])]
+            q2min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
+            
             qsq,qsqerr = unmake_gvar_vec(qsq)
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
-            
+            for q2 in np.linspace(q2min.mean,q2max.mean,nopts):
+                y2.append(make_fp_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass),const2=const2).mean)
+                qsq2.append((q2/Fit['a']**2).mean)
+                z2.append(make_z(q2,t_0,pfit['MH_{0}_m{1}'.format(Fit['conf'],mass)],pfit['MK_{0}'.format(Fit['conf'])]).mean)
+                
             plt.figure(4,figsize=figsize)
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            #plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(qsq2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(5,figsize=figsize)
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            #plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(z2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
@@ -379,7 +406,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     p = make_p_physical_point_DK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
-        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphysav'],p['MKphysav']) #all GeV dimensions
         if zed ==0:
             z.append(zed)
         else:
@@ -446,7 +473,7 @@ def f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,con
     p = make_p_physical_point_DK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
-        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphysav'],p['MKphysav']) #all GeV dimensions
         if zed ==0:
             z.append(zed)
         else:
@@ -459,10 +486,10 @@ def f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,con
     ypmean,yperr = unmake_gvar_vec(yp)
     ypupp,yplow = make_upp_low(yp)
     plt.figure(4,figsize=figsize)
-    plt.plot(qsq, y0mean, color='r',label='$f_0$')
-    plt.fill_between(qsq,y0low,y0upp, color='r',alpha=alpha)
-    plt.plot(qsq, ypmean, color='b',label='$f_+$')
-    plt.fill_between(qsq,yplow,ypupp, color='b',alpha=alpha)
+    plt.plot(qsq, y0mean, color='b',label='$f_0$')
+    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
+    plt.plot(qsq, ypmean, color='r',label='$f_+$')
+    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
 
     #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     #plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
@@ -486,10 +513,10 @@ def f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,con
     plt.close()
     
     plt.figure(5,figsize=figsize)
-    plt.plot(z,y0mean, color='r',label='$f_0$')
-    plt.fill_between(z,y0low,y0upp, color='r',alpha=alpha)
-    plt.plot(z,ypmean, color='b',label='$f_+$')
-    plt.fill_between(z,yplow,ypupp, color='b',alpha=alpha)
+    plt.plot(z,y0mean, color='b',label='$f_0$')
+    plt.fill_between(z,y0low,y0upp, color='b',alpha=alpha)
+    plt.plot(z,ypmean, color='r',label='$f_+$')
+    plt.fill_between(z,yplow,ypupp, color='r',alpha=alpha)
     plt.legend(fontsize=fontsizeleg,frameon=False)
     plt.xlabel('$z$',fontsize=fontsizelab)
     #plt.ylabel(r'$f_+(z)$',fontsize=fontsizelab)
@@ -522,6 +549,12 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
             z = []
             y0 = []
             yp = []
+            y2 = []
+            qsq2 = []
+            z2 = []
+            y3 = []
+            qsq3 = []
+            z3 = []
             for twist in Fit['twists']:
                 if fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)] != None:
                     q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)] # lat units
@@ -532,19 +565,36 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
             qsq,qsqerr = unmake_gvar_vec(qsq)
             z,zerr = unmake_gvar_vec(z)
             y0,y0err = unmake_gvar_vec(y0)
-            yp,yperr = unmake_gvar_vec(yp)            
+            yp,yperr = unmake_gvar_vec(yp)
+            q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][0])]
+            q2min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
+            q3max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][1])]
+            q3min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
+            for q2 in np.linspace(q2min.mean,q2max.mean,nopts):
+                y2.append(make_f0_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass)).mean)
+                qsq2.append((q2/Fit['a']**2).mean)
+                z2.append(make_z(q2,t_0,pfit['MH_{0}_m{1}'.format(Fit['conf'],mass)],pfit['MK_{0}'.format(Fit['conf'])]).mean)
+            for q2 in np.linspace(q3min.mean,q3max.mean,nopts):
+                y3.append(make_fp_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass),const2=const2).mean)
+                qsq3.append((q2/Fit['a']**2).mean)
+                z3.append(make_z(q2,t_0,pfit['MH_{0}_m{1}'.format(Fit['conf'],mass)],pfit['MK_{0}'.format(Fit['conf'])]).mean)
+                
             plt.figure(108,figsize=figsize)
-            plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
+            #plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(qsq2, y2, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(qsq, y0, xerr=qsqerr, yerr=y0err, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             legend_elements.append(Line2D([0], [0],color='k',linestyle='None', marker=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label']))))
-            plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
+            #plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(qsq3, y3, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(qsq, yp, xerr=qsqerr, yerr=yperr, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(109,figsize=figsize)
-            plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
-            plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
-            plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
+            #plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(z2, y2, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(z, y0, xerr=zerr, yerr=y0err, color='b', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
+            #plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='b', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(z3, y3, color='r', mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.errorbar(z, yp, xerr=zerr, yerr=yperr, color='r', fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
         i += 1
@@ -555,7 +605,7 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
     p = make_p_physical_point_DK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
-        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphysav'],p['MKphysav']) #all GeV dimensions
         if zed ==0:
             z.append(zed)
         else:
@@ -568,12 +618,12 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
     ypmean,yperr = unmake_gvar_vec(yp)
     ypupp,yplow = make_upp_low(yp)
     plt.figure(108,figsize=figsize)
-    plt.plot(qsq, y0mean, color='r',label='$f_0$')
-    plt.fill_between(qsq,y0low,y0upp, color='r',alpha=alpha)
-    plt.plot(qsq, ypmean, color='b',label='$f_+$')
-    plt.fill_between(qsq,yplow,ypupp, color='b',alpha=alpha)
-    legend_elements.append(Line2D([0], [0], color='r', lw=4, label='$f_0$'))
-    legend_elements.append(Line2D([0], [0], color='b', lw=4, label='$f_+$'))
+    plt.plot(qsq, y0mean, color='b',label='$f_0$')
+    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
+    plt.plot(qsq, ypmean, color='r',label='$f_+$')
+    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
+    legend_elements.append(Line2D([0], [0], color='b', lw=4, label='$f_0$'))
+    legend_elements.append(Line2D([0], [0], color='r', lw=4, label='$f_+$'))
     #plt.errorbar(0,0.765, yerr=0.031,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)
     #plt.errorbar(0,0.745, yerr=0.011,fmt='bs',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1305.1462',lw=lw)
     #plt.errorbar(qsqmaxphysDK.mean,1.336, yerr=0.054,fmt='s',color='purple',ms=ms,mfc='none',label = r'$D\to{}K$ arXiv:1706.03017',lw=lw)#
@@ -597,10 +647,10 @@ def f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddat
     plt.close()
     
     plt.figure(109,figsize=figsize)
-    plt.plot(z,y0mean, color='r',label='$f_0$')
-    plt.fill_between(z,y0low,y0upp, color='r',alpha=alpha)
-    plt.plot(z,ypmean, color='b',label='$f_+$')
-    plt.fill_between(z,yplow,ypupp, color='b',alpha=alpha)
+    plt.plot(z,y0mean, color='b',label='$f_0$')
+    plt.fill_between(z,y0low,y0upp, color='b',alpha=alpha)
+    plt.plot(z,ypmean, color='r',label='$f_+$')
+    plt.fill_between(z,yplow,ypupp, color='r',alpha=alpha)
     #plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2)
     plt.legend(handles=legend_elements,fontsize=fontsizeleg,frameon=False,ncol=2)
     plt.xlabel('$z$',fontsize=fontsizelab)
@@ -626,26 +676,40 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
         fit = Fit['conf']
         j = 0
         for mass in Fit['masses']:
+            MDphysav = (pfit['MDphys0'] + pfit['MDphyspm'])/2
             qsq = []
             z = []
             y = []
+            y2 = []
+            qsq2 = []
+            z2 = []
             for twist in Fit['twists']:
                 q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)] # lat units
                 qsq.append(q2/Fit['a']**2) #want qsq for the x value in GeV
                 z.append(make_z(q2,t_0,Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))#all lat units
-                MHs0 = pfit['MH_{0}_m{1}'.format(fit,mass)] + pfit['a_{0}'.format(fit)] * (pfit['MDs0phys']- pfit['MDphys'])
+                MHs0 = pfit['MH_{0}_m{1}'.format(fit,mass)] + pfit['a_{0}'.format(fit)] * (pfit['MDs0phys']- MDphysav)
                 pole = 1-(q2/MHs0**2)
                 y.append(pole * fs_data[Fit['conf']]['f0_m{0}_tw{1}'.format(mass,twist)])
             qsq,qsqerr = unmake_gvar_vec(qsq)
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
-            
+            q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][0])]
+            q2min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
+            MDs0 = Fit['M_parent_m{0}'.format(mass)] + (pfit['MDs0phys']-MDphysav) * Fit['a']
+            for q2 in np.linspace(q2min.mean,q2max.mean,nopts):
+                qsq2.append((q2/Fit['a']**2).mean)
+                pole = 1 - q2/(MDs0)**2
+                z2.append(make_z(q2,t_0,pfit['MH_{0}_m{1}'.format(Fit['conf'],mass)],pfit['MK_{0}'.format(Fit['conf'])]).mean)
+                y2.append((pole*make_f0_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass))).mean)
+
             plt.figure(6,figsize=figsize)
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            #plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(qsq2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(7,figsize=figsize)
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            #plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(z2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
@@ -657,7 +721,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         pole = 1 - q2/(p['MDs0phys'])**2
-        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphysav'],p['MKphysav']) #all GeV dimensions
         if zed == 0:
             z.append(zed)
         else:
@@ -728,27 +792,42 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
         fit = Fit['conf']
         j = 0
         for mass in Fit['masses']:
+            MDphysav = (pfit['MDphys0'] + pfit['MDphyspm'])/2
             qsq = []
             z = []
             y = []
+            y2 = []
+            qsq2 = []
+            z2 = []
             for twist in Fit['twists']:
                 if fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)] != None:
                     q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)] # lat units
                     qsq.append(q2/Fit['a']**2) #want qsq for the x value in GeV
                     z.append(make_z(q2,t_0,Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))#all lat units
-                    MHsstar = make_MHsstar(pfit['MH_{0}_m{1}'.format(fit,mass)],pfit,pfit['a_{0}'.format(fit)])
+                    MHsstar = Fit['M_parent_m{0}'.format(mass)] + (pfit['MDsstarphys']-MDphysav)*Fit['a']
+                    #MHsstar = make_MHsstar(pfit['MH_{0}_m{1}'.format(fit,mass)],pfit,pfit['a_{0}'.format(fit)])
                     pole = 1-(q2/MHsstar**2)
                     y.append(pole * fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)])
             qsq,qsqerr = unmake_gvar_vec(qsq)
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
-            
+            q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][1])]
+            q2min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
+            MDsstar = Fit['M_parent_m{0}'.format(mass)] + (pfit['MDsstarphys']-MDphysav)*Fit['a']
+            for q2 in np.linspace(q2min.mean,q2max.mean,nopts):
+                qsq2.append((q2/Fit['a']**2).mean)
+                z2.append(make_z(q2,t_0,pfit['MH_{0}_m{1}'.format(Fit['conf'],mass)],pfit['MK_{0}'.format(Fit['conf'])]).mean)
+                pole = 1 - (q2/MDsstar**2)
+                y2.append((pole*make_fp_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass),const2=const2)).mean)
+
             plt.figure(8,figsize=figsize)
-            plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            #plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(qsq2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             plt.figure(9,figsize=figsize)
-            plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            #plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], mfc='none',linestyle=lines[i],alpha=alpha)
+            plt.plot(z2, y2, color=cols[j], mfc='none',linestyle=lines[i])
             plt.errorbar(z, y, xerr=zerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])),alpha=alpha)
             
             j += 1
@@ -760,7 +839,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         pole = 1 - (q2/p['MDsstarphys']**2)
-        zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphysav'],p['MKphysav']) #all GeV dimensions
         if zed ==0:
             z.append(zed)
         else:
@@ -814,44 +893,144 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.savefig('DKPlots/fpnopoleinz.pdf')
     plt.close()
     return()
+##########################################################################################################################
+# plot of f_+ and f_0 vs 1706.03017,1305.1462,1008.4562
+#1706
+# qsq 0 f0+ = 0.765(31)  qsqmax f0 = 0.979(19) f_+ = 1.336(54)
+# 1305
+#qsq 0 f0+ = 0.745(11)   qsqmax f0 = 1.011(15) f_+ = 1.466(30)
+# 1305
+#qsq 0 f0 = 0.747(19)   qsqmax f0 = 1.051(26) 
+def ff_comp(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
+    rot =60.
+    p = make_p_physical_point_DK(pfit,Fits)
+    f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+    fpmax = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmaxphysDK.mean,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    f0max = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmaxphysDK.mean,t_0,Fits[0]['masses'][0],fpf0same,0)
+    Test = ["HPQCD '21","ETMC '17","HPQCD '13","HPQCD '10"]
+    Zero = ['{0}'.format(f00),'0.765(31)','0.745(11)','0.747(19)']
+    Max0 = ['{0}'.format(f0max),'0.979(19)','1.011(15)','1.051(26)']
+    Maxplus = ['{0}'.format(fpmax),'1.336(54)','1.466(30)','1000(10)']
+    test = []
+    zeromean = []
+    zeroerr = []
+    max0mean = []
+    max0err = []
+    maxplusmean = []
+    maxpluserr = []
+    for i in range(1,len(Test)):
+        test.append(i)
+        zeromean.append(gv.gvar(Zero[i]).mean)
+        zeroerr.append(gv.gvar(Zero[i]).sdev)
+        max0mean.append(gv.gvar(Max0[i]).mean)
+        max0err.append(gv.gvar(Max0[i]).sdev)
+        maxplusmean.append(gv.gvar(Maxplus[i]).mean)
+        maxpluserr.append(gv.gvar(Maxplus[i]).sdev)
+    N = len(Test)
+    
+    plt.figure(figsize=figsize)
+    ax1 = plt.subplot(311)
 
+    Z = gv.gvar(Zero[0])
+    plt.errorbar(0,Z.mean,yerr=Z.sdev,fmt='kd',ms=ms,mfc='none')
+    plt.errorbar(test,zeromean,yerr=zeroerr,fmt='ko',ms=ms,mfc='none')
+    plt.fill_between([-1,N],[Z.mean-Z.sdev,Z.mean-Z.sdev],[Z.mean+Z.sdev,Z.mean+Z.sdev], color='purple',alpha=0.3)
+    plt.setp(ax1.get_xticklabels(), fontsize=fontsizelab)
+    plt.setp(ax1.get_xticklabels(), visible=False)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.gca().yaxis.set_ticks_position('both')
+    plt.gca().xaxis.set_ticks_position('none')
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.02))
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.ylabel('$f_{0,+}(0)$',fontsize=fontsizelab)
+    for i in range(len(Test)):
+        plt.text(i,plt.ylim()[1],Test[i],fontsize=fontsizeleg, verticalalignment='bottom',horizontalalignment='center',rotation =rot)
+
+    M0 = gv.gvar(Max0[0])
+
+    ax2 = plt.subplot(312, sharex=ax1)
+    plt.errorbar(0,M0.mean,yerr=M0.sdev,fmt='kd',ms=ms,mfc='none')
+    plt.errorbar(test,max0mean,yerr=max0err,fmt='ko',ms=ms,mfc='none')
+    plt.fill_between([-1,N],[M0.mean-M0.sdev,M0.mean-M0.sdev],[M0.mean+M0.sdev,M0.mean+M0.sdev], color='purple',alpha=0.3)
+    # make these tick labels invisible
+    plt.setp(ax2.get_xticklabels(), visible=False)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.ylabel('$f_0(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
+    plt.gca().yaxis.set_ticks_position('both')
+    plt.gca().xaxis.set_ticks_position('none')
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.04))
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.02))
+
+    Mp = gv.gvar(Maxplus[0])
+
+    ax3 = plt.subplot(313, sharex=ax1)
+    plt.errorbar(0,Mp.mean,yerr=Mp.sdev,fmt='kd',ms=ms,mfc='none')
+    plt.errorbar(test[:-1],maxplusmean[:-1],yerr=maxpluserr[:-1],fmt='ko',ms=ms,mfc='none')
+    plt.fill_between([-1,N],[Mp.mean-Mp.sdev,Mp.mean-Mp.sdev],[Mp.mean+Mp.sdev,Mp.mean+Mp.sdev], color='purple',alpha=0.3)
+
+
+    plt.xlim(-0.5, N-0.5)
+    #plt.xlabel('$z$',fontsize=30)
+    #plt.ylabel(r'$\left(1-\frac{q^2}{M^2_{H_{s}^*}} \right)f_{\mathrm{plus}}$',fontsize=30)
+    plt.gca().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.gca().tick_params(which='major',length=major)
+    plt.gca().tick_params(which='minor',length=minor)
+    plt.ylabel('$f_+(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
+    plt.gca().yaxis.set_ticks_position('both')
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.gca().yaxis.set_minor_locator(MultipleLocator(0.05))
+    plt.gca().xaxis.set_ticks([]) # stop x labels
+    
+    plt.tight_layout()
+    plt.savefig('DKPlots/ff_comp.pdf')
+    plt.close()
+    return()
 ##########################################################################################################################
 
 def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
+    linew = 3
+    capw = 3
+    sms = ms * 0.7
+    yhi = 1.25
+    ylo = 0.74
     plt.figure(figsize=figsize)
     d = comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2)
     x = []
     y = []
     for i in range(len(d['Cleo1V2'])):
         x.append((d['Cleobins'][i]+d['Cleobins'][i+1])/2)
-        y.append(gv.sqrt(d['Cleo1V2'][i]/cor2))
+        y.append(gv.sqrt(d['Cleo1V2'][i]/cor20))
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ko' ,mfc='none',label="CLEO '09 ($D^0$)",alpha=0.8)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='ko' ,mfc='none',label="CLEO '09 ($D^0$)",alpha=0.8)
     x = []
     y = []
     for i in range(len(d['Cleo2V2'])):
         x.append((d['Cleobins'][i]+d['Cleobins'][i+1])/2)
-        y.append(gv.sqrt(d['Cleo2V2'][i]/cor2))
+        y.append(gv.sqrt(d['Cleo2V2'][i]/cor2p))
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='rs' ,mfc='none',label="CLEO '09 ($D^+$)",alpha=0.8)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='rs' ,mfc='none',label="CLEO '09 ($D^+$)",alpha=0.8)
     x = []
     y = []
     for i in range(len(d['BESV2'])):
         x.append((d['BESbins'][i]+d['BESbins'][i+1])/2)
-        y.append(gv.sqrt(d['BESV2'][i]/cor2))
+        y.append(gv.sqrt(d['BESV2'][i]/cor20))
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='b^' ,mfc='none',label="BES '15A",alpha=0.8)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='b^' ,mfc='none',label="BES '15A",alpha=0.8)
     x = []
     y = []
     for i in range(len(d['BaBarV2'])):
         x.append((d['BaBarbins'][i]+d['BaBarbins'][i+1])/2)
-        y.append(gv.sqrt(d['BaBarV2'][i]*Banorm/cor2))
+        y.append(gv.sqrt(d['BaBarV2'][i]*Banorm/cor20))
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='gd' ,mfc='none',label="BaBar '06",alpha=0.8)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='gd' ,mfc='none',label="BaBar '06",alpha=0.8,lw=linew)
     av = d['average']
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], linestyle ='-',color='purple',alpha=alpha/2)
-    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$|V_{cs}|$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -878,9 +1057,9 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         terr.append(d['Cleo1terr'][i])
         eerr.append(d['Cleo1eerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ko' ,mfc='k',label="CLEO '09 ($D^0$)",alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='ko' ,mfc='k',label="CLEO '09 ($D^0$)",alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=terr,ms=sms,fmt='none',color='r' ,mfc='none',label='Theory error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=sms,fmt='none',color='b' ,mfc='none',label='Exp. error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
     
     av = d['Cleo1av']
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
@@ -893,7 +1072,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.74,1.23])
+    plt.ylim([ylo,yhi])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
@@ -913,9 +1092,9 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         terr.append(d['Cleo2terr'][i])
         eerr.append(d['Cleo2eerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='ks' ,mfc='k',label="CLEO '09 ($D^+$)",alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='ks' ,mfc='k',label="CLEO '09 ($D^+$)",alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=terr,ms=sms,fmt='none',color='r' ,mfc='none',label='Theory error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=sms,fmt='none',color='b' ,mfc='none',label='Exp. error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
     av = d['Cleo2av']
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
@@ -927,7 +1106,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.74,1.23])
+    plt.ylim([ylo,yhi])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
@@ -947,9 +1126,9 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         terr.append(d['BESterr'][i])
         eerr.append(d['BESeerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='k^' ,mfc='k',label="BES '15A",alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='k^' ,mfc='k',label="BES '15A",alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=terr,ms=sms,fmt='none',color='r' ,mfc='none',label='Theory error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=sms,fmt='none',color='b' ,mfc='none',label='Exp. error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
     av = d['BESav']
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
@@ -961,7 +1140,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.74,1.23])
+    plt.ylim([ylo,yhi])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
@@ -981,9 +1160,9 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         terr.append(d['BESDpterr'][i])
         eerr.append(d['BESDpeerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='k^' ,mfc='k',label="BES '17",alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='k^' ,mfc='k',label="BES '17",alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=terr,ms=sms,fmt='none',color='r' ,mfc='none',label='Theory error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=sms,fmt='none',color='b' ,mfc='none',label='Exp. error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
     av = d['BESDpav']
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
@@ -995,7 +1174,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.74,1.23])
+    plt.ylim([ylo,yhi])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
@@ -1015,9 +1194,9 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         terr.append(d['BaBarterr'][i])
         eerr.append(d['BaBareerr'][i])
     ymean,yerr = unmake_gvar_vec(y)
-    plt.errorbar(x, ymean, yerr=yerr,ms=ms,fmt='kd' ,mfc='k',label="BaBar '06",alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=terr,ms=ms,fmt='none',color='r' ,mfc='none',label='Theory',alpha=0.8,capsize=capsize,lw=lw)
-    plt.errorbar(x, ymean, yerr=eerr,ms=ms,fmt='none',color='b' ,mfc='none',label='Exp',alpha=0.8,capsize=capsize,lw=lw)
+    plt.errorbar(x, ymean, yerr=yerr,ms=sms,fmt='kd' ,mfc='k',label="BaBar '06",alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=terr,ms=sms,fmt='none',color='r' ,mfc='none',label='Theory error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
+    plt.errorbar(x, ymean, yerr=eerr,ms=sms,fmt='none',color='b' ,mfc='none',label='Exp. error',alpha=0.8,capsize=capsize,lw=linew, markeredgewidth=capw)
     av = d['BaBarav']
     plt.plot([-1,2],[av.mean,av.mean],color='purple',label='Average')
     plt.fill_between([-1,2],[av.mean-av.sdev,av.mean-av.sdev],[av.mean+av.sdev,av.mean+av.sdev], color='purple',alpha=alpha/2)
@@ -1029,7 +1208,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.xlim([0,qsqmaxphysDK.mean])
-    plt.ylim([0.74,1.23])
+    plt.ylim([ylo,yhi])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
@@ -1044,7 +1223,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     p = make_p_physical_point_DK(pfit,Fits)
     fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
     HFLAV= gv.gvar('0.7180(33)')# from #1909.12524 p318
-    Vcsq20 = HFLAV/(fp0*gv.sqrt(cor2))
+    Vcsq20 = HFLAV/(fp0*gv.sqrt(etaEW2*deltaEM20))# D0 is biggest
     av = d['average']
     ETMC1 = gv.gvar('0.945(38)')#1706.03017
     ETMC2 = gv.gvar('0.970(33)')#1706.03657
@@ -1077,7 +1256,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.gca().set_yticklabels(["HPQCD '21","HPQCD '21","HPQCD '21","ETMC '17","ETMC '17","HPQCD '13","HPQCD '10","Fermilab/MILC '04","PDG '20 SL av."])#'arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
-    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$\frac{d\Gamma}{dq^2}$'),Patch(facecolor='r', edgecolor='r',label=r'$|V_{cs}|f_+(0)$'),Patch(facecolor='g', edgecolor='g',label=r'$\Gamma$')]
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$d\Gamma/dq^2$'),Patch(facecolor='r', edgecolor='r',label=r'$f_+(0)$'),Patch(facecolor='g', edgecolor='g',label=r'$\mathcal{B}$')]
     plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
     plt.tight_layout()
     plt.savefig('DKPlots/Vcscomp.pdf')
@@ -1106,12 +1285,12 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         plt.fill_between([x.mean-x.sdev,x.mean+x.sdev],[0.8,0.8],[1.05,1.05], color=cols[i],alpha=alpha)
     x = av
     matplotlib.rcParams['hatch.linewidth'] = 2
-    plt.fill_between([0.1,0.3],[x.mean-x.sdev,x.mean-x.sdev],[x.mean+x.sdev,x.mean+x.sdev],linewidth=3, fc='none' ,edgecolor='b',hatch='x')
+    plt.fill_between([0.1,0.3],[x.mean-x.sdev,x.mean-x.sdev],[x.mean+x.sdev,x.mean+x.sdev],linewidth=3,color='b',alpha=alpha*1.65)#, fc='none' ,edgecolor='b',hatch='x')
     for i in np.linspace(0.1,0.3,nopts):
         unitx.append(i)
         unity.append(gv.sqrt(1-i**2-Vts**2))
     unitymean,unitysdev = unmake_gvar_vec(unity)
-    plt.plot([0.1,0.3],[Vud.mean,Vud.mean],color='g',lw=5)
+    #plt.plot([0.1,0.3],[Vud.mean,Vud.mean],color='g',lw=5)
     plt.plot(unitx, unitymean, color='k',linestyle='--',lw=5)
     plt.xlabel('$|V_{us}|$',fontsize=fontsizelab)
     plt.ylabel(r'$|V_{cs}|$',fontsize=fontsizelab)#r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$'
@@ -1130,7 +1309,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.001))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.02))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
-    handles = [ Patch(facecolor='b', edgecolor='b',label=r'SL',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'L',alpha=alpha),Line2D([0], [0], color='g', lw=5, label=r'$V_{ud}$'),Patch(facecolor='none', edgecolor='b',hatch='x',label=r"HPQCD '21"),Line2D([0], [0], color='k',linestyle='--', lw=5, label='Unitarity')]
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'SL',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'L',alpha=alpha),Patch(color='b', alpha=alpha*1.65,label=r"HPQCD '21"),Line2D([0], [0], color='k',linestyle='--', lw=5, label='Unitarity')]#Line2D([0], [0], color='g', lw=5, label=r'$V_{ud}$')
     plt.legend(handles=handles,fontsize=fontsizeleg*0.9,frameon=False,ncol=2,loc='lower right')
     plt.tight_layout()
     plt.savefig('DKPlots/Vcsus.pdf')
@@ -1140,7 +1319,10 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     Vcdl = gv.gvar(0.2173,np.sqrt(0.0051**2+0.0007**2)) #PDG
     Vcdsl = gv.gvar(0.2330,np.sqrt(0.0029**2+0.0133**2)) #PDG
     Vcb = gv.gvar('0.0410(14)') #PDG
-    Vud = gv.gvar('0.97370(14)') #PDG 
+    Vud = gv.gvar('0.97370(14)') #PDG
+    #Vcdcsfrat = gv.gvar('0.1843(48)') # Vcd/Vcs * fDs /fD from 1812.08791
+    #fDsfD = gv.gvar('1.1749(16)')# fDs/fD Fermilab from Christine email 31/03/2021
+    Vcdcs = gv.gvar('0.2209(56)')#Vcdcsfrat * fDsfD
     stuff1 = [Vcsl]#,Vcssl]
     stuff2 = [Vcdl,Vcdsl]
     cols = ['r','b']
@@ -1154,15 +1336,25 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     for i in range(len(stuff2)):
         x = stuff2[i]
         plt.fill_between([x.mean-x.sdev,x.mean+x.sdev],[0.5,0.5],[1.5,1.5], color=cols[i],alpha=alpha)
+    x1 = 0.1
+    x2 = 0.3
+    y1upp = x1/(Vcdcs.mean-Vcdcs.sdev)
+    y1low = x1/(Vcdcs.mean+Vcdcs.sdev)
+    y2upp = x2/(Vcdcs.mean-Vcdcs.sdev)
+    y2low = x2/(Vcdcs.mean+Vcdcs.sdev) 
+    plt.fill_between([x1,x2],[y1low,y2low],[y1upp,y2upp], color='r', alpha=alpha)
+
     x = av
     matplotlib.rcParams['hatch.linewidth'] = 2
-    plt.fill_between([0.1,0.3],[x.mean-x.sdev,x.mean-x.sdev],[x.mean+x.sdev,x.mean+x.sdev],linewidth=3, fc='none' ,edgecolor='b',hatch='x')
+    plt.fill_between([0.1,0.3],[x.mean-x.sdev,x.mean-x.sdev],[x.mean+x.sdev,x.mean+x.sdev],linewidth=3,color='b', alpha=alpha*1.65)#, fc='none' ,edgecolor='b',hatch='x')
+
     for i in np.linspace(0.1,0.3,nopts):
         unitx.append(i)
         unity.append(gv.sqrt(1-i**2-Vcb**2))
     unitymean,unitysdev = unmake_gvar_vec(unity)
-    plt.plot([0.1,0.3],[Vud.mean,Vud.mean],color='g',lw=5)
+    #plt.plot([0.1,0.3],[Vud.mean,Vud.mean],color='g',lw=5)
     plt.plot(unitx, unitymean, color='k',linestyle='--',lw=5)
+    plt.text(0.202,0.85,'$(D_s/D^+)_L$',fontsize=fontsizelab, va='center',ha='center')
     plt.xlabel('$|V_{cd}|$',fontsize=fontsizelab)
     plt.ylabel(r'$|V_{cs}|$',fontsize=fontsizelab)#r'$\eta^2_{\mathrm{EW}}(1+\delta_{\mathrm{EM}})|V_{cs}|^2$'
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -1180,8 +1372,8 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.005))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
-    handles = [ Patch(facecolor='b', edgecolor='b',label=r'SL',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'L',alpha=alpha),Line2D([0], [0], color='g', lw=5, label=r'$V_{ud}$'),Patch(facecolor='none', edgecolor='b',hatch='x',label=r"HPQCD '21"),Line2D([0], [0], color='k',linestyle='--', lw=5, label='Unitarity')]
-    plt.legend(handles=handles,fontsize=fontsizeleg*0.9,frameon=False,ncol=1,loc='lower left')
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'SL',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'L',alpha=alpha),Patch(color='b',alpha=alpha*1.65,label=r"HPQCD '21"),Line2D([0], [0], color='k',linestyle='--', lw=5, label='Unitarity')]#,Patch(facecolor='none', edgecolor='r',hatch='o',label=r"$V_{cs}/V_{cd}$")]
+    plt.legend(handles=handles,fontsize=fontsizeleg*0.9,frameon=False,ncol=1,loc='upper left')
     plt.tight_layout()
     plt.savefig('DKPlots/Vcscd.pdf')
     plt.close()
@@ -1192,11 +1384,12 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     #p = make_p_physical_point_DK(pfit,Fits)
     #f00,fp0 = make_spline_f0_fp_physpoint(p,Fits[0],0)
     
-    CLEO0 =  gv.sqrt(d['Cleo1av']/cor2)
-    CLEOp =  gv.sqrt(d['Cleo2av']/cor2)
-    BES =   gv.sqrt(d['BESav']/cor2)
-    BESDp =   gv.sqrt(d['BESDpav']/cor2)
-    BABAR =  gv.sqrt(d['BaBarav']/cor2)
+    CLEO0 =  gv.sqrt(d['Cleo1av']/cor20)
+    CLEOp =  gv.sqrt(d['Cleo2av']/cor2p)
+    #print('cleo dGamma/dq^2')
+    BES =   gv.sqrt(d['BESav']/cor20)
+    BESDp =   gv.sqrt(d['BESDpav']/cor2p)
+    BABAR =  gv.sqrt(d['BaBarav']/cor20)
     #av2 = gv.sqrt(lsqfit.wavg([d['Cleo1av'],d['Cleo2av'],d['BESav'],d['BaBarav']])/cor2)
     plt.errorbar(BESDp.mean, 5, xerr=BESDp.sdev,ms=ms,fmt='ro',mfc='none' ,capsize=capsize,lw=lw)
     plt.plot([0.9275,1.1],[4.5,4.5],color='k',linestyle='--')
@@ -1210,7 +1403,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.errorbar(BABAR.mean, 1, xerr=BABAR.sdev,ms=ms,fmt='b^' ,capsize=capsize,lw=lw)
     plt.text(0.905,2.0,r'$D^0\to{}K^-e^+\nu_e$',fontsize=fontsizelab, va='center',ha='center')
     plt.text(0.905,4.5,r'$D^+\to\bar{K}^0e^+\nu_e$',fontsize=fontsizelab, va='center',ha='center')
-    plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab,va='center',ha='center')
+    #plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab,va='center',ha='center')
     plt.xlabel('$|V_{cs}|$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -1235,15 +1428,15 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     #f00,fp0 = make_spline_f0_fp_physpoint(p,Fits[0],0)
     av = Vcsq20
     # all from HFLAV 19
-    BELLE6 = 1/fp0 * gv.gvar(0.6762,np.sqrt(0.0068**2+0.0214**2))/gv.sqrt(cor2) #D0 0604049 
-    BABAR6 = 1/fp0 * gv.gvar(0.7211,np.sqrt(0.0069**2+0.0085**2))/gv.sqrt(cor2) #D0 0704.0020
-    CLEOC9 = 1/fp0 * gv.gvar(0.7189,np.sqrt(0.0064**2+0.0048**2))/gv.sqrt(cor2) #both combined 0906.2983
-    BES15A = 1/fp0 * gv.gvar(0.7195,np.sqrt(0.0035**2+0.0041**2))/gv.sqrt(cor2) #D0 1508.07560
-    BES19  = 1/fp0 * gv.gvar(0.7133,np.sqrt(0.0038**2+0.0030**2))/gv.sqrt(cor2) #D0 muon 1810.03127
-    p = make_p_physical_point_DK(pfit,Fits,Dplus=True)
+    BELLE6 = 1/fp0 * gv.gvar(0.6762,np.sqrt(0.0068**2+0.0214**2))/gv.sqrt(cor20) #D0 0604049 
+    BABAR6 = 1/fp0 * gv.gvar(0.7211,np.sqrt(0.0069**2+0.0085**2))/gv.sqrt(cor20) #D0 0704.0020
+    CLEOC9 = 1/fp0 * gv.gvar(0.7189,np.sqrt(0.0064**2+0.0048**2))/gv.sqrt(cor20) #both combined 0906.2983
+    BES15A = 1/fp0 * gv.gvar(0.7195,np.sqrt(0.0035**2+0.0041**2))/gv.sqrt(cor20) #D0 1508.07560
+    BES19  = 1/fp0 * gv.gvar(0.7133,np.sqrt(0.0038**2+0.0030**2))/gv.sqrt(cor20) #D0 muon 1810.03127
+    p = make_p_physical_point_DK(pfit,Fits,D='p')
     fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
-    BES15B = 1/fp0 * gv.gvar(0.7370,np.sqrt(0.0060**2+0.0090**2))/gv.sqrt(cor2) #Dp 1510.00308 
-    BES17  = 1/fp0 * gv.gvar(0.6983,np.sqrt(0.0056**2+0.0112**2))/gv.sqrt(cor2) #Dp 1703.09084
+    BES15B = 1/fp0 * gv.gvar(0.7370,np.sqrt(0.0060**2+0.0090**2))/gv.sqrt(cor2p) #Dp 1510.00308 
+    BES17  = 1/fp0 * gv.gvar(0.6983,np.sqrt(0.0056**2+0.0112**2))/gv.sqrt(cor2p) #Dp 1703.09084
     plt.errorbar(BES17.mean, 7, xerr=BES17.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
     plt.errorbar(BES15B.mean, 6, xerr=BES15B.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
     plt.plot([0.8,1.1],[5.5,5.5],color='k')
@@ -1257,7 +1450,7 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.text(0.88,2.5,r'$D^0\to{}K^-e^+\nu_e$',fontsize=fontsizelab, va='center')
     plt.text(0.88,5,r'$D^0\to{}K^-\mu^+\nu_{\mu}$',fontsize=fontsizelab, va='center')
     plt.text(0.88,6.5,r'$D^+\to\bar{K}^0e^+\nu_e$',fontsize=fontsizelab, va='center')
-    plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab, va='center',ha='center')
+    #plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab, va='center',ha='center')
     #plt.text(0.95,1.5,r'Wt. average',fontsize=fontsizelab)
     plt.xlabel('$|V_{cs}|$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
@@ -1270,9 +1463,9 @@ def plot_Vcs_by_bin(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.gca().set_yticklabels(["BES '17","BES '15B","BES '19","BES '15A","CLEO '09","BaBar '06","BELLE '06"])#'arXiv:1706.03657','arXiv:1706.03017','arXiv:1305.1462','arXiv:1008.4562'])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.02))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
-    plt.text(1.01,7.5,r'$|V_{cs}|f_+(0)$',fontsize=fontsizelab*1.25,va='top',ha='right')
-    plt.plot([0.979,1.1],[6.7,6.7],color='k')
-    plt.plot([0.979,0.979],[6.7,7.5],color='k')
+    plt.text(1.01,7.5,r'$f_+(0)$',fontsize=fontsizelab*1.25,va='top',ha='right')
+    plt.plot([0.99,1.1],[6.7,6.7],color='k')
+    plt.plot([0.99,0.99],[6.7,7.5],color='k')
     plt.tight_layout()
     plt.savefig('DKPlots/Vcsexpf0comp.pdf')
     plt.close()
@@ -1291,15 +1484,19 @@ def find_bin_centres(bins):
 ###################################################################################################
 
 def plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
-    p = make_p_physical_point_DK(pfit,Fits)
+    p = make_p_physical_point_DK(pfit,Fits,D='0')
     y = []
+    y2 = []
+    y3 = []
     qsq = []
-    bins = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,qsqmaxphysDK.mean]
+    bins = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,qsqmaxphysDK0.mean]
     Rs = gv.gvar(['0.796(27)','0.973(26)','0.959(26)','0.974(37)','0.979(29)','1.057(34)','0.990(31)','1.012(39)','1.060(34)','1.026(35)','0.963(36)','1.076(68)','1.004(47)','1.065(57)','1.008(64)','0.979(67)','0.940(86)','1.318(217)'])#only stat error
     A = 3/8 * p['MDphys']**2 * (1 - (p['MKphys']**2/p['MDphys']**2) )**2 
-    def ratio(qsq):
+    def ratio(qsq,cs): # cs is chosen (actually cs/(ms-mc)) ms-mc is roughly -1.2 GeV
         epse = M_e**2/qsq
         epsmu = M_mu**2/qsq
+        fac_e = 1#(1 + cs*qsq/M_e )**2
+        fac_mu = (1 + cs*qsq/M_mu )**2
         p2 = (qsq-p['MKphys']**2-p['MDphys']**2)**2/(4*p['MDphys']**2)-p['MKphys']**2
         if p2.mean < 0:
             p2 = 0
@@ -1307,22 +1504,30 @@ def plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         p1 = p2**(1/2)
         fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
         f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
-        integrand = (1-epsmu)**2 * (p3 * fp**2 * (1 + epsmu/2) + p1 * f0**2 * epsmu * A) /((1-epse)**2 * (p3 * fp**2 * (1 + epse/2) + p1 * f0**2 * epse * A))
-        if qsq == qsqmaxphysDK.mean:
+        integrand = (1-epsmu)**2 * (p3 * fp**2 * (1 + epsmu/2) + p1 * fac_mu * f0**2 * epsmu * A) /((1-epse)**2 * (p3 * fp**2 * (1 + epse/2) + p1 * fac_e * f0**2 * epse * A))
+        if qsq == qsqmaxphysDK0.mean:
             integrand = epsmu*(1-epsmu)**2/(epse*(1-epse)**2)
         return(integrand)
-    
-    for q2 in np.linspace((M_mu**2).mean,qsqmaxphysDK.mean-0.001,nopts):
-        y.append(ratio(q2))
+    left = -0.12
+    right = 0.12
+    for q2 in np.linspace((M_mu**2).mean,qsqmaxphysDK0.mean-0.001,nopts):
+        y.append(ratio(q2,0))
+        y2.append(ratio(q2,left/(-1.2)))
+        y3.append(ratio(q2,right/(-1.2)))
         qsq.append(q2)
     ymean,yerr = unmake_gvar_vec(y)
+    y2mean,y2err = unmake_gvar_vec(y2)
+    y3mean,y3err = unmake_gvar_vec(y3)
     Rmean,Rerr = unmake_gvar_vec(Rs)
     yupp,ylow = make_upp_low(y)
     binmean,binerr = unmake_gvar_vec(find_bin_centres(bins))  
     plt.figure(figsize=figsize)
-    plt.plot(qsq, ymean, color='k',label=r'$R_{\mu/e}$')
+    plt.plot(qsq, ymean, color='k',label=r'$R_{\mu/e}^{\zeta_S=0}~(\mathrm{SM})$')
     plt.fill_between(qsq,ylow,yupp, color='k',alpha=alpha)
-
+    
+    plt.plot(qsq, y2mean, color='r',label=r'$R_{\mu/e}^{\zeta_S=0.1}$',linestyle ='--')
+    plt.plot(qsq, y3mean, color='b',label=r'$R_{\mu/e}^{\zeta_S=-0.1}$',linestyle='--')
+    
     plt.errorbar(binmean,Rmean, xerr=binerr, yerr=Rerr,fmt='s',color='purple',ms=ms,mfc='none',label = r"BES '19",lw=lw)
     plt.legend(fontsize=fontsizeleg,frameon=False)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
@@ -1333,14 +1538,82 @@ def plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.axes().yaxis.set_ticks_position('both')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
-    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
-    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.ylim([0.7,1.6])
+    #plt.xlim([0.1,1.7])
     plt.tight_layout()
     plt.savefig('DKPlots/Rmue.pdf')
     plt.close()
+    return()
+
+###################################################################################################
+def make_lambda(x,y,z):
+    return(x**2 + y**2 + z**2 - 2*( x*y + x*z + y*z ))
+
+def plot_AFB(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
+    p = make_p_physical_point_DK(pfit,Fits)
+    y = []
+    y2 = []
+    y3 = []
+    qsq = []
+    #A = 3/8 * p['MDphysav']**2 * (1 - (p['MKphysav']**2/p['MDphysav']**2) )**2 
+    def AFB(qsq,cs): # cs is chosen (actually cs/(ms-mc)) ms-mc is roughly -1.2 GeV
+        #epse = M_e**2/qsq
+        epsmu = M_mu**2/qsq
+        #fac_e = (1 + cs*qsq/M_e )
+        fac_mu = (1 + cs*qsq/M_mu )
+        #p2 = (qsq-p['MKphysav']**2-p['MDphysav']**2)**2/(4*p['MDphysav']**2)-p['MKphysav']**2
+        #if p2.mean < 0:
+        #    p2 = 0
+        #p3 = (p2)**(3/2)
+        #p1 = p2**(1/2)
+        fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+        lamb = make_lambda(p['MDphysav']**2,p['MKphysav']**2,qsq)
+        h0 = gv.sqrt(lamb/qsq) * fp
+        ht = fac_mu * f0 * ((p['MDphysav']**2 - p['MKphysav']**2)/gv.sqrt(qsq)) 
+        FB = 3/2 * (epsmu * h0 * ht)/( (1 + epsmu) * h0**2 + 3/2 * epsmu * ht**2 )
+        #if qsq == qsqmaxphysDK.mean:
+        #    integrand = epsmu*(1-epsmu)**2/(epse*(1-epse)**2)
+        return(FB)
+    left = -0.12
+    right = 0.12
+    for q2 in np.linspace((M_mu**2).mean,((p['MDphysav']-p['MKphysav'])**2).mean-0.00001,10*nopts):
+        y.append(AFB(q2,0))
+        y2.append(AFB(q2,left/(-1.2)))
+        y3.append(AFB(q2,right/(-1.2)))
+        qsq.append(q2)
+    ymean,yerr = unmake_gvar_vec(y)
+    y2mean,y2err = unmake_gvar_vec(y2)
+    y3mean,y3err = unmake_gvar_vec(y3)
+    yupp,ylow = make_upp_low(y)  
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, ymean, color='k',label=r'$A_{\mathrm{FB}}^{\zeta_S=0}(\mathrm{SM})$')
+    plt.fill_between(qsq,ylow,yupp, color='k',alpha=alpha)
+    
+    plt.plot(qsq, y2mean, color='r',label=r'$A_{\mathrm{FB}}^{\zeta_S=0.1}$',linestyle ='--')
+    plt.plot(qsq, y3mean, color='b',label=r'$A_{\mathrm{FB}}^{\zeta_S=-0.1}$',linestyle='--')
+    plt.plot([-1,3],[0,0],color='k', linestyle = ':')
+    plt.legend(fontsize=fontsizeleg,frameon=False)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_+(q^2)$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.02))
+    plt.ylim([-0.05,0.3])
+    plt.xlim([-0.1,1.9])
+    plt.tight_layout()
+    plt.savefig('DKPlots/AFB.pdf')
+    plt.close()
         
     return()
+
 ####################################################################################################
 
 def partially_correlate_errors(data):
@@ -1368,48 +1641,159 @@ def partially_correlate_errors(data):
 ####################################################################################################
 
 def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
-    p = make_p_physical_point_DK(pfit,Fits)
-    integrale0 = integrate_fp(0,qsqmaxphysDK.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500)
-    integralep = integrate_fp(0,qsqmaxphysDK.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500,Dplus=True)
-    integralmu = integrate_fp(0,qsqmaxphysDK.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_mu,iters=500)
-    BbyVcsD0mu = GF**2/(24*np.pi**3*6.582119569*1e-16)*integralmu*tauD0
-    BbyVcsD0e = GF**2/(24*np.pi**3*6.582119569*1e-16)*integrale0*tauD0
-    BbyVcsDpme = GF**2/(24*np.pi**3*6.582119569*1e-16)*integralep*tauDpm
+    for_peter = gv.BufferDict()
+    #p = make_p_physical_point_DK(pfit,Fits)
+    integrale0 = integrate_fp(M_e.mean**2,qsqmaxphysDK0.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500,D='0',qmax=True)
+    integralep = integrate_fp(M_e.mean**2,qsqmaxphysDKp.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_e,iters=500,D='p',qmax=True)
+    integralmu0 = integrate_fp(M_mu.mean**2,qsqmaxphysDK0.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_mu,iters=500,D='0',qmax=True)
+    integralmup = integrate_fp(M_mu.mean**2,qsqmaxphysDKp.mean,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,M_mu,iters=500,D='p',qmax=True)
+    GammaD0mu = GF**2/(24*np.pi**3*6.582119569*1e-16)*integralmu0
+    GammaD0e = GF**2/(24*np.pi**3*6.582119569*1e-16)*integrale0
+    GammaDpme = GF**2/(24*np.pi**3*6.582119569*1e-16)*integralep
+    GammaDpmmu = GF**2/(24*np.pi**3*6.582119569*1e-16)*integralmup
+    print('Gamma/(V_cs^2*eta^2*(1+delta)) D^0 e = ', GammaD0e)
+    print('Gamma/(V_cs^2*eta^2*(1+delta)) D^0 mu = ', GammaD0mu)
+    print('Gamma/(V_cs^2*eta^2*(1+delta)) D^+ e = ', GammaDpme)
+    print('Gamma/(V_cs^2*eta^2*(1+delta)) D^+ mu = ', GammaDpmmu)
+    BbyVcsD0mu = GammaD0mu*tauD0
+    BbyVcsD0e = GammaD0e*tauD0
+    BbyVcsDpme = GammaDpme*tauDpm
+    BbyVcsDpmmu = GammaDpmmu*tauDpm
+    
     plt.figure(figsize=figsize)
     # [mean, stat, syst]
     Cleo0 = [0.0350,0.0003,0.0004]#gv.gvar(0.0350,np.sqrt(0.0003**2+0.0004**2)) # 0906.2983 CLEO '09
     Cleop = [0.0883,0.0010,0.0020]#gv.gvar(0.0883,np.sqrt(0.0010**2+0.0020**2)) # 0906.2983 CLEO '09
-    [Cleo0,Cleop] = partially_correlate_errors([Cleo0,Cleop])
-    VCleo0 = gv.sqrt(Cleo0/(cor2*BbyVcsD0e))
-    VCleop = gv.sqrt(Cleop/(cor2*BbyVcsDpme))
-    
+    [Cleo0,Cleop] = partially_correlate_errors([Cleo0,Cleop]) # correlates systematic error 
+    VCleo0 = gv.sqrt(Cleo0/(cor20*BbyVcsD0e))
+    VCleop = gv.sqrt(Cleop/(cor2p*BbyVcsDpme))
+    #print('cleo B',VCleop,'theory err', = VCleop.partialsdev(cor2*BbyVcsDpme))
     BESe = [0.03505,0.00014,0.00033]#gv.gvar(0.03505,np.sqrt(0.00014**2+0.00033**2)) # 1508.07560 BES 15'A
     BESmu = [0.03413,0.00019,0.00035]#gv.gvar(0.03413,np.sqrt(0.00019**2+0.00035**2)) #1810.03127 BES '19
     BES17 = [0.0860,0.0006,0.0015]#gv.gvar(0.0860,np.sqrt(0.0006**2+0.0015**2))#Dp 1703.09084 BES '17
-    [BESe,BESmu,BES17] = partially_correlate_errors([BESe,BESmu,BES17])
-    VBESe = gv.sqrt(BESe/(cor2*BbyVcsD0e))
-    VBESmu = gv.sqrt(BESmu/(cor2*BbyVcsD0mu))
-    VBES17 = gv.sqrt(BES17/(cor2*BbyVcsDpme))
-
+    BES16pmu = [0.0872,0.0007,0.0018] #1605.00068
+    [BESe,BESmu,BES17,BES16pmu] = partially_correlate_errors([BESe,BESmu,BES17,BES16pmu])
+    VBESe = gv.sqrt(BESe/(cor20*BbyVcsD0e))
+    VBESmu = gv.sqrt(BESmu/(cor20mu*BbyVcsD0mu))
+    VBES17 = gv.sqrt(BES17/(cor2p*BbyVcsDpme))
+    VBES16pmu = gv.sqrt(BES16pmu/(cor2pmu*BbyVcsDpmmu))
     BELLEe = [0.0345,0.0010,0.0019]#gv.gvar(0.0345,np.sqrt(0.0010**2+0.0019**2)) # hep-ex/0604049 Belle '06
     BELLEmu = [0.0345,0.0010,0.0021] #gv.gvar(0.0345,np.sqrt(0.0010**2+0.0021**2)) #hep-ex/0604049 Belle '06
     [BELLEe,BELLEmu] = partially_correlate_errors([BELLEe,BELLEmu])
-    VBELLEe = gv.sqrt(BELLEe/(cor2*BbyVcsD0e))
-    VBELLEmu = gv.sqrt(BELLEmu/(cor2*BbyVcsD0mu))
+    VBELLEe = gv.sqrt(BELLEe/(cor20*BbyVcsD0e))
+    VBELLEmu = gv.sqrt(BELLEmu/(cor20mu*BbyVcsD0mu))
     
-    BaBar = gv.gvar(0.927,np.sqrt(0.007**2+0.012**2)) * gv.gvar(0.03999,0.00044) #  0704.0020 BaBar '06
-    VBaBar = gv.sqrt(BaBar/(cor2*BbyVcsD0e))
+    BaBar = gv.gvar(0.927,np.sqrt(0.007**2+0.012**2)) * BforBaBar#gv.gvar(0.03999,0.00044) #  0704.0020 BaBar '06 other number from PDG
+    VBaBar = gv.sqrt(BaBar/(cor20*BbyVcsD0e))
 
     
     #BES15B = gv.gvar(0.04481,np.sqrt(0.00027**2+0.00103**2))#Dp 1510.00308 K_L ?? BES '15B
     #VBES15B = gv.sqrt(BES15B/BbyVcsDpme)
 
-    av = gv.sqrt(lsqfit.wavg([Cleo0/BbyVcsD0e,Cleop/BbyVcsDpme,BESe/BbyVcsD0e,BESmu/BbyVcsD0mu,BES17/BbyVcsDpme,BELLEe/BbyVcsD0e,BELLEmu/BbyVcsD0mu,BaBar/BbyVcsD0e])/cor2)
-    terr = av.partialsdev(tuple([integrale0,integralep,integralmu]))
-    eerr = av.partialsdev(tuple([Cleo0,Cleop,BESe,BESmu,BES17,BELLEe,BELLEmu,BaBar,tauD0,tauDpm]))
-    cerr = av.partialsdev(cor2)
-    print('C) Average V_cs from branching = ', av)
-    print('Theory error = {0:.4f} Exp error = {1:.4f} Correction error = {2:.4f} Total = {3:.4f}'.format(terr,eerr,cerr,np.sqrt(eerr**2+terr**2+cerr**2)))
+    
+    #av_thing  =  lsqfit.wavg([Cleo0/BbyVcsD0e,Cleop/BbyVcsDpme,BESe/BbyVcsD0e,BESmu/BbyVcsD0mu,BES17/BbyVcsDpme,BELLEe/BbyVcsD0e,BELLEmu/BbyVcsD0mu,BaBar/BbyVcsD0e])#svdcut =0.1 for good fit
+    #av = gv.sqrt(av_thing/cor2)
+    
+    
+    av_thing0  =  lsqfit.wavg([Cleo0,BESe,BELLEe,BaBar])
+    #av_thing0  =  lsqfit.wavg([Cleo0,BESe,BELLEe]) #without BaBar
+    av02 = av_thing0/(cor20*BbyVcsD0e)  # cor20 is etaEW^2*deltaEM^2 for the electron D^0 case. cor2p is D^+ and a mu denotes the muon (cor2 means correction^2)
+    av0 = gv.sqrt(av02)
+
+    av_thing0mu  =  lsqfit.wavg([BESmu,BELLEmu])
+    av0mu2 = av_thing0mu/(cor20mu*BbyVcsD0mu)
+    av0mu = gv.sqrt(av0mu2)
+    
+    av_thingp  =  lsqfit.wavg([Cleop,BES17])
+    avp2 = av_thingp/(cor2p*BbyVcsDpme)
+    avp = gv.sqrt(avp2)
+
+    avpmu2 = BES16pmu/(BbyVcsDpmmu*cor2pmu)
+    avpmu = gv.sqrt(avpmu2)
+    
+    av2oneway = lsqfit.wavg([av02,avp2,av0mu2,avpmu2])
+    
+    old_av2 = lsqfit.wavg([Cleo0/(BbyVcsD0e*deltaEM20),BESe/(BbyVcsD0e*deltaEM20),BELLEe/(BbyVcsD0e*deltaEM20),BaBar/(BbyVcsD0e*deltaEM20),BESmu/(BbyVcsD0mu*deltaEM20mu),BELLEmu/(BbyVcsD0mu*deltaEM20mu),Cleop/(BbyVcsDpme*deltaEM2p),BES17/(BbyVcsDpme*deltaEM2p),BES16pmu/(BbyVcsDpmmu*deltaEM2pmu)])
+    #old_av2 = lsqfit.wavg([Cleo0/(BbyVcsD0e*deltaEM20),BESe/(BbyVcsD0e*deltaEM20),BELLEe/(BbyVcsD0e*deltaEM20),BESmu/(BbyVcsD0mu*deltaEM20mu),BELLEmu/(BbyVcsD0mu*deltaEM20mu),Cleop/(BbyVcsDpme*deltaEM2p),BES17/(BbyVcsDpme*deltaEM2p),BES16pmu/(BbyVcsDpmmu*deltaEM2pmu)])#withoutBaBar
+    old_av = gv.sqrt(old_av2/etaEW2)
+    ###################################### Do fit #####################################################
+    fit_data = [Cleo0,BESe,BELLEe,BaBar,BESmu,BELLEmu,Cleop,BES17,BES16pmu]
+    #fit_data = [Cleo0,BESe,BELLEe,BESmu,BELLEmu,Cleop,BES17,BES16pmu]#without BaBar
+    fit_prior = gv.BufferDict()
+    fit_prior['wavg'] = gv.gvar('0.95(10)')
+    fit_prior['deltaEM20'] = deltaEM20
+    fit_prior['deltaEM2p'] = deltaEM2p
+    fit_prior['deltaEM20mu'] = deltaEM20mu
+    fit_prior['deltaEM2pmu'] = deltaEM2pmu
+    fit_prior['etaEW2'] = etaEW2
+    fit_prior['GammaD0e'] = GammaD0e
+    fit_prior['GammaD0mu'] = GammaD0mu
+    fit_prior['GammaDpme'] = GammaDpme
+    fit_prior['GammaDpmmu'] = GammaDpmmu
+    fit_prior['tauDpm'] = tauDpm
+    fit_prior['tauD0'] = tauD0
+    def fcn(p):
+        e0 = p['wavg']**2 * p['etaEW2'] * p['deltaEM20'] * p['GammaD0e'] * p['tauD0']
+        ep = p['wavg']**2 * p['etaEW2'] * p['deltaEM2p'] * p['GammaDpme'] * p['tauDpm']
+        mu0 = p['wavg']**2 * p['etaEW2'] * p['deltaEM20mu'] * p['GammaD0mu'] * p['tauD0']
+        mup = p['wavg']**2 * p['etaEW2'] * p['deltaEM2pmu'] * p['GammaDpmmu'] * p['tauDpm']
+        return([e0,e0,e0,e0,mu0,mu0,ep,ep,mup])
+        #return([e0,e0,e0,mu0,mu0,ep,ep,mup]) #without BaBar
+    fit = lsqfit.nonlinear_fit(prior=fit_prior, fcn=fcn, data=fit_data)
+    print(fit)
+    av = fit.p['wavg']
+    ###################################################################################################
+    print('C) Average V_cs from branching fit = ',av,'chi^2 = {0:.3f} Q = {1:.3f}'.format(fit.chi2/fit.dof,fit.Q))
+    print('Average V_cs from branching wavg = ', old_av, 'chi^2 = {0:.3f} Q = {1:.3f}'.format(old_av2.chi2/old_av2.dof,old_av2.Q))
+    print('As average of charges below: ',gv.sqrt(av2oneway))
+    
+    terr = av.partialsdev(tuple([integrale0,integralep,integralmu0,integralmup]))
+    eerr = av.partialsdev(tuple([Cleo0,Cleop,BESe,BESmu,BES17,BES16pmu,BELLEe,BELLEmu,BaBar,fit_prior['tauD0'],fit_prior['tauDpm'],GF]))
+    cerrEW = av.partialsdev(fit_prior['etaEW2'])
+    cerrEM = av.partialsdev(tuple([fit_prior['deltaEM20'],fit_prior['deltaEM2p'],fit_prior['deltaEM20mu'],fit_prior['deltaEM2pmu']]))
+    
+    print('D^0 e Average V_cs from branching = ', av0, 'chi^2 = {0:.3f} Q = {1:.3f}'.format(av_thing0.chi2/av_thing0.dof,av_thing0.Q))
+    print('D^+ e Average V_cs from branching = ', avp, 'chi^2 = {0:.3f} Q = {1:.3f}'.format(av_thingp.chi2/av_thingp.dof,av_thingp.Q))
+    print('D^0 mu Average V_cs from branching = ', av0mu, 'chi^2 = {0:.3f} Q = {1:.3f}'.format(av_thing0mu.chi2/av_thing0mu.dof,av_thing0mu.Q))
+    print('D^+ mu V_cs from branching = ', avpmu)
+    print('Theory error = {0:.4f} Exp error = {1:.4f} EM error = {2:.4f} EW error = {3:.4f} Total = {4:.4f}'.format(terr,eerr,cerrEM,cerrEW,np.sqrt(eerr**2+terr**2+cerrEW**2+cerrEM**2)))
+    
+    ##### look at PDG average ###
+    PDG0e = gv.gvar('0.03542(35)')
+    PDG0mu = gv.gvar('0.0341(4)')
+    PDGpe = gv.gvar('0.0873(10)')
+    PDGpmu = gv.gvar('0.0876(19)')
+    print('PDG D0 mu = ',gv.sqrt(PDG0mu/(BbyVcsD0mu*cor20mu)))
+    print('PDG D0 e = ',gv.sqrt(PDG0e/(BbyVcsD0e*cor20)))
+    print('PDG D+ mu = ',gv.sqrt(PDGpmu/(BbyVcsDpmmu*cor2pmu)))
+    print('PDG D+ e = ',gv.sqrt(PDGpe/(BbyVcsDpme*cor2p)))
+    #############################
+    for_peter['BbyVcsD0mu'] = BbyVcsD0mu
+    for_peter['BbyVcsD0e'] = BbyVcsD0e
+    for_peter['BbyVcsDpme'] = BbyVcsDpme
+    for_peter['BbyVcsDpmmu'] = BbyVcsDpmmu
+    for_peter['Cleo0'] = Cleo0
+    for_peter['Cleop'] = Cleop
+    for_peter['BESe'] = BESe
+    for_peter['BESmu'] = BESmu
+    for_peter['BES17'] = BES17
+    for_peter['BES16pmu'] = BES16pmu
+    for_peter['BELLEe'] = BELLEe
+    for_peter['BELLEmu'] = BELLEmu
+    for_peter['BaBar'] = BaBar
+    for_peter['cor20'] = cor20
+    for_peter['cor2p'] = cor2p
+    for_peter['cor20mu'] = cor20mu
+    for_peter['cor2pmu'] = cor2pmu
+    for_peter['etaEW2'] = etaEW2
+    for_peter['deltaEM20'] = deltaEM20
+    for_peter['deltaEM2p'] = deltaEM2p
+    for_peter['deltaEM20mu'] = deltaEM20mu
+    for_peter['deltaEM2pmu'] = deltaEM2pmu
+    gv.dump(for_peter,'for_peter.p')
+    ############################# BELOW HERE JUST PLOTTING #####################################################
+    plt.errorbar(VBES16pmu.mean, 9, xerr=VBES16pmu.sdev,ms=ms,color='orange',fmt='*' ,capsize=capsize,lw=lw)
+    plt.plot([0.8,1.1],[8.5,8.5],color='k')
     plt.errorbar(VBES17.mean, 8, xerr=VBES17.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
     plt.errorbar(VCleop.mean, 7, xerr=VCleop.sdev,ms=ms,fmt='ro' ,capsize=capsize,lw=lw)
     plt.plot([0.8,1.1],[6.5,6.5],color='k')
@@ -1421,25 +1805,26 @@ def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.errorbar(VBaBar.mean, 2, xerr=VBaBar.sdev,ms=ms,fmt='bs' ,capsize=capsize,lw=lw)
     plt.errorbar(VBELLEe.mean, 1, xerr=VBELLEe.sdev,ms=ms,fmt='b^' ,capsize=capsize,lw=lw)
     #plt.errorbar(VBES15B.mean, 8, xerr=VBES15B.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
-    plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[9,9], color='purple',alpha=alpha/2)
+    plt.fill_between([av.mean-av.sdev,av.mean+av.sdev],[0,0],[10,10], color='purple',alpha=alpha/2)
     plt.text(0.89,2.5,r'$D^0\to{}K^-e^+\nu_e$',fontsize=fontsizelab, va='center')
     plt.text(0.89,5.5,r'$D^0\to{}K^-\mu^+\nu_{\mu}$',fontsize=fontsizelab, va='center')
     plt.text(0.89,7.5,r'$D^+\to\bar{K}^0e^+\nu_e$',fontsize=fontsizelab, va='center')
-    plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab, va='center',ha='center')
+    plt.text(0.89,9.0,r'$D^+\to\bar{K}^0\mu^+\nu_{\mu}$',fontsize=fontsizelab, va='center')
+    #plt.text(av.mean,1.5,r'Weighted av.',fontsize=fontsizelab, va='center',ha='center')
     plt.xlabel('$|V_{cs}|$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
     plt.xlim([0.875,1.01])
-    plt.ylim([0.5,8.5])
-    plt.gca().set_yticks([8,7,6,5,4,3,2,1])
-    plt.gca().set_yticklabels(["BES '17","CLEO '09","BES '19","BELLE '06","BES '15A","CLEO '09","BaBar '06","BELLE '06"])
+    plt.ylim([0.5,9.5])
+    plt.gca().set_yticks([9,8,7,6,5,4,3,2,1])
+    plt.gca().set_yticklabels(["BES '16","BES '17","CLEO '09","BES '19","BELLE '06","BES '15A","CLEO '09","BaBar '06","BELLE '06"])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.02))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
-    plt.text(1.01,8.5,r'$\Gamma$',fontsize=fontsizelab*2,va='top',ha='right')
-    plt.plot([1,1.1],[7.5,7.5],color='k')
-    plt.plot([1,1],[7.5,8.5],color='k')
+    plt.text(1.008,9.45,r'$\mathcal{B}$',fontsize=fontsizelab*2,va='top',ha='right')
+    plt.plot([1,1.1],[8.5,8.5],color='k')
+    plt.plot([1,1],[8.5,9.5],color='k')
     plt.tight_layout()
     plt.savefig('DKPlots/VcsfromB.pdf')
     plt.close()
@@ -1454,10 +1839,10 @@ def plot_Ht_H0(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2
     Ht = []
     qsq = []
     for q2 in np.linspace(0.05,qsqmaxphysDK.mean,nopts): #q2 now in GeV
-        pV = gv.sqrt((q2-(p['MDphys']+p['MKphys'])**2)*(q2-(p['MDphys']-p['MKphys'])**2)/(4*p['MDphys']**2))
+        pV = gv.sqrt((q2-(p['MDphysav']+p['MKphysav'])**2)*(q2-(p['MDphysav']-p['MKphysav'])**2)/(4*p['MDphysav']**2))
         qsq.append(q2)
         Ht.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)/gv.sqrt(q2)) #only need one fit
-        H0.append(2*p['MDphys']*pV*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)/gv.sqrt(q2))
+        H0.append(2*p['MDphysav']*pV*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)/gv.sqrt(q2))
     H0mean,H0err = unmake_gvar_vec(H0)
     H0upp,H0low = make_upp_low(H0)
     Htmean,Hterr = unmake_gvar_vec(Ht)
@@ -1484,8 +1869,8 @@ def plot_Ht_H0(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2
 
 ####################################################################################################
 
-def plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,const2):
-    fitp,refitp = re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,const2)
+def plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,noise,const2):
+    fitp,refitp = re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,noise,const2)
 
     qsq = []
     orfit = []
@@ -1508,7 +1893,7 @@ def plot_re_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornois
     plt.plot(qsq, refitmean, color='b')
     plt.fill_between(qsq,refitlow,refitupp, color='b',alpha=alpha,label=r'$f_+(q^2)_{\mathrm{refit}}$')
     plt.plot(qsq, ratmean, color='k')
-    plt.fill_between(qsq,ratlow,ratupp, color='k',alpha=alpha,label=r'$\frac{f_+(q^2)_{\mathrm{orig}}}{f_+(q^2)_{\mathrm{refit}}}$')
+    plt.fill_between(qsq,ratlow,ratupp, color='k',alpha=alpha,label=r'$f_+(q^2)_{\mathrm{orig}}/f_+(q^2)_{\mathrm{refit}}$')
 
     #handles, labels = plt.gca().get_legend_handles_labels()
     #handles = [h[0] for h in handles]
@@ -1870,7 +2255,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,Del,addrho,fpf0same,adddata):
     p = make_p_physical_point_DK(pfit,Fits,Del,t_0)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
-        zed = make_z(q2,t_0,p['MDphys'],MKphys) #all GeV dimensions
+        zed = make_z(q2,t_0,p['MDphysav'],p['MKphysav']) #all GeV dimensions
         z.append(zed.mean)
         #        make_fp_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,fpf0same,amh)
         y.append(make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
