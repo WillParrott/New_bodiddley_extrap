@@ -128,7 +128,8 @@ def make_upp_low(vec):
 
 def convert_Gev(a):
     #converts lattice spacings from fm to GeV-1
-    aGev = gv.gvar(a)/(gv.gvar(hbar)*clight*1e-2) #bar in x10^-25 GeV seconds so hence 1e-2 
+    aGev = gv.gvar(a)/(gv.gvar(hbar)*clight*1e-2) #bar in x10^-25 GeV seconds so hence 1e-2
+    
     return(aGev)
 
 ####################################################################################################
@@ -151,7 +152,7 @@ def make_params_BK(Fits,Masses,Twists):
     for Fit in Fits:
         Fit['momenta'] = []
         daughters = []
-        Fit['a'] = w0/(hbar*clight*0.01*Fit['w0/a']) 
+        Fit['a'] = w0/(hbar*clight*0.01*Fit['w0/a'])
         j = 0
         for i in range(len(Fit['masses'])):
             if i not in Masses[Fit['conf']]:
@@ -259,6 +260,14 @@ def make_fs(Fit,fs,thpts,Z_T):
                 fp = (1/(A-B))*(Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0)
                 if 'T' in thpts[Fit['conf']]:
                     fT = Z_T[Fit['conf']]*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*momi)
+                    #q0 = Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(twist)]
+                    #ZVV0 = Z_v * Fit ['V_m{0}_tw{1}'.format(mass,twist)]
+                    #pxZV = momi * Z_v * 3 # we have x y and z 
+                    #RHS = (float(mass) - float(Fit['m_s'])) * Fit['S_m{0}_tw{1}'.format(mass,twist)]
+                    #print(q0,ZVV0,pxZV,RHS,q0*ZVV0,)
+                    #V_xfromV_0 = -(q0 * ZVV0 - RHS)/pxZV
+                    #print('V_x from V_0',V_xfromV_0) # This is from the Z_V expression. 
+                    
             if 'X_m{0}_tw{1}'.format(mass,twist) in Fit:
                 fp2 = (1/(A2-B2))*(-1*Z_v*Fit['X_m{0}_tw{1}'.format(mass,twist)] - B2*f0)
                 print('fp0: ',fp,'fp1: ',fp2,'fp1/fp0: ',fp2/fp)
@@ -358,9 +367,10 @@ def make_z(qsq,t0,M_H,M_K,M_parent=None,M_daughter=None): # this is give M_H and
     t_plus = make_t_plus(M_H,M_K)
     t_0 = make_t_0(t0,M_H,M_K,M_parent,M_daughter)
     z = (gv.sqrt(t_plus - qsq) - gv.sqrt(t_plus - t_0)) / (gv.sqrt(t_plus - qsq) + gv.sqrt(t_plus - t_0))
-    if z.mean == 0 and z.sdev == 0:
-        z = 0 # ensures not 0(0)
-    #print(qsq,z,M_H,M_K,M_parent,M_daughter,t0,t_0,t_plus)
+    if qsq == t_0:
+        z = 0
+    elif z.mean == 0 and z.sdev == 0:
+        z = 0 #gv.gvar(0,1e-10) # ensures not 0(0)
     return(z)
 
 ######################################################################################################
@@ -457,7 +467,8 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         f['gB'] = gB
         f['gD'] = gD
     if constraint:
-        f['constraint'] = gv.gvar(0,1e-4)
+        f['constraint'] = gv.gvar(0,1e-5)
+        #f['constraint'] = make_f0_BK(Nijk,Npow,Nm,addrho,prior,Fits[0],0,t_0,Fits[0]['masses'][0],False,0,const=True)
     if adddata: #not fot fT at the moment Have a big think about if this works
         f['f0_qsq{0}'.format(qsqmaxphys)] = dataf0maxBsEtas # onlyone BsEtas works
         #f['f0_qsq{0}2'.format(qsqmaxphys)] = dataf0max2BsEtas # onlyone BsEtas works
@@ -656,7 +667,7 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
 
 ########################################################################################################
 
-def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,const2=False):
+def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,const2=False,optional_z=False,pole=True):
     MKphysav = (p['MKphys0'] + p['MKphysp'])/2
     MBphysav = (p['MBphys0'] + p['MBphysp'])/2
     fit = Fit['conf']
@@ -677,6 +688,10 @@ def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
     pole = 1-(qsq/MHsstar**2)
     fppole0 = 1.0
     f0pole0 = 1.0
+    if optional_z != False:
+        z = optional_z
+    if pole == False:
+        pole = 1.0 
     if newdata:
         g = p['ginf'] + p['c1'] * (LQCD/MBphysav) + p['c2'] * (LQCD/MBphysav)**2
         logsBsEtas = 1 - ( (9/8) * g**2 * 1/10 * ( gv.log(1/10) ) )
@@ -792,11 +807,11 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0sam
         return dict(data=f, fcn=fcn, prior=prior)
     ##################################################
     p0 = None
-    if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm)):
-        p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
+    if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0)):
+        p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0))
     #p0 = None
-    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn,svdcut=1e-12 ,noise=noise,  maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
-    gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}.pickle'.format(addrho,Npow,Nijk,Nm))
+    fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn,svdcut=1e-8,noise=noise,  maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True )
+    gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0))
     print(fit.format(maxline=True))
     print('chi^2/dof = {0:.3f} Q = {1:.3f} logGBF = {2:.2f}'.format(fit.chi2/fit.dof,fit.Q,fit.logGBF))
     #fit2, w = lsqfit.empbayes_fit(1.1, fitargs)
@@ -861,6 +876,7 @@ def make_p_Mh_BK(pfit,Fits,MH):#just takes average massed for D and K
     p = gv.BufferDict()
     MDphysav = (pfit['MDphys0'] + pfit['MDphysp'])/2
     MKphysav = (pfit['MKphys0'] + pfit['MKphysp'])/2
+    MBphysav = (pfit['MBphys0'] + pfit['MBphysp'])/2
     for Fit in Fits:
         fit = Fit['conf']
         p['a_{0}'.format(fit)] = 0
@@ -875,6 +891,9 @@ def make_p_Mh_BK(pfit,Fits,MH):#just takes average massed for D and K
         p['ml10ms_{0}'.format(fit)] = 1/(mlmsfac*pfit['slratio'])
         p['deltaFV_{0}'.format(fit)] = 0
         p['MD_{0}'.format(fit)] = MDphysav
+        p['MDphys'] = MDphysav
+        p['MKphys'] = MKphysav
+        p['MBphys'] = MBphysav
         for mass in Fit['masses']:
             p['MH_{0}_m{1}'.format(fit,mass)] = MH
                 
@@ -1022,11 +1041,11 @@ def make_beta_delta_BK(Fits,t_0,Nijk,Npow,Nm,addrho,p,fpf0same,MH,const2):
     alpha = 1-1/alpharat
     delta = 1 - ((MH**2-p['MKphys']**2)/fp0) * (fpprime0-f0prime0)
     invbeta = ((MH**2-p['MKphys']**2)/fp0) * f0prime0
-    if MH == MBphys.mean:
+    if MH == p['MBphys'].mean:
         print('delta at MB = ',delta)
         print('alpha at MB = ',alpha)
         print('beta at MB = ',1/invbeta)
-    if MH == MDphys.mean:
+    if MH == p['MDphys'].mean:
         print('delta at MD = ',delta)
         print('alpha at MD = ',alpha)
         print('beta at MD = ',1/invbeta)

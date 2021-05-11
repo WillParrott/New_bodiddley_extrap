@@ -297,7 +297,7 @@ cvalpri ='0.0(1.0)'
 rhopri ='0.0(2.0)'
 Kwikfit = False
 Npow = 3 #3
-Nijk = [3,2,2,3] # i,j,k,l
+Nijk = [3,2,2,3] # i,j,k,l #[3,2,2,3]
 Nm=0
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
@@ -328,55 +328,75 @@ for Fit in Fits:
 #check_poles(Fits) Not working atm
 #plot_gold_non_split(Fits)
 
-
 #Z_V_plots(Fits,fs_data)
+################################ Test average #####################################
+average_t_0_cases = gv.BufferDict()
+fpf0same = True
+constraint = False#add constraint the f0(0)=fp(0)
+t_0 = '0'
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
-
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+
+fpf0same = False
+constraint = True#add constraint the f0(0)=fp(0)
+t_0 = 'min'
+prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
+pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+
+fpf0same = False
+constraint = True#add constraint the f0(0)=fp(0)
+t_0 = 'rev'
+prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
+pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+###################################################################################
 
 fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ################
-dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_emu(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the_0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-p_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-Bnu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_emu(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#p_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Bnu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ###############################
-speed_of_light(Fits)
-f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del)
-DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
-error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
+#speed_of_light(Fits)
+#ff_ratios_qsq_MH(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del)
+#DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
+#error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
 ############################## Redundant?#########
 #comp(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,constraint2)
 #test_stuff(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)

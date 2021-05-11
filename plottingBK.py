@@ -581,11 +581,13 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
 
 ################################################################################################
 
-def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
+
+def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2,average_t_0_cases):
     i = 0
+    p = make_p_physical_point_BK(pfit,Fits)
     plotfits = []
     for Fit in Fits:
-        if Fit['conf'] not in ['F','Fs','Fp','VC','C','VCp','Cp','SFs','UFs']:
+        if Fit['conf'] not in ['UFs']:
             plotfits.append(Fit)
     for Fit in plotfits:
         if Fit['conf' ] == 'F':
@@ -595,6 +597,8 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
         j = 0
         for mass in Fit['masses']:
             qsq = []
+            fp_for_t0 = []
+            z_for_t0 = []
             z = []
             y = []
             y2 = []
@@ -609,16 +613,25 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
                     qsq.append(q2/Fit['a']**2) #want qsq for the x value in GeV
                     if Fit['conf'] == 'Fs':
                         z.append(make_z(q2,t_0,F['M_parent_m{0}'.format(mass)],F['M_daughter'],Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))#all lat units
+                        MHsstar = make_MHsstar(F['M_parent_m{0}'.format(mass)],pfit,F['a'])
                     elif Fit['conf'] == 'SFs':
                         z.append(make_z(q2,t_0,SF['M_parent_m{0}'.format(mass)],SF['M_daughter'],Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))
+                        MHsstar = make_MHsstar(SF['M_parent_m{0}'.format(mass)],pfit,SF['a'])
                     else:
                         z.append(make_z(q2,t_0,Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))
+                        MHsstar = make_MHsstar(Fit['M_parent_m{0}'.format(mass)],pfit,Fit['a'])
                     y.append(fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)])
+                    if q2 >= 0.0:
+                        fp_for_t0.append( make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq[-1],t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2,optional_z=z[-1],pole=False))#optional z to give the z value where this data point is qsq in GeV but z calculated already 
+                        z_for_t0.append(z[-1])
+                        #fp_for_t0.append( make_fp_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass),const2=const2,pole=False)) # this is at a
                 if fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
                     thing = fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)]
                     y3.append(thing)
                     z3.append(z[-1])
                     qsq3.append(qsq[-1])
+            average_t_0_cases['z_{0}_m{1}_t0{2}'.format(Fit['conf'],mass,t_0)] = z_for_t0
+            average_t_0_cases['fp_{0}_m{1}_t0{2}'.format(Fit['conf'],mass,t_0)] = fp_for_t0
             q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][1])]
             q2min = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][-1])]
             for q2 in np.linspace(q2min.mean,q2max.mean,nopts):
@@ -630,6 +643,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
                     z2.append(make_z(q2,t_0,pfit['MH_{0}_m{1}'.format('SF',mass)],pfit['MK_{0}'.format('SF')],pfit['MH_{0}_m{1}'.format(Fit['conf'],mass)],pfit['MK_{0}'.format(Fit['conf'])]).mean)
                 else:
                     z2.append(make_z(q2,t_0,pfit['MH_{0}_m{1}'.format(Fit['conf'],mass)],pfit['MK_{0}'.format(Fit['conf'])]).mean)
+            
             qsq,qsqerr = unmake_gvar_vec(qsq)
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
@@ -652,7 +666,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     qsq = []
     z = []
     y = []
-    p = make_p_physical_point_BK(pfit,Fits)
+    #p = make_p_physical_point_BK(pfit,Fits)
     for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,p['MBphys'],p['MKphys']) #all GeV dimensions
@@ -661,6 +675,11 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
         else:
             z.append(zed.mean)
         y.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)) #only need one fit
+    gv.dump(qsq,'Fits/qsq_t0{0}.pickle'.format(t_0))
+    gv.dump(y,'Fits/fp_t0{0}.pickle'.format(t_0))
+    average_t_0_cases['{0}'.format(t_0)] = y
+    #print(average_t_0_cases)
+    gv.dump(average_t_0_cases,'Fits/average_t_0_cases.pickle')
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
     plt.figure(4,figsize=figsize)
@@ -708,7 +727,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.tight_layout()
     plt.savefig('Plots/fppoleinz.pdf')
     plt.close()
-    return()
+    return(average_t_0_cases)
 
 ################################################################################################
 
@@ -847,7 +866,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
                     MHs0 = SF['M_parent_m{0}'.format(mass)] + SF['a'] * Del
                 else:
                     z.append(make_z(q2,t_0,Fit['M_parent_m{0}'.format(mass)],Fit['M_daughter']))
-                    MHs0 = Fit['M_parent_m{0}'.format(mass)] + Fit['a'] * Del  
+                    MHs0 = Fit['M_parent_m{0}'.format(mass)] + Fit['a'] * Del
                 pole = 1-(q2/MHs0**2)
                 y.append(pole * fs_data[fit]['f0_m{0}_tw{1}'.format(mass,twist)])
             q2max = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,Fit['twists'][0])]
@@ -1208,6 +1227,74 @@ def fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
 
 ################################################################################################
 
+def ff_ratios_qsq_MH(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    p = make_p_physical_point_BK(pfit,Fits)
+    no_divs = 50
+    f0overfp = np.zeros((no_divs,no_divs))
+    fToverfp = np.zeros((no_divs,no_divs))
+    d_qsq = (qsqmaxphysBK.mean - 0)/no_divs
+    d_M = (p['MBphys'].mean - p['MDphys'].mean)/no_divs
+    qsqs = [0 + d_qsq/2] 
+    Ms = [p['MDphys'].mean + d_M/2]
+    for i in range(1,no_divs):
+        qsqs.append(0 + i * d_qsq)
+        Ms.append(p['MDphys'].mean + i * d_M)
+    for i, M in enumerate(Ms):
+        expT = 1 + p['MKphys']/M
+        p = make_p_Mh_BK(pfit,Fits,M)
+        for j, qsq in enumerate(qsqs):
+            if qsq <= ((M-p['MKphys']).mean)**2:
+                f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+                fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+                fT = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+                exp0 = 1 - qsq/(M**2-p['MKphys']**2)
+                sigma0 = abs((f0/fp - exp0).mean/(f0/fp - exp0).sdev)
+                sigmaT = abs((fT/fp - expT).mean/(fT/fp - expT).sdev)
+                f0overfp[i][j] = sigma0
+                fToverfp[i][j] = sigmaT # plots like shape of matrix, i.e. (for ij) [[00,01],[10,11]]
+    qsqlabs = []
+    qsqlabspos = []
+    Mlabs = []
+    Mlabspos = []
+    for q in [0,5,10,15,20]:
+        qsqlabs.append('{0}'.format(q))
+        qsqlabspos.append(q/(d_qsq) - 1/2)
+    for M in [2,3,4,5]:
+        Mlabs.append('{0}'.format(M))
+        Mlabspos.append((M-p['MDphys'].mean)/(d_M) - 1/2)
+        
+    plt.figure(figsize=figsize)
+    hm = plt.imshow(f0overfp, cmap='hot',interpolation="nearest")
+    plt.colorbar(hm)
+    plt.axes().tick_params(width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.xticks(ticks=qsqlabspos,labels=qsqlabs)
+    plt.yticks(ticks=Mlabspos,labels=Mlabs)
+
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel('$M_H[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.tight_layout()
+    plt.savefig('Plots/f0overfpheat.pdf')
+    plt.close()
+
+    plt.figure(figsize=figsize)
+    hm = plt.imshow(fToverfp, cmap='hot',interpolation="nearest")
+    plt.colorbar(hm)
+    plt.axes().tick_params(width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.xticks(ticks=qsqlabspos,labels=qsqlabs)
+    plt.yticks(ticks=Mlabspos,labels=Mlabs)
+
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel('$M_H[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.tight_layout()
+    plt.savefig('Plots/fToverfpheat.pdf')
+    plt.close()
+    return()
+
+################################################################################################
 def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     qsq = []
     y0 = []
@@ -1337,7 +1424,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.close()
 
     
-    p = make_p_Mh_BK(pfit,Fits,pfit['MDphysav'])
+    p = make_p_Mh_BK(pfit,Fits,(pfit['MDphys0']+pfit['MDphysp'])/2)
     qsq = []
     y0 = []
     yp = []
@@ -1454,9 +1541,10 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     f0lows = np.zeros((mpts,qpts))
     fplows = np.zeros((mpts,qpts))
     fTlows = np.zeros((mpts,qpts))
-    for i,Mh in enumerate(np.linspace(MDphys.mean,MBphys.mean,mpts)): #Mh now in GeV
+    p = make_p_physical_point_BK(pfit,Fits)
+    for i,Mh in enumerate(np.linspace(p['MDphys'].mean,p['MBphys'].mean,mpts)): #Mh now in GeV
         p = make_p_Mh_BK(pfit,Fits,Mh)
-        for j,qsq in enumerate(np.linspace(0,((Mh-MKphys)**2).mean,qpts)): #qsq in GeV
+        for j,qsq in enumerate(np.linspace(0,((Mh-p['MKphys'])**2).mean,qpts)): #qsq in GeV
             f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
             fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
             fT = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
@@ -1491,7 +1579,8 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     fpmax = []
     fT0 = []
     fTmax = []
-    for Mh in np.linspace(MDphys.mean,MBphys.mean,nopts): #q2 now in GeV
+    p = make_p_physical_point_BK(pfit,Fits)
+    for Mh in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts): #q2 now in GeV
         p = make_p_Mh_BK(pfit,Fits,Mh)
         qsqmax = (Mh-p['MKphys'])**2
         MHs.append(Mh)
@@ -1526,10 +1615,10 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.plot([MDphys.mean,MDphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
-    plt.text(MDphys.mean,-0.30,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
-    plt.plot([MBphys.mean,MBphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
-    plt.text(MBphys.mean,-0.30,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(p['MDphys'].mean,-0.30,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(p['MBphys'].mean,-0.30,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
     #plt.text(4.0,2.5,'$f_+(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
     #plt.text(2.5,0.3,'$f_{0,+}(0)$',fontsize=fontsizelab)
     #plt.text(4.5,1.0,'$f_0(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
@@ -1541,22 +1630,22 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #plt.errorbar(MBsphys.mean,0.323, yerr=0.063,fmt='k*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
     #plt.errorbar(MBsphys.mean,0.819, yerr=0.021,fmt='b*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
     #plt.errorbar(MBsphys.mean,3.27, yerr=0.15,fmt='r*',ms=ms,mfc='none',label = r'$B_s\to{}K$ arXiv:1406.2279',lw=lw)#,capsize=capsize)
-    #plt.errorbar(MBphys.mean-0.01,0.20, yerr=0.14,fmt='k^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
-    #plt.errorbar(MBphys.mean,1.024, yerr=0.025,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
-    #plt.errorbar(MBphys.mean-0.01,2.82, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBphys.mean,0.319, yerr=0.066,fmt='ko',ms=ms,mfc='none',lw=lw,capsize=capsize,label='HPQCD')#,label = r'arXiv:1306.2384')
-    plt.errorbar(MBphys.mean,0.861, yerr=0.048,fmt='bo',ms=ms,mfc='none',label = r'HPQCD',lw=lw,capsize=capsize)
-    plt.errorbar(MBphys.mean,2.63, yerr=0.13,fmt='ro',ms=ms,mfc='none',label = r'HPQCD',lw=lw,capsize=capsize)
-    plt.errorbar(MBphys.mean,2.39, yerr=0.17,fmt='o',color='purple',ms=ms,mfc='none',label = r'HPQCD',lw=lw,capsize=capsize)
-    plt.errorbar(MBphys.mean,0.270, yerr=0.095,fmt='go',ms=ms,mfc='none',label = r'HPQCD',lw=lw,capsize=capsize)
-    #plt.errorbar(MDphys.mean,0.612, yerr=0.035,fmt='kd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.765, yerr=0.031,fmt='ks',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)
-    #plt.errorbar(MDphys.mean,1.134, yerr=0.049,fmt='bd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    #plt.errorbar(MDphys.mean,2.130, yerr=0.096,fmt='rd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.979, yerr=0.019,fmt='bs',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)#,label = r'arXiv:1706.03017'
-    plt.errorbar(MDphys.mean,1.336, yerr=0.054,fmt='rs',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.687, yerr=0.054,fmt='g*',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)#,label = r'arXiv:1803.04807'
-    plt.errorbar(MDphys.mean,1.170, yerr=0.056,fmt='*',color='purple',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)
+    #plt.errorbar(p['MBphys'].mean-0.01,0.20, yerr=0.14,fmt='k^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    #plt.errorbar(p['MBphys'].mean,1.024, yerr=0.025,fmt='b^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    #plt.errorbar(p['MBphys'].mean-0.01,2.82, yerr=0.14,fmt='r^',ms=ms,mfc='none',label = r'$B\to{}\pi$ arXiv:1503.07839',lw=lw)#,capsize=capsize)
+    plt.errorbar(p['MBphys'].mean,0.319, yerr=0.066,fmt='ko',ms=ms,mfc='none',lw=lw,capsize=capsize,label='HPQCD')#,label = r'arXiv:1306.2384')
+    plt.errorbar(p['MBphys'].mean,0.861, yerr=0.048,fmt='bo',ms=ms,mfc='none',label = r'HPQCD',lw=lw,capsize=capsize)
+    plt.errorbar(p['MBphys'].mean,2.63, yerr=0.13,fmt='ro',ms=ms,mfc='none',label = r'HPQCD',lw=lw,capsize=capsize)
+    plt.errorbar(p['MBphys'].mean,2.39, yerr=0.17,fmt='o',color='purple',ms=ms,mfc='none',label = r'HPQCD',lw=lw,capsize=capsize)
+    plt.errorbar(p['MBphys'].mean,0.270, yerr=0.095,fmt='go',ms=ms,mfc='none',label = r'HPQCD',lw=lw,capsize=capsize)
+    #plt.errorbar(p['MDphys'].mean,0.612, yerr=0.035,fmt='kd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(p['MDphys'].mean,0.765, yerr=0.031,fmt='ks',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)
+    #plt.errorbar(p['MDphys'].mean,1.134, yerr=0.049,fmt='bd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    #plt.errorbar(p['MDphys'].mean,2.130, yerr=0.096,fmt='rd',ms=ms,mfc='none',label = r'$D\to{}\pi$ arXiv:1706.03017',lw=lw)#,capsize=capsize)
+    plt.errorbar(p['MDphys'].mean,0.979, yerr=0.019,fmt='bs',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)#,label = r'arXiv:1706.03017'
+    plt.errorbar(p['MDphys'].mean,1.336, yerr=0.054,fmt='rs',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)
+    plt.errorbar(p['MDphys'].mean,0.687, yerr=0.054,fmt='g*',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)#,label = r'arXiv:1803.04807'
+    plt.errorbar(p['MDphys'].mean,1.170, yerr=0.056,fmt='*',color='purple',ms=ms,mfc='none',label = r'ETMC',lw=lw,capsize=capsize)
     #handles, labels = plt.gca().get_legend_handles_labels()
     #handles = [h[0] for h in handles]
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')#handles=handles,labels=labels)
@@ -1574,7 +1663,8 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     delta = []
     invbeta = []
     alp =[]
-    for MH in np.linspace(MDphys.mean,MBphys.mean,nopts): #q2 now in GeV
+    p = make_p_physical_point_BK(pfit,Fits)
+    for MH in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts): #q2 now in GeV
         p = make_p_Mh_BK(pfit,Fits,MH)
         MHs.append(MH)
         al,d,invb = make_beta_delta_BK(Fits,t_0,Nijk,Npow,Nm,addrho,p,fpf0same,MH,const2)
@@ -1599,10 +1689,10 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.plot([MDphys.mean,MDphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
-    plt.text(MDphys.mean+0.05,-0.05,'$M_{D}$',fontsize=fontsizelab)
-    plt.plot([MBphys.mean,MBphys.mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
-    plt.text(MBphys.mean-0.05,-0.05,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='right')
+    plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(p['MDphys'].mean+0.05,-0.05,'$M_{D}$',fontsize=fontsizelab)
+    plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(p['MBphys'].mean-0.05,-0.05,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='right')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
@@ -1613,12 +1703,13 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().set_ylim([-0.1,1.0])
     ############ add data ############
     # data from hep-lat/0409116
-    plt.errorbar(MBphys.mean,0.63,yerr=0.05,fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{B\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
-    plt.errorbar(MBphys.mean,0.847, yerr=0.036,fmt='b*',ms=ms,mfc='none',label = r'$1/\beta^{B\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.44,yerr=0.04,fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{D\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.50,yerr=0.04,fmt='ko',ms=ms,mfc='none',label = r'$\alpha^{D\to K} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.709, yerr=0.030,fmt='b*',ms=ms,mfc='none',label = r'$1/\beta^{D\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
-    plt.errorbar(MDphys.mean,0.763, yerr=0.041,fmt='bo',ms=ms,mfc='none',label = r'$1/\beta^{D\to K} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    p = make_p_physical_point_BK(pfit,Fits)
+    plt.errorbar(p['MBphys'].mean,0.63,yerr=0.05,fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{B\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(p['MBphys'].mean,0.847, yerr=0.036,fmt='b*',ms=ms,mfc='none',label = r'$1/\beta^{B\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(p['MDphys'].mean,0.44,yerr=0.04,fmt='k*',ms=ms,mfc='none',label = r'$\alpha^{D\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(p['MDphys'].mean,0.50,yerr=0.04,fmt='ko',ms=ms,mfc='none',label = r'$\alpha^{D\to K} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(p['MDphys'].mean,0.709, yerr=0.030,fmt='b*',ms=ms,mfc='none',label = r'$1/\beta^{D\to\pi} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
+    plt.errorbar(p['MDphys'].mean,0.763, yerr=0.041,fmt='bo',ms=ms,mfc='none',label = r'$1/\beta^{D\to K} \mathrm{hep-lat/0409116}$',lw=lw)#,capsize=capsize)
 
     
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -3612,7 +3703,7 @@ def DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho):
     Fit = Fits[0]
     mass = Fit['masses'][0]
     fit = Fit['conf']
-    p = make_p_Mh_BK(pfit,Fits,pfit['MDphys'])
+    p = make_p_Mh_BK(pfit,Fits,(pfit['MDphys0']+pfit['MDphysp'])/2)
     logs = make_logs(p,mass,Fit)
     atab = open('Tables/DKfTtablesofas.txt','w')
     for n in range(Npow):
@@ -3847,7 +3938,7 @@ def DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     qsq = []
     z = []
     y = []
-    p = make_p_Mh_BK(pfit,Fits,pfit['MDphys'])
+    p = make_p_Mh_BK(pfit,Fits,(pfit['MDphys0']+pfit['MDphysp'])/2)
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
