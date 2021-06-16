@@ -2,6 +2,7 @@ from functionsBK import *
 import numpy as np
 import gvar as gv
 import lsqfit
+#import qcdevol # for running Z_T
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
@@ -580,7 +581,65 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     return()
 
 ################################################################################################
+def fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
+    i = 0
+    plt.figure(figsize=figsize)
+    plotfits = []
+    for Fit in Fits:
+        if Fit['conf'] not in ['UFs']:
+            plotfits.append(Fit)
+    for Fit in plotfits:
+        if Fit['conf' ] == 'F':
+            F = Fit
+        if Fit['conf' ] == 'SF':
+            SF = Fit
+        j = 0
+        for mass in Fit['masses']:
+            qsq = []
+            y = []
+            mom = []
+            for twist in Fit['twists']:                    
+                if fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
+                    q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)]
+                    V1 = fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)]
+                    V0 = fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)]
+                    #print(gv.evalcorr([V1,V0]))
+                    y.append(V1/V0)
+                    qsq.append(q2)
+                    mom.append((Fit['momenta'][Fit['twists'].index(twist)])**2)
+                    #print('PLOT',Fit['conf'],(Fit['momenta'][Fit['twists'].index(twist)])**2)
 
+            y,yerr = unmake_gvar_vec(y)
+            qsq,qsqerr = unmake_gvar_vec(qsq)
+            if y != []:
+                plt.errorbar(qsq, y, xerr=qsqerr, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)))
+                #plt.errorbar(mom, y, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),capsize=capsize)
+            j += 1
+        i += 1
+    plt.plot([0,30],[1,1],color='k',linestyle='--')
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3)
+    plt.xlabel('$(aq)^2$',fontsize=fontsizelab)
+    #plt.xlabel(r'$(|a\vec{p}_K|^2)$',fontsize=fontsizelab)
+    plt.ylabel(r'$f_+^{V^1}/f_+^{V^0}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.xlim([0,1])
+    #plt.xlim([0,0.06])
+    plt.tight_layout()
+    plt.savefig('Plots/fpV0V1diff.pdf')
+    plt.close()
+    
+    return()
+
+###########################################################################################################
 
 def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2,average_t_0_cases):
     i = 0
@@ -1241,7 +1300,7 @@ def ff_ratios_qsq_MH(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
         Ms.append(p['MDphys'].mean + i * d_M)
     for i, M in enumerate(Ms):
         expT = 1 + p['MKphys']/M
-        p = make_p_Mh_BK(pfit,Fits,M)
+        p = make_p_Mh_BK(pfit,Fits,M) # Don't use running here but could do 
         for j, qsq in enumerate(qsqs):
             if qsq <= ((M-p['MKphys']).mean)**2:
                 f0 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
@@ -1541,7 +1600,7 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     f0lows = np.zeros((mpts,qpts))
     fplows = np.zeros((mpts,qpts))
     fTlows = np.zeros((mpts,qpts))
-    p = make_p_physical_point_BK(pfit,Fits)
+    p = make_p_physical_point_BK(pfit,Fits) ## we have not run Z_T here 
     for i,Mh in enumerate(np.linspace(p['MDphys'].mean,p['MBphys'].mean,mpts)): #Mh now in GeV
         p = make_p_Mh_BK(pfit,Fits,Mh)
         for j,qsq in enumerate(np.linspace(0,((Mh-p['MKphys'])**2).mean,qpts)): #qsq in GeV
@@ -3704,14 +3763,14 @@ def DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho):
     mass = Fit['masses'][0]
     fit = Fit['conf']
     p = make_p_Mh_BK(pfit,Fits,(pfit['MDphys0']+pfit['MDphysp'])/2)
-    logs = make_logs(p,mass,Fit)
+    logs = make_logs(p,mass,Fit) # we apply the running to 2 GeV to a_n^T
     atab = open('Tables/DKfTtablesofas.txt','w')
     for n in range(Npow):
         if n == 0:
-            atab.write('      {0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same)))
+            atab.write('      {0}&'.format(Z_T_running*make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same)))
         else:
-            atab.write('{0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same)))
-        listT.append(make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same))
+            atab.write('{0}&'.format(Z_T_running*make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same)))
+        listT.append(Z_T_running*make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same))
     MDsstar = p['MDsstarphys']
     atab.write('{0}&{1}\\\\ [1ex]\n'.format(MDsstar,logs))
     atab.write('      \hline \n')
@@ -3938,7 +3997,7 @@ def DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     qsq = []
     z = []
     y = []
-    p = make_p_Mh_BK(pfit,Fits,(pfit['MDphys0']+pfit['MDphysp'])/2)
+    p = make_p_Mh_BK(pfit,Fits,(pfit['MDphys0']+pfit['MDphysp'])/2) 
     for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
         qsq.append(q2)
         zed = make_z(q2,t_0,p['MDphys'],p['MKphys']) #all GeV dimensions
@@ -3946,7 +4005,7 @@ def DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
             z.append(zed)
         else:
             z.append(zed.mean)
-        y.append(make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+        y.append(Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)) #only need one fit#include running here 
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
     plt.figure(figsize=figsize)

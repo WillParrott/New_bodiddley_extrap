@@ -78,6 +78,7 @@ qsqmaxphys = (MBsphys-Metasphys)**2
 qsqmaxphysBK = (MBphys-MKphys)**2
 qsqmaxphysDK = (MDphys-MKphys)**2
 #Del = (MDs0phys-MDphys).mean # 0.4 +0.1 in control too
+mlmsfac = 5.63  #gives ml/(mlmsfac*ms) 10 originally, now 5.63
 #####################################################################################################
 ############################### Other data #########################################################
 dataf0maxBK = None  #only works for BsEtas for now
@@ -356,7 +357,7 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         prior['Metac_{0}'.format(fit)] = globals()['Metac{0}'.format(fit)]/Fit['a'] #in GeV
         prior['deltaFV_{0}'.format(fit)] = globals()['deltaFV{0}'.format(fit)]
         prior['mstuned_{0}'.format(fit)] = ms0val*(Metasphys/Metas)**2
-        prior['ml10ms_{0}'.format(fit)] = ml0val/(10*prior['mstuned_{0}'.format(fit)])
+        prior['ml10ms_{0}'.format(fit)] = ml0val/(mlmsfac*prior['mstuned_{0}'.format(fit)])
         mltuned = prior['mstuned_{0}'.format(fit)]/prior['slratio'] 
         #prior['MD_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units
         prior['deltas_{0}'.format(fit)] = ms0-prior['mstuned_{0}'.format(fit)]     
@@ -500,7 +501,12 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
 def make_fp_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False,const=False,const2=False,gs=None):
     fit = Fit['conf']
     logs = make_logs(p,Fit)
-    MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p,p['a_{0}'.format(fit)])
+    #MHsstar = make_MHsstar(p['MH_{0}_m{1}'.format(fit,mass)],p,p['a_{0}'.format(fit)])
+    Del =  p['MDsstarphys']- p['MDphys']
+    if p['a_{0}'.format(fit)] != 0:
+        MHsstar = p['MH_{0}_m{1}'.format(fit,mass)] + p['a_{0}'.format(fit)]*Del
+    else:
+        MHsstar = p['MH_{0}_m{1}'.format(fit,mass)] + Del
     pole = 1-(qsq/MHsstar**2)
     if gs != None:
         qsq = qsq/p['a_{0}'.format(fit)]**2
@@ -598,7 +604,7 @@ def make_p_physical_point_DK(pfit,Fits):
         p['deltal_{0}'.format(fit)] = 0
         p['deltasval_{0}'.format(fit)] = 0
         p['deltalval_{0}'.format(fit)] = 0
-        p['ml10ms_{0}'.format(fit)] = 1/(10*pfit['slratio'])
+        p['ml10ms_{0}'.format(fit)] = 1/(mlmsfac*pfit['slratio'])
         p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
             p['MH_{0}_m{1}'.format(fit,mass)] = pfit['MDphys']
@@ -626,7 +632,7 @@ def make_p_Mh_BK(pfit,Fits,MH):
         p['deltal_{0}'.format(fit)] = 0
         p['deltalval_{0}'.format(fit)] = 0
         p['deltasval_{0}'.format(fit)] = 0
-        p['ml10ms_{0}'.format(fit)] = 1/(10*pfit['slratio'])
+        p['ml10ms_{0}'.format(fit)] = 1/(mlmsfac*pfit['slratio'])
         p['deltaFV_{0}'.format(fit)] = 0
         for mass in Fit['masses']:
             p['MH_{0}_m{1}'.format(fit,mass)] = MH

@@ -288,24 +288,25 @@ constraint2 =False # not working
 noise = False
 FitNegQsq = True
 prifac = 1.0
-dpri = '0.0({0})'.format(1.0*prifac)#1.0
-d000npri = '0.0({0})'.format(2.0*prifac)# backbone of a without disc effects
-di000pri = '0.0({0})'.format(2.0*prifac)#1.0'0.0(5.0)'very small because no real mass dependence
-di10npri = '0.0({0})'.format(1.0*prifac) # 0.5 as expect to be smaller
+dpri = '0.0({0})'.format(0.5*prifac)#1.0
+d000npri = '0.0({0})'.format(1.0*prifac)# backbone of a without disc effects
+di000pri = '0.0({0})'.format(1.0*prifac)#1.0'0.0(5.0)'very small because no real mass dependence
+di10npri = '0.0({0})'.format(0.5*prifac) # 0.5 as expect to be smaller
 cpri = '0.0(0.5)'
 cvalpri ='0.0(1.0)'
-rhopri ='0.0(2.0)'
+rhopri ='0.0(1.0)'
 Kwikfit = False
 Npow = 3 #3
 Nijk = [3,2,2,3] # i,j,k,l #[3,2,2,3]
-Nm=0
+Nm = 0
 SHOWPLOTS = False
 t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
 adddata = False #This includes the Bs Etas data, should not be used in conjunction with Fs, SFs, UFs Doesn't work with const2
 ############################################################################
 if t_0 != '0':
-    print('t_0 != 0, so fpf0same set to False')
+    print('t_0 != 0, so fpf0same = False constraint = True')
     fpf0same = False
+    constraint = True
 ############################################################################
 
 fs_data = collections.OrderedDict() #fs from data fs_data[Fit][]
@@ -327,33 +328,35 @@ for Fit in Fits:
     #mass_corr_plots(Fit,fs_data[Fit['conf']],thpts,F,fs_data['F'])
 #check_poles(Fits) Not working atm
 #plot_gold_non_split(Fits)
-
+fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #Z_V_plots(Fits,fs_data)
 ################################ Test average #####################################
 average_t_0_cases = gv.BufferDict()
-fpf0same = True
-constraint = False#add constraint the f0(0)=fp(0)
-t_0 = '0'
+#fpf0same = True
+#constraint = False#add constraint the f0(0)=fp(0)
+#t_0 = '0'
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
-average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+#average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+#fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 
-fpf0same = False
-constraint = True#add constraint the f0(0)=fp(0)
-t_0 = 'min'
-prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
-pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
-average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+#fpf0same = False
+#constraint = True#add constraint the f0(0)=fp(0)
+#t_0 = 'min'
+#prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
+#pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+#average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+#fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 
-fpf0same = False
-constraint = True#add constraint the f0(0)=fp(0)
-t_0 = 'rev'
-prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
-pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
-average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+#fpf0same = False
+#constraint = True#add constraint the f0(0)=fp(0)
+#t_0 = 'rev'
+#prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
+#pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+#average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
 ###################################################################################
 
-fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ################
 #dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
