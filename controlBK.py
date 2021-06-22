@@ -289,9 +289,11 @@ noise = False
 FitNegQsq = True
 prifac = 1.0
 dpri = '0.0({0})'.format(0.5*prifac)#1.0
-d000npri = '0.0({0})'.format(1.0*prifac)# backbone of a without disc effects
-di000pri = '0.0({0})'.format(1.0*prifac)#1.0'0.0(5.0)'very small because no real mass dependence
-di10npri = '0.0({0})'.format(0.5*prifac) # 0.5 as expect to be smaller
+d0000npri = '0.0({0})'.format(1.0*prifac)# backbone of a without disc effects
+di0000pri = '0.0({0})'.format(1.0*prifac)# HQET terms
+d000lnpri = '0.0({0})'.format(1.0*prifac)# raw light quark mistuning
+di100npri = '0.0({0})'.format(0.5*prifac) #smaller in case od charm because of HISQ action imporved at 2nd order
+
 cpri = '0.0(0.5)'
 cvalpri ='0.0(1.0)'
 rhopri ='0.0(1.0)'
@@ -335,24 +337,24 @@ average_t_0_cases = gv.BufferDict()
 #fpf0same = True
 #constraint = False#add constraint the f0(0)=fp(0)
 #t_0 = '0'
-prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
-pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,adddata,constraint)
+pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,constraint,constraint2)
 #average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
 #fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 
 #fpf0same = False
 #constraint = True#add constraint the f0(0)=fp(0)
 #t_0 = 'min'
-#prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
-#pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+#prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,adddata,constraint)
+#pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,constraint,constraint2)
 #average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
 #fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 
 #fpf0same = False
 #constraint = True#add constraint the f0(0)=fp(0)
 #t_0 = 'rev'
-#prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
-#pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
+#prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,adddata,constraint)
+#pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,constraint,constraint2)
 #average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
 ###################################################################################
 
