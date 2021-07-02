@@ -498,23 +498,25 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
     #prior['0mom'] =gv.gvar(Npow*['0(1)'])*w
     #prior['pmom'] =gv.gvar(Npow*['0(1)'])*w
     #prior['Tmom'] =gv.gvar(Npow*['0(1)'])*w
+    wdisc = w
+    wndisc = w# chnage this to decide where w used in empirical Bayes
     if addrho:
-        prior['0rho'] =gv.gvar(Npow*[rhopri])*w
-        prior['prho'] =gv.gvar(Npow*[rhopri])*w
-        prior['Trho'] =gv.gvar(Npow*[rhopri])*w
-    prior['0d'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*[dpri]]]]])*w
-    prior['0cs'] = gv.gvar(Npow*[cpri])*w
-    prior['0cl'] = gv.gvar(Npow*[cpri])*w
-    prior['0cc'] = gv.gvar(Npow*[cpri])*w
-    prior['0csval'] = gv.gvar(Npow*[cvalpri])*w
+        prior['0rho'] =gv.gvar(Npow*[rhopri])*wndisc
+        prior['prho'] =gv.gvar(Npow*[rhopri])*wndisc
+        prior['Trho'] =gv.gvar(Npow*[rhopri])*wndisc
+    prior['0d'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*[dpri]]]]])*wndisc
+    prior['0cs'] = gv.gvar(Npow*[cpri])
+    prior['0cl'] = gv.gvar(Npow*[cpri])
+    prior['0cc'] = gv.gvar(Npow*[cpri])
+    prior['0csval'] = gv.gvar(Npow*[cvalpri])
     #prior['0clval'] = gv.gvar(Nm*[Npow*[cvalpri]])*w
-    prior['Td'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*[dpri]]]]])*w
-    prior['Tcs'] = gv.gvar(Npow*[cpri])*w
-    prior['Tcl'] = gv.gvar(Npow*[cpri])*w
-    prior['Tcc'] = gv.gvar(Npow*[cpri])*w
-    prior['Tcsval'] = gv.gvar(Npow*[cvalpri])*w
+    prior['Td'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*[dpri]]]]])*wndisc
+    prior['Tcs'] = gv.gvar(Npow*[cpri])
+    prior['Tcl'] = gv.gvar(Npow*[cpri])
+    prior['Tcc'] = gv.gvar(Npow*[cpri])
+    prior['Tcsval'] = gv.gvar(Npow*[cvalpri])
     #prior['Tclval'] = gv.gvar(Nm*[Npow*[cvalpri]])*w
-    prior['pd'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*['0.0({0})'.format(gv.gvar(dpri).sdev*fpdisc)]]]]])*w
+    prior['pd'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*['0.0({0})'.format(gv.gvar(dpri).sdev*fpdisc)]]]]])*wndisc
     prior['SF_A_V1_m0.6'] = gv.gvar('0.0(1)')# coefficent of ap^2 in Z_V for V^1 case
     prior['SF_A_V1_m0.8'] = gv.gvar('0.0(1)')
     prior['UF_A_V1_m0.45'] = gv.gvar('0.0(1)')
@@ -522,26 +524,30 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
     prior['UF_A_V1_m0.8'] = gv.gvar('0.0(1)')
     for i in range(Nijk[0]):
         if i != 0:
-            prior['0d'][i][0][0][0][0] = gv.gvar(di0000pri)*w
-            prior['pd'][i][0][0][0][0] = gv.gvar(di0000pri)*w
-            prior['Td'][i][0][0][0][0] = gv.gvar(di0000pri)*w
+            prior['0d'][i][0][0][0][0] = gv.gvar(di0000pri)*wndisc
+            prior['pd'][i][0][0][0][0] = gv.gvar(di0000pri)*wndisc
+            prior['Td'][i][0][0][0][0] = gv.gvar(di0000pri)*wndisc
             for n in range(Npow):
-                prior['0d'][i][1][0][0][n] = gv.gvar(di100npri)*w
-                prior['pd'][i][1][0][0][n] = gv.gvar(di100npri)*w
-                prior['Td'][i][1][0][0][n] = gv.gvar(di100npri)*w
-                prior['0d'][0][0][0][0][n] = gv.gvar(d0000npri)*w 
-                prior['pd'][0][0][0][0][n] = gv.gvar(d0000npri)*w
-                prior['Td'][0][0][0][0][n] = gv.gvar(d0000npri)*w
-    for l in range(1,Nijk[3]):
-        for n in range(Npow):
-            prior['0d'][0][0][0][l][n] = gv.gvar(d000lnpri)*w 
-            prior['pd'][0][0][0][l][n] = gv.gvar(d000lnpri)*w
-            prior['Td'][0][0][0][l][n] = gv.gvar(d000lnpri)*w
+                #prior['0d'][i][1][0][0][n] = gv.gvar(di100npri)*wdisc
+                #prior['pd'][i][1][0][0][n] = gv.gvar(di100npri)*wdisc
+                #prior['Td'][i][1][0][0][n] = gv.gvar(di100npri)*wdisc
+                prior['0d'][0][0][0][0][n] = gv.gvar(d0000npri)*wndisc 
+                prior['pd'][0][0][0][0][n] = gv.gvar(d0000npri)*wndisc
+                prior['Td'][0][0][0][0][n] = gv.gvar(d0000npri)*wndisc
+    for i in range(Nijk[0]):
+        for l in range(Nijk[3]):
+            for n in range(Npow):
+                prior['0d'][i][1][0][l][n] = gv.gvar(di100npri)*wdisc 
+                prior['pd'][i][1][0][l][n] = gv.gvar(di100npri)*wdisc
+                prior['Td'][i][1][0][l][n] = gv.gvar(di100npri)*wdisc
+                prior['0d'][i][0][1][l][n] = gv.gvar(di100npri)*wdisc 
+                prior['pd'][i][0][1][l][n] = gv.gvar(di100npri)*wdisc
+                prior['Td'][i][0][1][l][n] = gv.gvar(di100npri)*wdisc
                 
-    prior['pcs'] = gv.gvar(Npow*[cpri])*w
-    prior['pcl'] = gv.gvar(Npow*[cpri])*w
-    prior['pcc'] = gv.gvar(Npow*[cpri])*w
-    prior['pcsval'] = gv.gvar(Npow*[cvalpri])*w
+    prior['pcs'] = gv.gvar(Npow*[cpri])
+    prior['pcl'] = gv.gvar(Npow*[cpri])
+    prior['pcc'] = gv.gvar(Npow*[cpri])
+    prior['pcsval'] = gv.gvar(Npow*[cvalpri])
     ### special case #####
     #prior['0d'][0][0][0][1][0] = gv.gvar('0(1)')*w
     #prior['0d'][0][0][0][1][1] = gv.gvar('0(1)')*w
@@ -553,7 +559,7 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
     #    prior['0d'] = kwikp['0d']
     #    prior['pd'] = kwikp['pd']
     #    prior['Td'] = kwikp['Td']
-    print('w = ',w)
+    print('wdisc = ',wdisc,'wndisc = ',wndisc)
     return(prior,f)
                 
 ########################################################################################################
@@ -586,7 +592,7 @@ def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,mass,amh,fpf0same,newdata=False,const=
                             tagsamed = '0'
                     if addrho:
                         if const:
-                            an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(MBphysav/MDphysav)) *  p['{0}d'.format(tagsamed)][i][j][k][l][n] * (LQCD/MBphysav)**int(i) * (0)**int(2*j) * (0)**int(2*k) * (0)**int(l)
+                            an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(MBphysav/MDphysav)) *  p['{0}d'.format(tagsamed)][i][j][k][l][n] * (LQCD/MBphysav)**int(i) * (0)**int(2*j) * (0)**int(2*k) * (0)**int(l) 
                         elif const2:
                             print('ERROR, WRONG MASS FOR s')
                             an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MH_{0}_m{1}'.format(fit,mass)]/p['MD_{0}'.format(fit)])) *  p['{0}d'.format(tagsamed)][i][j][k][l][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (0)**int(2*j) * (0)**int(2*k) 
@@ -595,6 +601,8 @@ def make_an_BK(n,Nijk,Nm,addrho,p,tag,Fit,mass,amh,fpf0same,newdata=False,const=
                             an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MBsphys']/p['MDsphys'])) *  p['{0}d'.format(tagsamed)][i][j][k][l][n] * (LQCD/p['MBsphys'])**int(i) * (0)**int(2*j) * (0)**int(2*k) * p['{0}clval'.format(tag)][0][n] * (1/10 - 1/(10*p['slratio']))
                         elif newdata == False and const == False and const2 == False :
                             an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['MH_{0}_m{1}'.format(fit,mass)]/p['MD_{0}'.format(fit)])) * (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + lvalerr  + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][l][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*p['a_{0}'.format(fit)]/np.pi)**int(2*k) * (xpithing)**int(l)
+                           # an += (1 + p['{0}rho'.format(tagsamerho)][n]*gv.log(p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])) * (1 + (p['{0}csval'.format(tag)][n]*p['deltasval_{0}'.format(fit)] + p['{0}cs'.format(tag)][n]*p['deltas_{0}'.format(fit)] + 2*p['{0}cl'.format(tag)][n]*p['deltal_{0}'.format(fit)])/(10*p['mstuned_{0}'.format(fit)]) + lvalerr  + p['{0}cc'.format(tag)][n]*((p['Metac_{0}'.format(fit)] - p['Metacphys'])/p['Metacphys'])) * p['{0}d'.format(tagsamed)][i][j][k][l][n] * (p['LQCD_{0}'.format(fit)]/p['MH_{0}_m{1}'.format(fit,mass)])**int(i) * (amh/np.pi)**int(2*j) * (LQCD*p['a_{0}'.format(fit)]/np.pi)**int(2*k) * (xpithing)**int(l)
+                            
                             
                         else:
                             print('Error in make_an_BK(): newdata = {0}, const = {1}, const2 = {2}'.format(newdata,const,const2))
@@ -836,7 +844,7 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0sam
     p0 = None
     if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0)):
         p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0))
-    #p0 = None
+    p0 = None
     fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn,svdcut=1e-4,noise=noise,  maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True ) #svdcut =1e-4
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0))
     print(fit.format(maxline=True))
@@ -974,16 +982,16 @@ def fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     fTmax = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
     print('f_+(0)/f_0(0) = {0}'.format(fp0/f00))
     print('f_0(0) = {0}  error: {1:.2%}'.format(f00,f00.sdev/f00.mean))
-    print(errs_per_ens(f00,data_for_err))
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
-    print(errs_per_ens(fp0,data_for_err))
     print('f_T(0) = {0}  error: {1:.2%}'.format(fT0,fT0.sdev/fT0.mean))
-    print(errs_per_ens(fT0,data_for_err))
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
-    print(errs_per_ens(f0max,data_for_err))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
-    print(errs_per_ens(fpmax,data_for_err))
     print('f_T(max) = {0}  error: {1:.2%}'.format(fTmax,fTmax.sdev/fTmax.mean))
+    print(errs_per_ens(f00,data_for_err))
+    print(errs_per_ens(fp0,data_for_err))
+    print(errs_per_ens(fT0,data_for_err))
+    print(errs_per_ens(f0max,data_for_err))
+    print(errs_per_ens(fpmax,data_for_err))
     print(errs_per_ens(fTmax,data_for_err))
     constl = 1/(2*p['MBphys']) * ((1 + (p['MBphys']**2-p['MKphys']**2)/qsqmaxphysBK)*fpmax - f0max* (p['MBphys']**2 - p['MKphys']**2)/qsqmaxphysBK)
     constr = fTmax /(p['MBphys']+p['MKphys'])
@@ -999,30 +1007,31 @@ def fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('a_0',a0)
     print('a_+',ap)
     print('a_T',aT)
+    print('fT_(0)/fp_(0) = {0}'.format(fT0/fp0))
     print('############## D to K ##############################################')
     p = make_p_Mh_BK(pfit,Fits,(pfit['MDphysp']+pfit['MDphys0'])/2)
     qsq0 = 0
     f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0)
     fp0 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
-    fT0 = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0)
+    fT0 = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0)
     qsq = qsqmaxphysDK.mean
     f0max = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
     fpmax = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
-    fTmax = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    fTmax = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
     print('f_+(0)/f_0(0) = {0}'.format(fp0/f00))
     print('f_0(0) = {0}  error: {1:.2%}'.format(f00,f00.sdev/f00.mean))
-    print(errs_per_ens(f00,data_for_err))
     #print('Error from as: ',f00.partialsdev(tuple(As)))
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
-    print(errs_per_ens(fp0,data_for_err))
-    print('f_T(0) = {0}  error: {1:.2%}'.format(fT0,fT0.sdev/fT0.mean))
-    print(errs_per_ens(fT0,data_for_err))
+    print('f_T(0)(2GeV) = {0}  error: {1:.2%}'.format(fT0,fT0.sdev/fT0.mean))
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
-    print(errs_per_ens(f0max,data_for_err))
     #print('Error from as: ',f0max.partialsdev(tuple(As)))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
+    print('f_T(max)(2GeV) = {0}  error: {1:.2%}'.format(fTmax,fTmax.sdev/fTmax.mean))
+    print(errs_per_ens(f00,data_for_err))
+    print(errs_per_ens(fp0,data_for_err))
+    print(errs_per_ens(fT0,data_for_err))
+    print(errs_per_ens(f0max,data_for_err))
     print(errs_per_ens(fpmax,data_for_err))
-    print('f_T(max) = {0}  error: {1:.2%}'.format(fTmax,fTmax.sdev/fTmax.mean))
     print(errs_per_ens(fTmax,data_for_err))
     a0 = []
     ap = []
@@ -1030,11 +1039,12 @@ def fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     for n in range(Npow):
         a0.append(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fits[0],Fits[0]['masses'][0],0,fpf0same))
         ap.append(make_an_BK(n,Nijk,Nm,addrho,p,'p',Fits[0],Fits[0]['masses'][0],0,fpf0same))
-        aT.append(make_an_BK(n,Nijk,Nm,addrho,p,'T',Fits[0],Fits[0]['masses'][0],0,fpf0same))
+        aT.append(Z_T_running*make_an_BK(n,Nijk,Nm,addrho,p,'T',Fits[0],Fits[0]['masses'][0],0,fpf0same))
     print('logs',make_logs(p,Fits[0]['masses'][0],Fits[0]))
     print('a_0',a0)
     print('a_+',ap)
-    print('a_T',aT)
+    print('a_T(2GeV)',aT)
+    print('fT_(0)(2GeV)/fp_(0) = {0}'.format(fT0/fp0))
     print('########################################################################')
     HFLAV= gv.gvar('0.7180(33)')# from #1909.12524 p318
     Vcsq20 = HFLAV/fp0

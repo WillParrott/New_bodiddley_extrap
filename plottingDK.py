@@ -206,6 +206,14 @@ def speed_of_light(Fits):
 #####################################################################################################
 
 def Z_V_plots(Fits,fs_data):
+    DanZV = gv.gvar(['0.95932(18)','0.97255(22)','0.98445(11)','0.99090(36)']) # from 1909.00756 table III SMOM VC,C,F,SF
+    tags = ['VC','C','F','SF']
+    Danx = [0,0,0,0]
+    mey = [0,0,0,0]
+    for Fit in Fits:
+        if Fit['conf'] in tags:
+            Danx[tags.index(Fit['conf'])] = float(Fit['masses'][0])**2
+    print(Danx)    
     plt.figure(19,figsize=figsize)
     i = 0
     plotfits =[]
@@ -219,6 +227,8 @@ def Z_V_plots(Fits,fs_data):
             x.append(float(mass)**2)
             Z_V = fs_data[Fit['conf']]['Z_v_m{0}'.format(mass)]
             y.append(Z_V)
+            if Fit['conf'] in tags:
+                mey[tags.index(Fit['conf'])] = Z_V-DanZV[tags.index(Fit['conf'])]
         y,yerr = unmake_gvar_vec(y)
         if Fit['conf'][-1] == 's':
             plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['label'],ms=ms,mfc='none')
@@ -227,8 +237,10 @@ def Z_V_plots(Fits,fs_data):
         else:
             plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['label'],ms=ms,mfc='none')
         i+=1
+    plt.errorbar(Danx,gv.mean(DanZV),yerr=gv.sdev(DanZV),fmt='h',color='purple',label='1909.00756',ms=ms,mfc='none')
     plt.plot([-0.1,0.9],[1,1],'k--')
     plt.xlim([0,0.85])
+    plt.ylim([0.95,1.08])
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
@@ -244,6 +256,27 @@ def Z_V_plots(Fits,fs_data):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
     plt.tight_layout()
     plt.savefig('DKPlots/Z_Vinamhsq.pdf')
+    plt.close()
+    
+    plt.figure(figsize=figsize)
+    plt.errorbar(Danx,gv.mean(mey),yerr=gv.sdev(mey),fmt='h',color='purple',ms=ms,mfc='none')
+    plt.plot([-0.1,0.9],[0,0],'k--')
+    plt.xlim([0,0.85])
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    #plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.xlabel('$(am_c)^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$Z_V^{\mathrm{This work}}-Z_V^{\mathrm{Dan}}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.01))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
+    plt.tight_layout()
+    plt.savefig('DKPlots/Z_Vdiffinamhsq.pdf')
     plt.close()
     return()
 
@@ -1668,14 +1701,16 @@ def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     VCleo0 = gv.sqrt(Cleo0/(cor20*BbyVcsD0e))
     VCleop = gv.sqrt(Cleop/(cor2p*BbyVcsDpme))
     #print('cleo B',VCleop,'theory err', = VCleop.partialsdev(cor2*BbyVcsDpme))
-    BESe = [0.03505,0.00014,0.00033]#gv.gvar(0.03505,np.sqrt(0.00014**2+0.00033**2)) # 1508.07560 BES 15'A
+    #BESe = [0.03505,0.00014,0.00033]# other (2021) ->[0.03574,0.00031,0.00025]##gv.gvar(0.03505,np.sqrt(0.00014**2+0.00033**2)) BES '15A
+    BESe = [0.03533,0.00021,0.00020]# 2104.08081 average in summary BES '21
     BESmu = [0.03413,0.00019,0.00035]#gv.gvar(0.03413,np.sqrt(0.00019**2+0.00035**2)) #1810.03127 BES '19
-    BES17 = [0.0860,0.0006,0.0015]#gv.gvar(0.0860,np.sqrt(0.0006**2+0.0015**2))#Dp 1703.09084 BES '17
+    #BES17 = [0.0860,0.0006,0.0015]# other (2021) ->[0.0870,0.0014,0.0016]# #gv.gvar(0.0860,np.sqrt(0.0006**2+0.0015**2))#Dp 1703.09084 BES '17
+    BES21 = [0.0862,0.0007,0.0014]# Dp 2104.08081 average in summary BES '21
     BES16pmu = [0.0872,0.0007,0.0018] #1605.00068
-    [BESe,BESmu,BES17,BES16pmu] = partially_correlate_errors([BESe,BESmu,BES17,BES16pmu])
+    [BESe,BESmu,BES21,BES16pmu] = partially_correlate_errors([BESe,BESmu,BES21,BES16pmu])
     VBESe = gv.sqrt(BESe/(cor20*BbyVcsD0e))
     VBESmu = gv.sqrt(BESmu/(cor20mu*BbyVcsD0mu))
-    VBES17 = gv.sqrt(BES17/(cor2p*BbyVcsDpme))
+    VBES21 = gv.sqrt(BES21/(cor2p*BbyVcsDpme))
     VBES16pmu = gv.sqrt(BES16pmu/(cor2pmu*BbyVcsDpmmu))
     BELLEe = [0.0345,0.0010,0.0019]#gv.gvar(0.0345,np.sqrt(0.0010**2+0.0019**2)) # hep-ex/0604049 Belle '06
     BELLEmu = [0.0345,0.0010,0.0021] #gv.gvar(0.0345,np.sqrt(0.0010**2+0.0021**2)) #hep-ex/0604049 Belle '06
@@ -1704,7 +1739,7 @@ def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     av0mu2 = av_thing0mu/(cor20mu*BbyVcsD0mu)
     av0mu = gv.sqrt(av0mu2)
     
-    av_thingp  =  lsqfit.wavg([Cleop,BES17])
+    av_thingp  =  lsqfit.wavg([Cleop,BES21])
     avp2 = av_thingp/(cor2p*BbyVcsDpme)
     avp = gv.sqrt(avp2)
 
@@ -1713,12 +1748,12 @@ def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     
     av2oneway = lsqfit.wavg([av02,avp2,av0mu2,avpmu2])
     
-    old_av2 = lsqfit.wavg([Cleo0/(BbyVcsD0e*deltaEM20),BESe/(BbyVcsD0e*deltaEM20),BELLEe/(BbyVcsD0e*deltaEM20),BaBar/(BbyVcsD0e*deltaEM20),BESmu/(BbyVcsD0mu*deltaEM20mu),BELLEmu/(BbyVcsD0mu*deltaEM20mu),Cleop/(BbyVcsDpme*deltaEM2p),BES17/(BbyVcsDpme*deltaEM2p),BES16pmu/(BbyVcsDpmmu*deltaEM2pmu)])
-    #old_av2 = lsqfit.wavg([Cleo0/(BbyVcsD0e*deltaEM20),BESe/(BbyVcsD0e*deltaEM20),BELLEe/(BbyVcsD0e*deltaEM20),BESmu/(BbyVcsD0mu*deltaEM20mu),BELLEmu/(BbyVcsD0mu*deltaEM20mu),Cleop/(BbyVcsDpme*deltaEM2p),BES17/(BbyVcsDpme*deltaEM2p),BES16pmu/(BbyVcsDpmmu*deltaEM2pmu)])#withoutBaBar
+    old_av2 = lsqfit.wavg([Cleo0/(BbyVcsD0e*deltaEM20),BESe/(BbyVcsD0e*deltaEM20),BELLEe/(BbyVcsD0e*deltaEM20),BaBar/(BbyVcsD0e*deltaEM20),BESmu/(BbyVcsD0mu*deltaEM20mu),BELLEmu/(BbyVcsD0mu*deltaEM20mu),Cleop/(BbyVcsDpme*deltaEM2p),BES21/(BbyVcsDpme*deltaEM2p),BES16pmu/(BbyVcsDpmmu*deltaEM2pmu)])
+    #old_av2 = lsqfit.wavg([Cleo0/(BbyVcsD0e*deltaEM20),BESe/(BbyVcsD0e*deltaEM20),BELLEe/(BbyVcsD0e*deltaEM20),BESmu/(BbyVcsD0mu*deltaEM20mu),BELLEmu/(BbyVcsD0mu*deltaEM20mu),Cleop/(BbyVcsDpme*deltaEM2p),BES21/(BbyVcsDpme*deltaEM2p),BES16pmu/(BbyVcsDpmmu*deltaEM2pmu)])#withoutBaBar
     old_av = gv.sqrt(old_av2/etaEW2)
     ###################################### Do fit #####################################################
-    fit_data = [Cleo0,BESe,BELLEe,BaBar,BESmu,BELLEmu,Cleop,BES17,BES16pmu]
-    #fit_data = [Cleo0,BESe,BELLEe,BESmu,BELLEmu,Cleop,BES17,BES16pmu]#without BaBar
+    fit_data = [Cleo0,BESe,BELLEe,BaBar,BESmu,BELLEmu,Cleop,BES21,BES16pmu]
+    #fit_data = [Cleo0,BESe,BELLEe,BESmu,BELLEmu,Cleop,BES21,BES16pmu]#without BaBar
     fit_prior = gv.BufferDict()
     fit_prior['wavg'] = gv.gvar('0.95(10)')
     fit_prior['deltaEM20'] = deltaEM20
@@ -1748,7 +1783,7 @@ def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     print('As average of charges below: ',gv.sqrt(av2oneway))
     
     terr = av.partialsdev(tuple([integrale0,integralep,integralmu0,integralmup]))
-    eerr = av.partialsdev(tuple([Cleo0,Cleop,BESe,BESmu,BES17,BES16pmu,BELLEe,BELLEmu,BaBar,fit_prior['tauD0'],fit_prior['tauDpm'],GF]))
+    eerr = av.partialsdev(tuple([Cleo0,Cleop,BESe,BESmu,BES21,BES16pmu,BELLEe,BELLEmu,BaBar,fit_prior['tauD0'],fit_prior['tauDpm'],GF]))
     cerrEW = av.partialsdev(fit_prior['etaEW2'])
     cerrEM = av.partialsdev(tuple([fit_prior['deltaEM20'],fit_prior['deltaEM2p'],fit_prior['deltaEM20mu'],fit_prior['deltaEM2pmu']]))
     
@@ -1776,7 +1811,7 @@ def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     for_peter['Cleop'] = Cleop
     for_peter['BESe'] = BESe
     for_peter['BESmu'] = BESmu
-    for_peter['BES17'] = BES17
+    for_peter['BES21'] = BES21
     for_peter['BES16pmu'] = BES16pmu
     for_peter['BELLEe'] = BELLEe
     for_peter['BELLEmu'] = BELLEmu
@@ -1794,7 +1829,7 @@ def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     ############################# BELOW HERE JUST PLOTTING #####################################################
     plt.errorbar(VBES16pmu.mean, 9, xerr=VBES16pmu.sdev,ms=ms,color='orange',fmt='*' ,capsize=capsize,lw=lw)
     plt.plot([0.8,1.1],[8.5,8.5],color='k')
-    plt.errorbar(VBES17.mean, 8, xerr=VBES17.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
+    plt.errorbar(VBES21.mean, 8, xerr=VBES21.sdev,ms=ms,fmt='r*' ,capsize=capsize,lw=lw)
     plt.errorbar(VCleop.mean, 7, xerr=VCleop.sdev,ms=ms,fmt='ro' ,capsize=capsize,lw=lw)
     plt.plot([0.8,1.1],[6.5,6.5],color='k')
     plt.errorbar(VBESmu.mean, 6, xerr=VBESmu.sdev,ms=ms,fmt='g*' ,capsize=capsize,lw=lw)
@@ -1819,7 +1854,7 @@ def plot_Vcs_from_B(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.xlim([0.875,1.01])
     plt.ylim([0.5,9.5])
     plt.gca().set_yticks([9,8,7,6,5,4,3,2,1])
-    plt.gca().set_yticklabels(["BES '16","BES '17","CLEO '09","BES '19","BELLE '06","BES '15A","CLEO '09","BaBar '06","BELLE '06"])
+    plt.gca().set_yticklabels(["BES '16","BES '21","CLEO '09","BES '19","BELLE '06","BES '21","CLEO '09","BaBar '06","BELLE '06"])
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.02))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
     plt.text(1.008,9.45,r'$\mathcal{B}$',fontsize=fontsizelab*2,va='top',ha='right')

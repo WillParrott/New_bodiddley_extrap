@@ -284,19 +284,18 @@ thpts['UFs'] = ['S','V']
 addrho = True
 fpf0same = True
 constraint = False#add constraint the f0(0)=fp(0)
-constraint2 =False # not working
+constraint2 = False # not working
 noise = False
 FitNegQsq = True
 prifac = 1.0
-dpri = '0.0({0})'.format(0.5*prifac)#1.0
+dpri = '0.0({0})'.format(1.0*prifac)
 d0000npri = '0.0({0})'.format(1.0*prifac)# backbone of a without disc effects
 di0000pri = '0.0({0})'.format(1.0*prifac)# HQET terms
-d000lnpri = '0.0({0})'.format(1.0*prifac)# raw light quark mistuning
-di100npri = '0.0({0})'.format(0.5*prifac) #smaller in case od charm because of HISQ action imporved at 2nd order
-
+d000lnpri = '0.0({0})'.format(1.0*prifac)# NOTE actually di00ln i.e. all non disc terms
+di100npri = '0.0({0})'.format(0.3*prifac) #covers any j=1 or k=1 but not both suppressed as O(a^2)
+rhopri ='0.0({0})'.format(1.0*prifac)
 cpri = '0.0(0.5)'
 cvalpri ='0.0(1.0)'
-rhopri ='0.0(1.0)'
 Kwikfit = False
 Npow = 3 #3
 Nijk = [3,2,2,3] # i,j,k,l #[3,2,2,3]
@@ -306,7 +305,7 @@ t_0 = '0' # for z conversion can be '0','rev','min' rev gives t_-
 adddata = False #This includes the Bs Etas data, should not be used in conjunction with Fs, SFs, UFs Doesn't work with const2
 ############################################################################
 if t_0 != '0':
-    print('t_0 != 0, so fpf0same = False constraint = True')
+    print('t_0 = {0} , so fpf0same = False constraint = True'.format(t_0))
     fpf0same = False
     constraint = True
 ############################################################################
@@ -330,7 +329,7 @@ for Fit in Fits:
     #mass_corr_plots(Fit,fs_data[Fit['conf']],thpts,F,fs_data['F'])
 #check_poles(Fits) Not working atm
 #plot_gold_non_split(Fits)
-fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #Z_V_plots(Fits,fs_data)
 ################################ Test average #####################################
 average_t_0_cases = gv.BufferDict()
@@ -389,14 +388,14 @@ fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #speed_of_light(Fits)
 #ff_ratios_qsq_MH(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
-#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
+#fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
+#DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del)
