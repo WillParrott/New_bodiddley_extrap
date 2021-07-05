@@ -45,7 +45,7 @@ MBsstarphys = gv.gvar('5.4158(15)') #PDG
 w0 = gv.gvar('0.1715(9)')  #fm
 hbar = gv.gvar('6.58211928(15)') # x 10^-25 GeV s
 clight = 2.99792458 #*10^23 fm/s
-slratio = gv.gvar('27.18(10)') #* 3/4
+slratio = gv.gvar('27.18(10)') #* 3/2
 MetacVCp = gv.gvar('2.283452(45)')# from Bp 
 MetacCp = gv.gvar('1.833947(14)')# '1.833950(18)'2005.01845  1.833947(14) from Judd's data 
 MetacFp = gv.gvar('1.32929(3)')# 1.32929(3) for 0.433 from 1408.4169 can adjust to 1.327173(30) for 0.432  
@@ -844,7 +844,7 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0sam
     p0 = None
     if os.path.isfile('Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0)):
         p0 = gv.load('Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0))
-    p0 = None
+    #p0 = None
     fit = lsqfit.nonlinear_fit(data=f, prior=prior, p0=p0, fcn=fcn,svdcut=1e-4,noise=noise,  maxit=500, tol=(1e-6,0.0,0.0),fitter='gsl_multifit', alg='subspace2D', solver='cholesky',debug=True ) #svdcut =1e-4
     gv.dump(fit.pmean,'Fits/pmeanBK{0}{1}{2}{3}{4}.pickle'.format(addrho,Npow,Nijk,Nm,t_0))
     print(fit.format(maxline=True))
@@ -954,6 +954,7 @@ def errs_per_ens(res,dat):
 ######################################################################################################
 
 def fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    dict_for_plot = collections.OrderedDict()
     data_for_err = collections.OrderedDict()
     for Fit in Fits:
         data_for_err[Fit['conf']] = []
@@ -993,6 +994,13 @@ def fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print(errs_per_ens(f0max,data_for_err))
     print(errs_per_ens(fpmax,data_for_err))
     print(errs_per_ens(fTmax,data_for_err))
+    
+    dict_for_plot['BKf00'] = errs_per_ens(f00,data_for_err)
+    dict_for_plot['BKfp0'] = errs_per_ens(fp0,data_for_err)
+    dict_for_plot['BKfT0'] = errs_per_ens(fT0,data_for_err)
+    dict_for_plot['BKf0max'] = errs_per_ens(f0max,data_for_err)
+    dict_for_plot['BKfpmax'] = errs_per_ens(fpmax,data_for_err)
+    dict_for_plot['BKfTmax'] = errs_per_ens(fTmax,data_for_err)
     constl = 1/(2*p['MBphys']) * ((1 + (p['MBphys']**2-p['MKphys']**2)/qsqmaxphysBK)*fpmax - f0max* (p['MBphys']**2 - p['MKphys']**2)/qsqmaxphysBK)
     constr = fTmax /(p['MBphys']+p['MKphys'])
     print('Hill const:',constr-constl)
@@ -1033,6 +1041,13 @@ def fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print(errs_per_ens(f0max,data_for_err))
     print(errs_per_ens(fpmax,data_for_err))
     print(errs_per_ens(fTmax,data_for_err))
+    dict_for_plot['DKf00'] = errs_per_ens(f00,data_for_err)
+    dict_for_plot['DKfp0'] = errs_per_ens(fp0,data_for_err)
+    dict_for_plot['DKfT0'] = errs_per_ens(fT0,data_for_err)
+    dict_for_plot['DKf0max'] = errs_per_ens(f0max,data_for_err)
+    dict_for_plot['DKfpmax'] = errs_per_ens(fpmax,data_for_err)
+    dict_for_plot['DKfTmax'] = errs_per_ens(fTmax,data_for_err)
+    gv.dump(dict_for_plot,'Fits/error_breakdown_data.pickle')
     a0 = []
     ap = []
     aT = []

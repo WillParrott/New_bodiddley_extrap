@@ -4,7 +4,7 @@ import lsqfit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import MultipleLocator
-from functionsDK import *
+from spline_and_non_functionsDK import *
 from plottingDK import *
 #matplotlib.use('Agg')
 plt.rc("font",**{"size":18})
@@ -241,13 +241,20 @@ for Fit in Fits:
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
     #results_tables(fs_data[Fit['conf']],Fit)
     #twist_corr_plots(Fit,fs_data[Fit['conf']],thpts)
-#check_poles(Fits) Doesn't work atm 
+#check_poles(Fits) Doesn't work atm
+
+prior_sp,f_sp = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint,spline=True)
+pfit_sp = do_fit_spline_BK(fs_data,adddata,Fits,f_sp,Nijk,Npow,Nm,t_0,addrho,noise,prior_sp,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 
+
+
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+spline_fs_at_lims_DK(pfit_sp,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+
 #ff_comp(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #Z_V_plots(Fits,fs_data)
 #plot_gold_non_split(Fits)
@@ -261,7 +268,7 @@ fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata)
 #fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-#f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+f0fp_in_qsq_z(fs_data,pfit,pfit_sp,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #f0fp_data_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 
 #error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)

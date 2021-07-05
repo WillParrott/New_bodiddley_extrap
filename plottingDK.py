@@ -1,4 +1,5 @@
-from functionsDK import *
+#from functionsDK import *
+from spline_and_non_functionsDK import *
 import numpy as np
 import gvar as gv
 import lsqfit
@@ -385,6 +386,8 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     plt.tight_layout()
     plt.savefig('DKPlots/f0poleinz.pdf')
     plt.close()
+
+    
     return()
 
 ################################################################################################
@@ -498,7 +501,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     return()
 ###############################################################################################
 
-def f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
+def f0fp_in_qsq_z(fs_data,pfit,pfit_sp,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
     qsq = []
     z = []
     y0 = []
@@ -563,6 +566,80 @@ def f0fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,con
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
     plt.savefig('DKPlots/f0fpinz.pdf')
+    plt.close()
+
+    p = make_p_physical_point_DK(pfit_sp,Fits)
+    #qsq_sp = []
+    y0sp = []
+    ypsp = []
+    y0rat = []
+    yprat = []
+    for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
+        #qsq.append(q2)
+        f0,fp=make_spline_f0_fp_physpoint(p,Fits[0],q2) #only need one fit
+        y0sp.append(f0)
+        ypsp.append(fp)
+    for i in range(len(y0sp)):
+        y0rat.append(y0sp[i]/y0[i])
+        yprat.append(ypsp[i]/yp[i])
+        
+    y0spmean,y0sperr = unmake_gvar_vec(y0sp)
+    y0spupp,y0splow = make_upp_low(y0sp)
+    ypspmean,ypsperr = unmake_gvar_vec(ypsp)
+    ypspupp,ypsplow = make_upp_low(ypsp)
+    
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, y0spmean, color='b')
+    plt.fill_between(qsq,y0splow,y0spupp, facecolor='none', edgecolor='b', hatch='X',alpha=alpha)
+    plt.plot(qsq, y0mean, color='b')
+    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
+    
+    plt.plot(qsq, ypspmean, color='r')
+    plt.fill_between(qsq,ypsplow,ypspupp, facecolor='none', edgecolor='r', hatch='X',alpha=alpha)
+    plt.plot(qsq, ypmean, color='r')
+    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
+    
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0$'),Patch(facecolor='r', edgecolor='r',label=r'$f_+$'),Patch(facecolor='none', edgecolor='b',hatch='X',label=r'$f_0^{\mathrm{spline}}$'),Patch(facecolor='none', edgecolor='r',hatch='X',label=r'$f_+^{\mathrm{spline}}$')]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
+    plt.tight_layout()
+    plt.savefig('DKPlots/spline_f0fpcompinqsq.pdf')
+    plt.close()
+    
+    y0ratmean,y0raterr = unmake_gvar_vec(y0rat)
+    y0ratupp,y0ratlow = make_upp_low(y0rat)
+    ypratmean,ypraterr = unmake_gvar_vec(yprat)
+    ypratupp,ypratlow = make_upp_low(yprat)
+    
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, y0ratmean, color='b')
+    plt.fill_between(qsq,y0ratlow,y0ratupp, color='b',alpha=alpha,label=r'$f_0^{mathrm{spline}}/f_0$')
+    
+    plt.plot(qsq, ypratmean, color='r')
+    plt.fill_between(qsq,ypratlow,ypratupp, color='r',alpha=alpha,label=r'$f_+^{mathrm{spline}}/f_+$')
+    plt.plot([-1,3],[1,1],linestyle='--',color='k')
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0^{\mathrm{spline}}/f_0$'),Patch(facecolor='r', edgecolor='r',label=r'$f_+^{\mathrm{spline}}/f_+$')]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.01))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
+    plt.xlim([0,qsqmaxphysDK.mean])
+    plt.tight_layout()
+    plt.savefig('DKPlots/spline_f0fpratioinqsq.pdf')
     plt.close()
     return()
 ##########################################################################################################################

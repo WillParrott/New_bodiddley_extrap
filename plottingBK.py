@@ -133,12 +133,16 @@ class Exp():
 
 #bins: emu:2  mu:1 mup:3 mu0:3 ep:1
     
-BELLE09 = Exp(label="Belle '09",arxiv='0904.0770',Rmue=[1.03,0.19,0.19,0.06],Be=[4.8,0.8,0.7,0.3],Bmu=[5.0,0.6,0.6,0.3],Bemu=[4.8,0.5,0.4,0.3],Be0=[2.0,1.4,1.0,0.1],   Bep=[5.7,0.9,0.8,0.3],Bmu0=[4.4,1.3,1.1,0.3],Bmup=[5.3,0.8,0.7,0.3],Bemu0=[3.4,0.9,0.8,0.2], Bemup=[5.7,0.9,0.8,0.3]     ,bins=[[0,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsqmaxphysBK.mean],[1,6]]                     ,binBemu=[[0.81,0.18,0.16,0.05],[0.46,0.14,0.12,0.03],[1.00,0.19,0.18,0.06],[0.55,0.16,0.14,0.03],[0.38,0.19,0.12,0.02],[0.98,0.2,0.18,0.06],[1.36,0.23,0.21,0.08]],sym='s')
+BELLE09 = Exp(label="Belle '09",arxiv='0904.0770',Rmue=[1.03,0.19,0.19,0.06],Be=[4.8,0.8,0.7,0.3],Bmu=[5.0,0.6,0.6,0.3],Bemu=[4.8,0.5,0.4,0.3],Be0=[2.0,1.4,1.0,0.1],   Bep=[5.7,0.9,0.8,0.3],Bmu0=[4.4,1.3,1.1,0.3],Bmup=[5.3,0.8,0.7,0.3],Bemu0=[3.4,0.9,0.8,0.2], Bemup=[5.7,0.9,0.8,0.3]     ,bins=[[0,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsqmaxphysBK.mean],[1,6]]                     ,binBemu=[[0.81,0.18,0.16,0.05],[0.46,0.14,0.12,0.03],[1.00,0.19,0.18,0.06],[0.55,0.16,0.14,0.03],[0.38,0.19,0.12,0.02],[0.98,0.2,0.18,0.06],[1.36,0.23,0.21,0.08]],sym='s') # R for all 
 BELLE09.fix_B_bins(BELLE09.binBemu)
+
+BELLE19 = Exp(label="Belle '19",arxiv='1908.01848',sym='s',Rmue=[1.08,0.16,0.15,0.02],Bemup=[5.99,0.45,0.43,0.14],Bemu0=[3.51,0.69,0.60,0.1],bins=[[0.1,4],[4,8.12],[1,6],[10.2,12.8],[14.18,qsqmaxphysBK.mean]],binBmup=[[1.76,0.41,0.37,0.04],[1.24,0.28,0.25,0.03],[2.30,0.41,0.38,0.05],[0.86,0.22,0.20,0.02],[1.34,0.24,0.22,0.03],[1.34,0.24,0.22,0.03]],binBep=[[1.80,0.33,0.30,0.05],[0.96,0.24,0.22,0.03],[1.66,0.32,0.29,0.04],[0.44,0.20,0.17,0.01],[1.18,0.25,0.22,0.03]])#R for all (binned available)binned B needs dividing by q^2
+BELLE19.fix_B_bins(BELLE19.binBmup)
+BELLE19.fix_B_bins(BELLE19.binBep)
 
 BaBar09 = Exp(label="BaBar '08",arxiv='0807.4119',Bemu = [3.94,0.73,0.69,0.20],Rmue=[0.96,0.44,0.34,0.05],Bmu0=[4.9,2.9,2.5,0.3],Bmup=[4.1,1.6,1.5,0.2],Be0=[0.8,1.5,1.2,0.1],Bep=[5.1,1.2,1.1,0.2],Bemu0=[2.1,1.5,1.3,0.2],Bemup=[4.76,0.92,0.86,0.22],Bmu=[4.1,1.3,1.2,0.2],Be=[3.88,0.9,0.83,0.2],sym='d')
 
-BaBar12 = Exp(label="BaBar '12",arxiv='1204.3933',Bemu=[4.7,0.6,0.6,0.2], bins=[[0.1,2],[2,4.3],[4.3,8.12],[10.11,12.89],[14.21,16],[16,qsqmaxphysBK.mean],[1,6]],   binBemu=[[0.71,0.2,0.18,0.02],[0.49,0.15,0.13,0.01],[0.94,0.2,0.19,0.02],[0.9,0.2,0.19,0.04],[0.49,0.15,0.14,0.02],[0.6,0.23,0.21,0.05],[1.36,0.27,0.24,0.03]],sym='d' )
+BaBar12 = Exp(label="BaBar '12",arxiv='1204.3933',Bemu=[4.7,0.6,0.6,0.2], bins=[[0.1,2],[2,4.3],[4.3,8.12],[10.11,12.89],[14.21,16],[16,qsqmaxphysBK.mean],[1,6]],   binBemu=[[0.71,0.2,0.18,0.02],[0.49,0.15,0.13,0.01],[0.94,0.2,0.19,0.02],[0.9,0.2,0.19,0.04],[0.49,0.15,0.14,0.02],[0.6,0.23,0.21,0.05],[1.36,0.27,0.24,0.03]],Rmue=[1.00,0.31,0.25,0.07],sym='d')
 BaBar12.fix_B_bins(BaBar12.binBemu)
 
 BaBar16 = Exp(label="BaBar '16",arxiv='1605.09637',Btaup=[0.00131,0.00066,0.00061,0.00035,0.00025],sym='d')#no *1e-7
@@ -162,6 +166,8 @@ LHCb14B = Exp(label="LHCb '14B",arxiv='1403.8045',sym='o',bins=[[0.1,0.98],[1.1,
 
 LHCb14C = Exp(label="LHCb '14C",arxiv='1406.6482',Rmuep=[0.745,0.09,0.074,0.036],bins=[[1,6]], binBep=[[1.56,0.19,0.15,0.06,0.04]],sym='o')# R, like B, is over range 1<q^2<6
 LHCb14C.fix_B_bins(LHCb14C.binBep)
+
+LHCb21 = Exp(label="LHCb '21",arxiv='2103.11769',bins=[[1.1,6]],binBep=[[0.286,0.015,0.014,0.013]],Rmuep=[[0.846,0.042,0.039,0.013,0.012]],sym='o')# use make_y R is over range 1.1<q^2<6
 ################################################################################################################
 
 class Theory():
@@ -343,6 +349,114 @@ def speed_of_light(Fits):
     #plt.ylim([0.9,1.2])
     plt.tight_layout()
     plt.savefig('Plots/speedoflight{0}.pdf'.format(factor))
+    plt.close()
+    return()
+
+#############################################################################################################
+
+def ensemble_error_breakdown():
+    #Only works if all ensembes used.
+    data = gv.load('Fits/error_breakdown_data.pickle')
+    f00 = []
+    fT0 = []
+    f0max = []
+    fpmax = []
+    fTmax = []
+    for lab in [' VCp:',' Cp:',' Fp:',' VC:',' C:',' F:',' SF:',' UF:']: # spaces important to distunguish 'F:' from 'SF:'
+        f00.append(float(data['BKf00'].split(lab)[1][:6])**2)
+        fT0.append(float(data['BKfT0'].split(lab)[1][:6])**2)
+        f0max.append(float(data['BKf0max'].split(lab)[1][:6])**2)
+        fpmax.append(float(data['BKfpmax'].split(lab)[1][:6])**2)
+        fTmax.append(float(data['BKfTmax'].split(lab)[1][:6])**2)
+    f00 = np.array(f00)/sum(f00)
+    fT0 = np.array(fT0)/sum(fT0)
+    f0max = np.array(f0max)/sum(f0max)
+    fpmax = np.array(fpmax)/sum(fpmax)
+    fTmax = np.array(fTmax)/sum(fTmax)
+    VCp = np.array([f00[0],fT0[0],f0max[0],fpmax[0],fTmax[0]])
+    Cp = np.array([f00[1],fT0[1],f0max[1],fpmax[1],fTmax[1]])
+    Fp = np.array([f00[2],fT0[2],f0max[2],fpmax[2],fTmax[2]])
+    VC = np.array([f00[3],fT0[3],f0max[3],fpmax[3],fTmax[3]])
+    C = np.array([f00[4],fT0[4],f0max[4],fpmax[4],fTmax[4]])
+    F = np.array([f00[5],fT0[5],f0max[5],fpmax[5],fTmax[5]])
+    SF = np.array([f00[6],fT0[6],f0max[6],fpmax[6],fTmax[6]])
+    UF = np.array([f00[7],fT0[7],f0max[7],fpmax[7],fTmax[7]])
+    x = range(5)
+    plt.figure(figsize=figsize)
+    plt.bar(x,VCp, color='r',alpha=0.33,label='Set 1')
+    plt.bar(x,Cp,bottom=VCp, color='r',alpha=0.66,label='Set 2')
+    plt.bar(x,Fp,bottom=VCp+Cp, color='r',alpha=1.0,label='Set 3')
+    plt.bar(x,VC,bottom=VCp+Cp+Fp, color='purple',alpha=0.33,label='Set 4')
+    plt.bar(x,C,bottom=VCp+Cp+Fp+VC, color='purple',alpha=0.66,label='Set 5')
+    plt.bar(x,F,bottom=VCp+Cp+Fp+VC+C, color='purple',alpha=1.0,label='Set 6')
+    plt.bar(x,SF,bottom=VCp+Cp+Fp+VC+C+F, color='b',alpha=0.5,label='Set 7')
+    plt.bar(x,UF,bottom=VCp+Cp+Fp+VC+C+F+SF, color='b',alpha=1.0,label='Set 8')
+    plt.gca().set_xticks(x)
+    plt.gca().set_xticklabels([r'$f_{0/+}(0)$',r'$f_T(0)$',r'$f_0(q^2_{\mathrm{max}})$',r'$f_+(q^2_{\mathrm{max}})$',r'$f_T(q^2_{\mathrm{max}})$'])
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,ncol=4,fontsize=fontsizeleg,frameon=False,loc='upper center')
+    plt.ylabel('$\sigma_i^2/\sum_i\sigma_i^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.ylim([0,1.2])
+    plt.tight_layout()
+    plt.savefig('Plots/BKensemble_error_breakdown{0}.pdf'.format(factor))
+    plt.close()
+    
+    f00 = []
+    fT0 = []
+    f0max = []
+    fpmax = []
+    fTmax = []
+    for lab in [' VCp:',' Cp:',' Fp:',' VC:',' C:',' F:',' SF:',' UF:']: # spaces important to distunguish 'F:' from 'SF:'
+        f00.append(float(data['DKf00'].split(lab)[1][:6])**2)
+        fT0.append(float(data['DKfT0'].split(lab)[1][:6])**2)
+        f0max.append(float(data['DKf0max'].split(lab)[1][:6])**2)
+        fpmax.append(float(data['DKfpmax'].split(lab)[1][:6])**2)
+        fTmax.append(float(data['DKfTmax'].split(lab)[1][:6])**2)
+    f00 = np.array(f00)/sum(f00)
+    fT0 = np.array(fT0)/sum(fT0)
+    f0max = np.array(f0max)/sum(f0max)
+    fpmax = np.array(fpmax)/sum(fpmax)
+    fTmax = np.array(fTmax)/sum(fTmax)
+    VCp = np.array([f00[0],fT0[0],f0max[0],fpmax[0],fTmax[0]])
+    Cp = np.array([f00[1],fT0[1],f0max[1],fpmax[1],fTmax[1]])
+    Fp = np.array([f00[2],fT0[2],f0max[2],fpmax[2],fTmax[2]])
+    VC = np.array([f00[3],fT0[3],f0max[3],fpmax[3],fTmax[3]])
+    C = np.array([f00[4],fT0[4],f0max[4],fpmax[4],fTmax[4]])
+    F = np.array([f00[5],fT0[5],f0max[5],fpmax[5],fTmax[5]])
+    SF = np.array([f00[6],fT0[6],f0max[6],fpmax[6],fTmax[6]])
+    UF = np.array([f00[7],fT0[7],f0max[7],fpmax[7],fTmax[7]])
+    x = range(5)
+    plt.figure(figsize=figsize)
+    plt.bar(x,VCp, color='r',alpha=0.33,label='Set 1')
+    plt.bar(x,Cp,bottom=VCp, color='r',alpha=0.66,label='Set 2')
+    plt.bar(x,Fp,bottom=VCp+Cp, color='r',alpha=1.0,label='Set 3')
+    plt.bar(x,VC,bottom=VCp+Cp+Fp, color='purple',alpha=0.33,label='Set 4')
+    plt.bar(x,C,bottom=VCp+Cp+Fp+VC, color='purple',alpha=0.66,label='Set 5')
+    plt.bar(x,F,bottom=VCp+Cp+Fp+VC+C, color='purple',alpha=1.0,label='Set 6')
+    plt.bar(x,SF,bottom=VCp+Cp+Fp+VC+C+F, color='b',alpha=0.5,label='Set 7')
+    plt.bar(x,UF,bottom=VCp+Cp+Fp+VC+C+F+SF, color='b',alpha=1.0,label='Set 8')
+    plt.gca().set_xticks(x)
+    plt.gca().set_xticklabels([r'$f_{0/+}(0)$',r'$f_T(0)$',r'$f_0(q^2_{\mathrm{max}})$',r'$f_+(q^2_{\mathrm{max}})$',r'$f_T(q^2_{\mathrm{max}})$'])
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,ncol=4,fontsize=fontsizeleg,frameon=False,loc='upper center')
+    plt.ylabel('$\sigma_i^2/\sum_i\sigma_i^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.ylim([0,1.2])
+    plt.tight_layout()
+    plt.savefig('Plots/DKensemble_error_breakdown{0}.pdf'.format(factor))
     plt.close()
     return()
 
@@ -2182,7 +2296,7 @@ def dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2): # results f
 ####################################################################################################################
 
 def dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    exps = [CDF11,LHCb12B,LHCb14A,LHCb14C]
+    exps = [CDF11,LHCb12B,LHCb14A,LHCb14C,LHCb21]
     m_lep = m_mu # use mu as most data muon and make no difference
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     B = []
@@ -2199,10 +2313,10 @@ def dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.figure(figsize=figsize)
     plt.plot(qsq, Bmean, color='b')
     plt.fill_between(qsq,Blow,Bupp, color='b',alpha=alpha)
-    cols = ['r','g','purple','m']
+    cols = ['r','g','purple','m','c']
     for i,exp in enumerate(exps):
         x,xerr = exp.make_x()
-        if exp.label == "LHCb '14C":
+        if exp.label == "LHCb '14C" or exp.label == "LHCb '21":
             y,yerr = exp.make_y(exp.binBep)
         else:
             y,yerr = exp.make_y(exp.binBmup)
@@ -2591,7 +2705,7 @@ def dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 #############################################################################################################
 
 def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    exps = [BELLE09,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C]
+    exps = [BELLE09,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C,LHCb21]
     m_lep = m_mu
     qsq_min = 4*m_lep**2
     ############### p ########
@@ -3155,8 +3269,8 @@ def Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #2 chargeless and one not (this one over q^2 range 1-6).
-    exps = [BELLE09,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C]
-    numbs = [4,3,1,2,5]
+    exps = [BELLE09,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C,LHCb21]
+    numbs = [4,3,5,2,1,6]
     labs = []
     i = 0
     plt.figure(figsize=figsize)
@@ -3166,7 +3280,12 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             x,xerr = exp.make_1_y(exp.Rmue)
             plt.errorbar(x,numbs[i], xerr=xerr,ms=ms,fmt=exp.sym,color='r' ,capsize=capsize,lw=lw)
             i += 1
-        if exp.Rmuep != []:
+        if exp.label == "LHCb '21":
+            labs.append(exp.label)
+            x,xerr = exp.make_y(exp.Rmuep)
+            plt.errorbar(x,numbs[i], xerr=xerr,ms=ms,fmt=exp.sym,color='b' ,capsize=capsize,lw=lw)
+            i += 1
+        elif exp.Rmuep != []:
             labs.append(exp.label)
             x,xerr = exp.make_1_y(exp.Rmuep)
             plt.errorbar(x,numbs[i], xerr=xerr,ms=ms,fmt=exp.sym,color='b' ,capsize=capsize,lw=lw)
@@ -3183,24 +3302,26 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     res2top = integrate_Gamma(p,4*m_mu**2,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)
     res2bot = integrate_Gamma(p,4*m_e**2,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)
     res = (res1top/res1bot +res2top/res2bot)/2
-    plt.errorbar(res.mean,5, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    plt.errorbar(res.mean,6, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
 
-    p = make_p_physical_point_BK(pfit,Fits,B='p')
-    qsq_max = 6
-    qsq_min = 1
-    res1top = integrate_Gamma(p,qsq_min,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
-    res1bot = integrate_Gamma(p,qsq_min,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
-    p = make_p_physical_point_BK(pfit,Fits,B='0')
-    res2top = integrate_Gamma(p,qsq_min,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
-    res2bot = integrate_Gamma(p,qsq_min,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
-    resp = (res1top/res1bot +res2top/res2bot)/2
-    plt.errorbar(resp.mean,2, xerr=resp.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    #p = make_p_physical_point_BK(pfit,Fits,B='p')
+    #qsq_max = 6
+    #qsq_min = 1
+    #res1top = integrate_Gamma(p,qsq_min,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
+    #res1bot = integrate_Gamma(p,qsq_min,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
+    #p = make_p_physical_point_BK(pfit,Fits,B='0')
+    #res2top = integrate_Gamma(p,qsq_min,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
+    #res2bot = integrate_Gamma(p,qsq_min,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
+    #resp = (res1top/res1bot +res2top/res2bot)/2
+    #plt.errorbar(resp.mean,3, xerr=resp.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     
     #plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
     labs.append("HPQCD '21")
-    labs.append("HPQCD '21")
-    plt.text(1.02,4.5,r'$R^{\mu}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
-    plt.text(1.02,1.5,r'$R^{\mu (+)}_e (1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
+    #labs.append("HPQCD '21")
+    plt.text(1.02,5.5,r'$R^{\mu}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
+    plt.text(1.02,1.0,r'$R^{\mu (+)}_e (1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
+    #plt.text(1.02,3.0,r'$R^{\mu (+)}_e (1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
+    plt.text(1.02,2.0,r'$R^{\mu (+)}_e (1.1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
     #plt.text(2.3,9,r'$B^+\to{}K^+\ell^+\ell^-$',fontsize=fontsizelab, va='center')
     plt.xlabel(r'$R^{\mu}_{e}$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
@@ -3208,7 +3329,7 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
     plt.xlim([0.6,1.44])
-    plt.ylim([0.5,5.5])
+    plt.ylim([0.5,6.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.2))

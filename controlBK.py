@@ -358,6 +358,7 @@ pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0
 ###################################################################################
 
 fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#ensemble_error_breakdown()
 ################
 #dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
@@ -368,7 +369,7 @@ fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)

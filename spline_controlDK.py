@@ -238,13 +238,15 @@ for Fit in Fits:
     fs_data[Fit['conf']] = collections.OrderedDict()
     get_results(Fit,thpts)
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
-    results_tables(fs_data[Fit['conf']],Fit)
+    #results_tables(fs_data[Fit['conf']],Fit)
 #check_poles(Fits) Doesn't work atm 
 
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,adddata,constraint)
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,svdnoise,priornoise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d000npri,di000pri,di10npri,constraint,constraint2)
 
 fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+
+
 #spline_fit(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
 #plot_spline_fit_fp(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,svdnoise,priornoise,constraint2)
 #Z_V_plots(Fits,fs_data)
