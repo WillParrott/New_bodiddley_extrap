@@ -136,7 +136,7 @@ class Exp():
 BELLE09 = Exp(label="Belle '09",arxiv='0904.0770',Rmue=[1.03,0.19,0.19,0.06],Be=[4.8,0.8,0.7,0.3],Bmu=[5.0,0.6,0.6,0.3],Bemu=[4.8,0.5,0.4,0.3],Be0=[2.0,1.4,1.0,0.1],   Bep=[5.7,0.9,0.8,0.3],Bmu0=[4.4,1.3,1.1,0.3],Bmup=[5.3,0.8,0.7,0.3],Bemu0=[3.4,0.9,0.8,0.2], Bemup=[5.7,0.9,0.8,0.3]     ,bins=[[0,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsqmaxphysBK.mean],[1,6]]                     ,binBemu=[[0.81,0.18,0.16,0.05],[0.46,0.14,0.12,0.03],[1.00,0.19,0.18,0.06],[0.55,0.16,0.14,0.03],[0.38,0.19,0.12,0.02],[0.98,0.2,0.18,0.06],[1.36,0.23,0.21,0.08]],sym='s') # R for all 
 BELLE09.fix_B_bins(BELLE09.binBemu)
 
-BELLE19 = Exp(label="Belle '19",arxiv='1908.01848',sym='s',Rmue=[1.08,0.16,0.15,0.02],Bemup=[5.99,0.45,0.43,0.14],Bemu0=[3.51,0.69,0.60,0.1],bins=[[0.1,4],[4,8.12],[1,6],[10.2,12.8],[14.18,qsqmaxphysBK.mean]],binBmup=[[1.76,0.41,0.37,0.04],[1.24,0.28,0.25,0.03],[2.30,0.41,0.38,0.05],[0.86,0.22,0.20,0.02],[1.34,0.24,0.22,0.03],[1.34,0.24,0.22,0.03]],binBep=[[1.80,0.33,0.30,0.05],[0.96,0.24,0.22,0.03],[1.66,0.32,0.29,0.04],[0.44,0.20,0.17,0.01],[1.18,0.25,0.22,0.03]])#R for all (binned available)binned B needs dividing by q^2
+BELLE19 = Exp(label="Belle '19",arxiv='1908.01848',sym='s',Rmuep=[1.08,0.16,0.15,0.02],Bemup=[5.99,0.45,0.43,0.14],Bemu0=[3.51,0.69,0.60,0.1],Bmup=[6.24,0.65,0.61,0.16],Bep=[5.75,0.64,0.61,0.15],bins=[[0.1,4],[4,8.12],[1,6],[10.2,12.8],[14.18,qsqmaxphysBK.mean]],binBmup=[[1.76,0.41,0.37,0.04],[1.24,0.28,0.25,0.03],[2.30,0.41,0.38,0.05],[0.86,0.22,0.20,0.02],[1.34,0.24,0.22,0.03],[1.34,0.24,0.22,0.03]],binBep=[[1.80,0.33,0.30,0.05],[0.96,0.24,0.22,0.03],[1.66,0.32,0.29,0.04],[0.44,0.20,0.17,0.01],[1.18,0.25,0.22,0.03]])#R for all (binned available)binned B needs dividing by q^2
 BELLE19.fix_B_bins(BELLE19.binBmup)
 BELLE19.fix_B_bins(BELLE19.binBep)
 
@@ -2296,7 +2296,7 @@ def dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2): # results f
 ####################################################################################################################
 
 def dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    exps = [CDF11,LHCb12B,LHCb14A,LHCb14C,LHCb21]
+    exps = [CDF11,BELLE19,LHCb12B,LHCb14A,LHCb14C,LHCb21]
     m_lep = m_mu # use mu as most data muon and make no difference
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     B = []
@@ -2313,14 +2313,14 @@ def dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.figure(figsize=figsize)
     plt.plot(qsq, Bmean, color='b')
     plt.fill_between(qsq,Blow,Bupp, color='b',alpha=alpha)
-    cols = ['r','g','purple','m','c']
+    cols = ['r','g','purple','m','c','b']
     for i,exp in enumerate(exps):
         x,xerr = exp.make_x()
-        if exp.label == "LHCb '14C" or exp.label == "LHCb '21":
+        if exp.label == "LHCb '14C" or exp.label == "LHCb '21" or exp.label == "Belle '19":
             y,yerr = exp.make_y(exp.binBep)
         else:
             y,yerr = exp.make_y(exp.binBmup)
-        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i], fmt=exp.sym,ms=ms,label=(exp.label),capsize=capsize)
+        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=exp.sym,ms=ms,label=(exp.label),capsize=capsize)
         
     plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
@@ -2339,7 +2339,7 @@ def dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
-    plt.axes().set_ylim([-0.02,0.42])
+    plt.axes().set_ylim([-0.02,0.55])
     plt.tight_layout()
     plt.savefig('Plots/dBdq2_emup{0}.pdf'.format(factor))
     plt.close()
@@ -2705,11 +2705,11 @@ def dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 #############################################################################################################
 
 def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    exps = [BELLE09,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C,LHCb21]
+    exps = [BELLE09,BELLE19,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C,LHCb21]
     m_lep = m_mu
     qsq_min = 4*m_lep**2
     ############### p ########
-    numbs = [7,2,9,6,1,8,3,4,5,10]
+    numbs = [8,2,11,9,6,12,7,1,10,3,4,5,13]
     labs = []
     i = 0
     plt.figure(figsize=figsize)
@@ -2730,8 +2730,8 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             plt.errorbar(x,numbs[i], xerr=xerr,ms=ms,fmt=exp.sym,color='purple' ,capsize=capsize,lw=lw)
             i += 1
 
-    plt.plot([1,8],[5.5,5.5],color='k')
-    plt.plot([1,8],[7.5,7.5],color='k')
+    plt.plot([1,8],[6.5,6.5],color='k')
+    plt.plot([1,8],[9.5,9.5],color='k')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     qsq_max = qsqmaxphysBKp.mean
     res = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)*tauBpmGeV*1e7
@@ -2739,20 +2739,20 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     tau_res = integrate_Gamma(p,4*m_tau**2,qsq_max,m_tau,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=150,qmax=True)*tauBpmGeV*1e7
     tau_x,tau_xerr = BaBar16.make_1_y(BaBar16.Btaup)
     print('Btau',tau_res,'BaBar16','{0}+{1}-{2}'.format(tau_x[0]*1e7,tau_xerr[1][0]*1e7,tau_xerr[0][0]*1e7))
-    plt.errorbar(res.mean,10, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
-    plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
-    plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[11,11], edgecolor='k',fc='none',alpha=alpha,hatch='X')    
+    plt.errorbar(res.mean,13, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[15,15], color='k',alpha=alpha/2)
+    plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[15,15], edgecolor='k',fc='none',alpha=alpha,hatch='X')    
     labs.append("HPQCD '21")
-    plt.text(2.3,6.5,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab, va='center')
-    plt.text(2.3,3,r'$B^+\to{}K^+\mu^+\mu^-$',fontsize=fontsizelab, va='center')
-    plt.text(2.3,9,r'$B^+\to{}K^+\ell^+\ell^-$',fontsize=fontsizelab, va='center')
+    plt.text(2.3,8.0,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab, va='center')
+    plt.text(2.3,3.5,r'$B^+\to{}K^+\mu^+\mu^-$',fontsize=fontsizelab, va='center')
+    plt.text(2.3,11.5,r'$B^+\to{}K^+\ell^+\ell^-$',fontsize=fontsizelab, va='center')
     plt.xlabel(r'$10^{7}\mathcal{B}^{(+)}$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([2.2,6.8])
-    plt.ylim([0.5,10.5])
+    plt.xlim([2.2,7.0])
+    plt.ylim([0.5,13.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
     plt.axes().xaxis.set_major_locator(MultipleLocator(1))
@@ -2765,7 +2765,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.close()
 
     ########################## 0 ##########################################################
-    numbs = [7,2,9,6,1,8,3,4,5,10]
+    numbs = [7,2,9,10,6,1,8,3,4,5,11]
     labs = []
     i = 0
     plt.figure(figsize=figsize)
@@ -2792,9 +2792,9 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     qsq_max = qsqmaxphysBK0.mean
     res = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)*tauB0GeV*1e7
     res2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps=True,qmax=True)*tauB0GeV*1e7
-    plt.errorbar(res.mean,10, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
-    plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
-    plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[11,11], edgecolor='k',fc='none',alpha=alpha,hatch='X') 
+    plt.errorbar(res.mean,11, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[12,12], color='k',alpha=alpha/2)
+    plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[12,12], edgecolor='k',fc='none',alpha=alpha,hatch='X') 
     labs.append("HPQCD '21")
     plt.text(6.15,6.5,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab, va='center')
     plt.text(6.15,3.0,r'$B^0\to{}K^0\mu^+\mu^-$',fontsize=fontsizelab, va='center')
@@ -2805,7 +2805,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
     plt.xlim([-0.5,9.3])
-    plt.ylim([0.5,10.5])
+    plt.ylim([0.5,11.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
     plt.axes().xaxis.set_major_locator(MultipleLocator(1))
@@ -2926,6 +2926,7 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #res2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps=True)*tauBpmGeV*1e7
     res0 = res
     res1418 = integrate_Gamma(p,14.18,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)*tauBpmGeV*1e7
+    print('')
     plt.errorbar(res.mean,8, xerr=res.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
     #plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[2.5,2.5],[11,11], color='r',alpha=alpha/2)
     labs.append("HPQCD '21")
@@ -3269,8 +3270,8 @@ def Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #2 chargeless and one not (this one over q^2 range 1-6).
-    exps = [BELLE09,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C,LHCb21]
-    numbs = [4,3,5,2,1,6]
+    exps = [BELLE09,BELLE19,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C,LHCb21]
+    numbs = [5,3,4,6,1,2,7]
     labs = []
     i = 0
     plt.figure(figsize=figsize)
@@ -3293,6 +3294,8 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
     plt.plot([1,1],[-1,10],color='k',linestyle='--')
     plt.plot([0,2],[2.5,2.5],color='k')
+    plt.plot([0,2],[3.5,3.5],color='k')
+    plt.plot([0,2],[1.5,1.5],color='k')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     qsq_max = qsqmaxphysBKp.mean
     res1top = integrate_Gamma(p,4*m_mu**2,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)
@@ -3302,7 +3305,7 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     res2top = integrate_Gamma(p,4*m_mu**2,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)
     res2bot = integrate_Gamma(p,4*m_e**2,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)
     res = (res1top/res1bot +res2top/res2bot)/2
-    plt.errorbar(res.mean,6, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    plt.errorbar(res.mean,7, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
 
     #p = make_p_physical_point_BK(pfit,Fits,B='p')
     #qsq_max = 6
@@ -3318,7 +3321,8 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
     labs.append("HPQCD '21")
     #labs.append("HPQCD '21")
-    plt.text(1.02,5.5,r'$R^{\mu}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
+    plt.text(0.62,5.5,r'$R^{\mu}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
+    plt.text(0.62,3,r'$R^{\mu(+)}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
     plt.text(1.02,1.0,r'$R^{\mu (+)}_e (1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
     #plt.text(1.02,3.0,r'$R^{\mu (+)}_e (1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
     plt.text(1.02,2.0,r'$R^{\mu (+)}_e (1.1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
@@ -3329,7 +3333,7 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
     plt.xlim([0.6,1.44])
-    plt.ylim([0.5,6.5])
+    plt.ylim([0.5,7.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.2))
@@ -3419,7 +3423,7 @@ def F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     qsq_min = 4*m_lep**2
     qsq.append((qsq_min+1)/2)
     F.append(integrate_FH(p,qsq_min,1,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2))
-    for qsq_min in range(1,23):
+    for qsq_min in range(1,22):
         qsq.append(qsq_min+0.5)
         F.append(integrate_FH(p,qsq_min,qsq_min+1,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2))
     Fmean,Ferr = unmake_gvar_vec(F)
@@ -3498,7 +3502,7 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.errorbar(x,3, xerr=xerr,ms=ms,fmt=the.sym,color='r' ,capsize=capsize,lw=lw)
     
     #plt.plot([0,0],[-1,10],color='k',linestyle='--')
-    plt.plot([30,100],[2.5,2.5],color='k')
+    plt.plot([30,150],[2.5,2.5],color='k')
     #plt.plot([0,30],[4.5,4.5],color='k')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     qsq_max = qsqmaxphysBKp.mean
@@ -3514,14 +3518,14 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #res = 1000*(res1418A+res1418B)/2
     #plt.errorbar(res.mean,2, xerr=res.sdev,ms=ms,fmt='*',color='purple',capsize=capsize,lw=lw)
     #labs.append("HPQCD '21")
-    plt.text(50,1.5,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab*0.9, va='center')
-    plt.text(50,3.5,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab*0.9, va='center')
+    plt.text(80,1.5,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab*0.9, va='center')
+    plt.text(80,3.5,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab*0.9, va='center')
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.xlabel('$10^8F_H^{e}$',fontsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([38,81])
+    plt.xlim([60,105])
     plt.ylim([0.5,4.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -4524,7 +4528,7 @@ def make_emu_bins(m_l,B=False):
         qsq_max = qsqmaxphysBKp.mean
     if B == False:
         qsq_max = qsqmaxphysBK.mean
-    bins = [[4*m_l**2,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsq_max],[1,6],[0.1,2]]
+    bins = [[4*m_l**2,qsq_max],[4*m_l**2,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsq_max],[1,6],[0.1,2]]# for Bemu 
     #bins = [[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[11,11.8]]#
     #bins = [[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
     return(bins)
@@ -4562,9 +4566,11 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         qsq_min = element[0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBKp.mean:
-            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauBpmGeV*1e7
+            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
         else:
-            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauBpmGeV*1e7
+            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -4577,9 +4583,11 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         qsq_min = element[0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBK0.mean:
-            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauB0GeV*1e7
+            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
         else:
-            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauB0GeV*1e7
+            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -4594,16 +4602,19 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         if qsq_max == qsqmaxphysBK.mean:
             p = make_p_physical_point_BK(pfit,Fits,B='p')
             qsq_max = qsqmaxphysBKp.mean
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauBpmGeV*1e7
+            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
             p = make_p_physical_point_BK(pfit,Fits,B='0')
             qsq_max = qsqmaxphysBK0.mean
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauB0GeV*1e7
+            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
         else:
             p = make_p_physical_point_BK(pfit,Fits,B='p')
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauBpmGeV*1e7
+            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
             p = make_p_physical_point_BK(pfit,Fits,B='0')
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauB0GeV*1e7
-        line3 = '{0} {1} '.format(line3,(B1+B2)/2)
+            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+        B = (B1+B2)/2
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
+        line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
@@ -4618,9 +4629,11 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         qsq_min = element[0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBKp.mean:
-            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauBpmGeV*1e7
+            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
         else:
-            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauBpmGeV*1e7
+            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -4633,9 +4646,11 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         qsq_min = element[0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBK0.mean:
-            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauB0GeV*1e7
+            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
         else:
-            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauB0GeV*1e7
+            B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -4649,102 +4664,122 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         if qsq_max == qsqmaxphysBK.mean:
             p = make_p_physical_point_BK(pfit,Fits,B='p')
             qsq_max = qsqmaxphysBKp.mean
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauBpmGeV*1e7
+            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
             p = make_p_physical_point_BK(pfit,Fits,B='0')
             qsq_max = qsqmaxphysBK0.mean
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauB0GeV*1e7
+            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
         else:
             p = make_p_physical_point_BK(pfit,Fits,B='p')
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauBpmGeV*1e7
+            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
             p = make_p_physical_point_BK(pfit,Fits,B='0')
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauB0GeV*1e7
-        line3 = '{0} {1} '.format(line3,(B1+B2)/2)
+            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+        B = (B1+B2)/2
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
+        line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     table.write('      \hline\n')
     ########################## e mu ###############################################
      ########################## emu p########################################
+    m_lep = m_e
+    binse = make_emu_bins(m_lep,B='p')
     m_lep = m_mu
-    bins = make_emu_bins(m_lep,B='p')
+    binsmu = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     line3 = '     $10^7\\mathcal{B}(B^+\\to K^+\\ell^+\\ell^-)$ &'
-    for element in bins:
+    for i,element in enumerate(binse):
         qsq_min = element[0]
+        qsq_minmu = binsmu[i][0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBKp.mean:
             m_lep = m_e
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauBpmGeV*1e7
+            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
             m_lep = m_mu
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauBpmGeV*1e7
+            B2 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
         else:
             m_lep = m_e
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauBpmGeV*1e7
+            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
             m_lep = m_mu
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauBpmGeV*1e7
-        line3 = '{0} {1} '.format(line3,(B1+B2)/2)
+            B2 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
+        B = (B1+B2)/2
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
+        line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### e 0 ##########################################
-    bins = make_emu_bins(m_lep,B='0')
+    m_lep = m_e
+    binse = make_emu_bins(m_lep,B='0')
+    m_lep = m_mu
+    binsmu = make_emu_bins(m_lep,B='0')
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     line3 = '     $10^7\\mathcal{B}(B^0\\to K^0\\ell^+\\ell^-)$ &'
-    for element in bins:
+    for i,element in enumerate(binse):
         qsq_min = element[0]
+        qsq_minmu = binsmu[i][0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBK0.mean:
             m_lep = m_e
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauB0GeV*1e7
+            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
             m_lep = m_mu
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauB0GeV*1e7
+            B2 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
         else:
             m_lep = m_e
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauB0GeV*1e7
+            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
             m_lep = m_mu
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauB0GeV*1e7
-        line3 = '{0} {1} '.format(line3,(B1+B2)/2)
+            B2 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+        B = (B1+B2)/2
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
+        line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## e ###########################################
-    bins = make_emu_bins(m_lep)
+    m_lep = m_e
+    binse = make_emu_bins(m_lep)
+    m_lep = m_mu
+    binsmu = make_emu_bins(m_lep)    
     line3 = '     $10^7\\mathcal{B}(B\\to K\\ell^+\\ell^-)$ &'
-    for element in bins:
+    for i,element in enumerate(binse):
         qsq_min = element[0]
+        qsq_minmu = binsmu[i][0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBK.mean:
             p = make_p_physical_point_BK(pfit,Fits,B='p')
             qsq_max = qsqmaxphysBKp.mean
             m_lep = m_e
-            B1p = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauBpmGeV*1e7
+            B1p = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
             m_lep = m_mu
-            B2p = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauBpmGeV*1e7
+            B2p = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
             p = make_p_physical_point_BK(pfit,Fits,B='0')
             qsq_max = qsqmaxphysBK0.mean
             m_lep = m_e 
-            B10 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauB0GeV*1e7
+            B10 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
             m_lep = m_mu 
-            B20 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True)*tauB0GeV*1e7
+            B20 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
         else:
             p = make_p_physical_point_BK(pfit,Fits,B='p')
             m_lep = m_e
-            B1p = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauBpmGeV*1e7
+            B1p = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
             m_lep = m_mu
-            B2p = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauBpmGeV*1e7
+            B2p = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
             p = make_p_physical_point_BK(pfit,Fits,B='0')
             m_lep = m_e 
-            B10 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauB0GeV*1e7
+            B10 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
             m_lep = m_mu 
-            B20 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)*tauB0GeV*1e7
-        line3 = '{0} {1} '.format(line3,(B1p+B2p+B10+B20)/4)
+            B20 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+        B = (B1p+B2p+B10+B20)/4
+        if isinstance(B,np.ndarray):
+            B = '{0} ({1})'.format(B[0],B[1])
+        line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
-    table.write('      \hline\n')
-
-
-    
+    table.write('      \hline\n')    
     table.write('    \end{tabular}')        
     table.close()
     return()
@@ -4754,7 +4789,7 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 
 def Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    m_lep = m_e # just does the bins 
+    m_lep = m_mu # just does the bins 
     bins = make_emu_bins(m_lep)
     #bins2 =[[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[11,11.8],[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
     line1 = '    \\begin{tabular}{ c |'
@@ -4781,7 +4816,7 @@ def Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     m_lep = m_mu
     bins = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    line3 = '     $10^3R^{\\mu(+)}_e$ &'
+    line3 = '     $10^3(R^{\\mu(+)}_e-1)$ &'
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -4799,7 +4834,7 @@ def Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ####################### Rmue 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     bins = make_emu_bins(m_lep,B='0')
-    line3 = '     $10^3R^{\\mu(0)}_e$ &'
+    line3 = '     $10^3(R^{\\mu(0)}_e-1)$ &'
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -4815,7 +4850,7 @@ def Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## Rmue ###########################################
-    line3 = '     $10^3R^{\\mu}_e$ &'
+    line3 = '     $10^3(R^{\\mu}_e-1)$ &'
     bins = make_emu_bins(m_lep)
     for element in bins:
         qsq_min = element[0]
@@ -4934,7 +4969,7 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('      \hline\n')
     ########################## e p########################################
     m_lep = m_e
-    bins = make_emu_bins(m_lep)
+    #bins = make_emu_bins(m_lep)
     bins = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     line3 = '     $10^8F_H^{e(+)}$ &'
@@ -5106,7 +5141,7 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     m_lep = m_tau 
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
     line1 = '    \\begin{tabular}{ c |'
     line2 = '     $q^2$ bin &'
     for element in bins:
@@ -5129,7 +5164,7 @@ def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('      \hline\n')
     ########################## tau p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
     line3 = '     $10^7\\mathcal{B}(B^+\\to K^+\\tau^+\\tau^-)$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5144,7 +5179,7 @@ def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### tau 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
     line3 = '     $10^7\\mathcal{B}(B^0\\to K^0\\tau^+\\tau^-)$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5160,7 +5195,7 @@ def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ######################## tau ###########################################
     
     line3 = '     $10^7\\mathcal{B}(B\\to K\\tau^+\\tau^-)$ &'
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -5191,7 +5226,7 @@ def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     m_lep = m_tau # just does the bins 
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
     line1 = '    \\begin{tabular}{ c |'
     line2 = '     $q^2$ bin &'
     for element in bins:
@@ -5214,7 +5249,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('      \hline\n')
     ########################## e p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
     line3 = '     $R^{\\tau(+)}_e$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5231,7 +5266,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### e 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
     line3 = '     $R^{\\tau(0)}_e$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5248,7 +5283,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## e ###########################################
     line3 = '     $R^{\\tau}_e$ &'
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -5276,7 +5311,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ########################## mu ###############################################
     ########################## mu p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
     line3 = '     $R^{\\tau(+)}_{\\mu}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5293,7 +5328,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### mu 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
     line3 = '     $R^{\\tau(0)}_{\\mu}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5310,7 +5345,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## mu ###########################################
     line3 = '     $R^{\\tau}_{\\mu}$ &'
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -5338,7 +5373,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ########################## e mu ###############################################
      ########################## emu p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
     line3 = '     $R^{\\tau(+)}_{\\ell}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5357,7 +5392,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### emu 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
     line3 = '     $R^{\\tau(0)}_{\\ell}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5375,7 +5410,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## emu ###########################################
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
     line3 = '     $R^{\\tau}_{\\ell}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5416,7 +5451,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     m_lep = m_tau 
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
     line1 = '    \\begin{tabular}{ c |'
     line2 = '     $q^2$ bin &'
     for element in bins:
@@ -5439,7 +5474,7 @@ def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('      \hline\n')
     ########################## tau p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
     line3 = '     $F_H^{\\tau(+)}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5451,7 +5486,7 @@ def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### tau 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
     line3 = '     $F_H^{\\tau(0)}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5462,7 +5497,7 @@ def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## tau ###########################################
-    bins = [[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
     line3 = '     $F_H^{\\tau}$ &'
     for element in bins:
         qsq_min = element[0]

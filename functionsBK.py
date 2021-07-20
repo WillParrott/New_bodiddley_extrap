@@ -1,5 +1,6 @@
 import numpy as np
 import gvar as gv
+import vegas
 import lsqfit
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -1158,7 +1159,7 @@ def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     fT = make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
     FA = C10eff*fp
     FVR = C9effR*fp + 2*m_b*C7eff*fT/(p['MBphys']+p['MKphys'])
-    FVI = C9effI*fp + 2*m_b*C7eff*fT/(p['MBphys']+p['MKphys'])    
+    FVI = C9effI*fp #+ 2*m_b*C7eff*fT/(p['MBphys']+p['MKphys'])    # this was in here. Mistake?
     FP = -m_l*C10eff*(fp - (p['MBphys']**2-p['MKphys']**2)*(f0-fp)/qsq)
     #print('FA',FA,FVR,FVI,FP)
     ######################################################
@@ -1188,47 +1189,177 @@ def check_gaps(qsq,gaps):
     return(zero)
     
 
-def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=25,gaps=False,qmax=False):
-    iters = iters
-    def integrand(qsq):
-        al,cl = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        integrand = 2*al + 2*cl/3
-        if np.isnan(integrand.mean):
+def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=None,gaps=False,qmax=False,table=False):
+    integrands = gv.BufferDict()
+    def integrand(qsq,gaps):
+        if qsq in integrands:
+            integrand = integrands[qsq]
+        else:    
+            al,cl = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            integrand = 2*al + 2*cl/3
+        if integrand != 0 and np.isnan(integrand.mean):
             integrand = 0
         if check_gaps(qsq,gaps):
             integrand = 0
+        integrands[qsq] = integrand
         return(integrand)
-    del_qsq =  (qsq_max-qsq_min) /iters
-    if qmax:
-        funcs = integrand(qsq_min)
+    iters = 16 # start with 16, then keep doubling until result stops changing significantly
+    Test = False
+    results = []
+    while Test == False:
+        points = np.linspace(qsq_min,qsq_max,iters+1) # means there are iters+1 points, so iters gaps and a number at each end
+        del_qsq =  (qsq_max-qsq_min) /iters
+        if qmax:
+            funcs = integrand(qsq_min,gaps)
+        else:
+            funcs = integrand(qsq_min,gaps) + integrand(qsq_max,gaps)
+        for i in range(1,iters):
+            funcs += 2*integrand(points[i],gaps)
+        result1 = del_qsq*funcs/2
+        results.append(result1)
+        iters *= 2
+        if len(results)>=2:
+            check = abs((results[-1].mean-results[-2].mean)/results[-1].sdev)
+            if check <= 0.02:
+                Test = True            
+    if table == True and qsq_min == 4*m_l**2 and qmax == True: # in case where we integrate whole q^2 range for table, we also give value with gaps. Shouldn't need to change iters as should be fine. 
+        gaps = True
+        Test = False
+        results = []
+        iters = int(iters/4) # gives first point so we can compare iters/2/2
+        while Test == False:
+            points = np.linspace(qsq_min,qsq_max,iters+1) 
+            del_qsq =  (qsq_max-qsq_min) /iters
+            if qmax:
+                funcs = integrand(qsq_min,gaps)
+            else:
+                funcs = integrand(qsq_min,gaps) + integrand(qsq_max,gaps)
+            for i in range(1,iters):
+                funcs += 2*integrand(points[i],gaps)
+            result2 = del_qsq*funcs/2
+            results.append(result2)
+            iters *= 2
+            if len(results)>=2:
+                check = abs((results[-1].mean-results[-2].mean)/results[-1].sdev)
+                if check <= 0.02:
+                    Test = True
+        return(np.array([result1,result2]))
     else:
-        funcs = integrand(qsq_min) + integrand(qsq_max)
-    for i in range(1,iters):
-        funcs += 2*integrand(qsq_min+del_qsq*i)
-    result = del_qsq*funcs/2
-    return(result)
+        return(result1)
 
 #########################################################################################
-
-def integrate_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=25):
-    iters = iters
-    def integrand_top(qsq):
-        al,cl = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        integrand = al + cl
-        return(integrand)
-    def integrand_bot(qsq):
-        al,cl = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        integrand = al + cl/3
-        return(integrand)
-    
-    del_qsq =  (qsq_max-qsq_min) /iters
-    funcs_top = integrand_top(qsq_min) + integrand_top(qsq_max)
-    funcs_bot = integrand_bot(qsq_min) + integrand_bot(qsq_max)
-    for i in range(1,iters):
-        funcs_top += 2*integrand_top(qsq_min+del_qsq*i)
-        funcs_bot += 2*integrand_bot(qsq_min+del_qsq*i)
-    result = funcs_top/funcs_bot
+def integrate_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=None):
+    # this acts as a shell for do_integral_FH. If the integral starts below 2, then it will take a very long time to do. Splitting up into qsq_min ->2 and 2-> qsq_max will speed this up as the latter half of the integral is smooth
+    threshold = 10 * 4*m_e**2 # want to focus on region where Beta <1  split into 3 firstly 10 * limit, then work in powers of 10 up to 1.0 that 100000*threshold gives~ 0.1
+    lower_threshold = 4*m_mu**2
+    if qsq_min < lower_threshold:
+        print('SPLITTING INTEGRAL','m_l = ',m_l,'qsq_min = ',qsq_min,'qsq_max = ',qsq_max)
+        parts = ['A','B','C','D','F','G','H','I','J','K','L']
+        i = 0 
+        low = qsq_min
+        upp  = 10 * qsq_min
+        tops = []
+        bots = []
+        while upp < qsq_max:
+            print('PART {0}: qsq = {1} to {2}'.format(parts[i],low,upp))
+            t,b = do_integral_FH(p,low,upp,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,split=True)
+            tops.append(t)
+            bots.append(b)
+            low = upp
+            upp *= 10
+            i += 1
+        upp = qsq_max
+        print('PART {0}: qsq = {1} to {2}'.format(parts[i],low,upp))
+        t,b = do_integral_FH(p,low,upp,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,split=True)
+        tops.append(t)
+        bots.append(b)
+        result = sum(tops)/sum(bots)
+        print('tops',tops)
+        print('bots',bots)
+        print('Result:',result)
+    else:
+        result = do_integral_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    print('MY METHOD RESULT: ',result)
+    ############## check with vegas ########################################################
+    def top(qsq):
+        al,cl = make_al_cl(p,qsq[0],m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        return(al.mean+cl.mean)
+    def bot(qsq):
+        al,cl = make_al_cl(p,qsq[0],m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        return(al.mean+cl.mean/3)
+    integ = vegas.Integrator([[qsq_min, qsq_max]])
+    result1 = integ(top,nitn=10,neval=1000)
+    print(result1.summary())
+    print('result1 = %s    Q = %.2f' % (result1, result1.Q))
+    result2 = integ(bot,nitn=10,neval=1000)
+    print(result2.summary())
+    print('result2 = %s    Q = %.2f' % (result2, result2.Q))
+    print('VEGAS RESULT (error only from integrating): ',result1/result2)
     return(result)
+
+
+
+def do_integral_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,split=False):
+    integrandstop = gv.BufferDict() # try vegas or other routine. If fails try edging closer to 48m_l**2
+    integrandsbot = gv.BufferDict()
+    def integrand(qsq):
+        if qsq in integrandstop:
+            integrandtop = integrandstop[qsq]
+            integrandbot = integrandsbot[qsq]
+        else:
+            al,cl = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            integrandtop = al + cl
+            integrandbot = al + cl/3
+            integrandstop[qsq] = integrandtop
+            integrandsbot[qsq] = integrandbot
+        return(integrandtop,integrandbot)
+    
+    Test = False
+    resultstop = []
+    resultsbot = []
+    results = []
+    iters = 16
+    while Test == False:
+        points = np.linspace(qsq_min,qsq_max,iters+1)
+        del_qsq =  (qsq_max-qsq_min) /iters
+        if qsq_min == 4*m_l**2:
+            t,b = integrand(qsq_max)
+            funcs_top = t
+            funcs_bot = b
+        else:
+            t1,b1 = integrand(qsq_min)
+            t2,b2 = integrand(qsq_max)
+            funcs_top = t1+t2
+            funcs_bot = b1+b2 
+        for i in range(1,iters):
+            t,b = integrand(points[i])
+            funcs_top += 2*t
+            funcs_bot += 2*b
+        int_top = del_qsq * funcs_top/2
+        int_bot = del_qsq * funcs_bot/2
+        result = int_top/int_bot
+        resultstop.append(int_top)
+        resultsbot.append(int_bot)
+        results.append(result)
+        print('Iters',iters)
+        #print('Results', results)
+        #print('Results top', resultstop)
+        #print('Results bot', resultsbot)
+        iters *= 2
+        if len(resultstop)>=2:
+            check = abs((results[-1].mean-results[-2].mean)/results[-1].sdev)
+            print('check',check)
+            #checktop = abs((resultstop[-1].mean-resultstop[-2].mean)/resultstop[-1].sdev)
+            #print('checktop',checktop)
+            #checkbot = abs((resultsbot[-1].mean-resultsbot[-2].mean)/resultsbot[-1].sdev)
+            #print('checkbot',checkbot)
+            if check <= 0.02: 
+                Test = True
+    print('FINAL ITERS AND RESULT: ',int(iters/2),result)
+    if split == True:
+        return(int_top,int_bot)
+    else:
+        return(result)
 
 #####################################################################
 Xt = gv.gvar('1.469(17)')#1009.0947 check for update
@@ -1238,27 +1369,42 @@ VubVusfK = gv.gvar('3.72(16)*1e-3') * gv.gvar('35.090(57)*1e-3') #GeV
 fB = gv.gvar('189.4(1.4)*1e-3')#GeV B+ from 1702.09262   #gv.gvar('190.5(4.2)*1e-3') #GeV
 Gammatau = (1/gv.gvar('290.3(5)*1e-3')) * 6.582119569*1e-13  # ps converted to GeV
 
-def integrate_fp_B(p,qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,iters=25,qmax=False):
+def integrate_fp_B(p,qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,iters=None,qmax=False):
+    integrands = gv.BufferDict()
     def integrand(qsq):
-        p3 = ((qsq-p['MKphys']**2-p['MBphys']**2)**2/(4*p['MBphys']**2)-p['MKphys']**2)**(3/2)
-        if math.isnan(p3.mean):
-            p3 = 0
-        fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
-        integrand = p3 * fp**2
+        if qsq in integrands:
+            integrand = integrands[qsq]
+        else:
+            p3 = ((qsq-p['MKphys']**2-p['MBphys']**2)**2/(4*p['MBphys']**2)-p['MKphys']**2)**(3/2)
+            if math.isnan(p3.mean):
+                p3 = 0
+            fp = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+            integrand = p3 * fp**2
+            integrands[qsq] = integrand
         return(integrand)
-    iters = iters
-    del_qsq =  (qsq_max-qsq_min) /iters
-    if qmax:
-        funcs = integrand(qsq_min)
-    else:
-        funcs = integrand(qsq_min) + integrand(qsq_max)
-    for i in range(1,iters):
-        funcs += 2*integrand(qsq_min+del_qsq*i)
-    result = del_qsq*funcs/2
+    Test = False
+    results = []
+    iters = 16
+    while Test == False:
+        points = np.linspace(qsq_min,qsq_max,iters+1)
+        del_qsq =  (qsq_max-qsq_min) /iters
+        if qmax:
+            funcs = integrand(qsq_min)
+        else:
+            funcs = integrand(qsq_min) + integrand(qsq_max)
+        for i in range(1,iters):
+            funcs += 2*integrand(points[i])
+        result = del_qsq*funcs/2
+        results.append(result)
+        iters *= 2
+        if len(results)>=2:
+            check = abs((results[-1].mean-results[-2].mean)/results[-1].sdev)
+            if check <= 0.02:
+                Test = True
     return(result)
     
 def neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    iters = 200
+    iters = 250
     qsq_min = 0
     ######## B0 SD ###########
     qsq_max = qsqmaxphysBK0.mean
@@ -1549,6 +1695,7 @@ def integrate_fp(qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,cons
     for i in range(1,iters):
         funcs += 2*integrand(qsq_min+del_qsq*i)
     result = del_qsq*funcs/2
+    print('ERROR integrate_fp not updated to chnage no. iters')
     return(result)
 
 #################################################################################################
