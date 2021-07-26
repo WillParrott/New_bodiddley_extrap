@@ -1655,6 +1655,31 @@ def plot_BES_R_mu_e(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
     plt.tight_layout()
     plt.savefig('DKPlots/Rmue.pdf')
     plt.close()
+    
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, ymean, color='k',label=r'$R_{\mu/e}^{\mathrm{SM}}$')
+    plt.fill_between(qsq,ylow,yupp, color='k',alpha=alpha)
+    
+    #plt.plot(qsq, y2mean, color='r',label=r'$R_{\mu/e}^{\zeta_S=0.1}$',linestyle ='--')
+    #plt.plot(qsq, y3mean, color='b',label=r'$R_{\mu/e}^{\zeta_S=-0.1}$',linestyle='--')
+    
+    plt.errorbar(binmean,Rmean, xerr=binerr, yerr=Rerr,fmt='s',color='purple',ms=ms,mfc='none',label = r"BES '19",lw=lw)
+    plt.legend(fontsize=fontsizeleg,frameon=False)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_+(q^2)$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.ylim([0.7,1.6])
+    #plt.xlim([0.1,1.7])
+    plt.tight_layout()
+    plt.savefig('DKPlots/plainRmue.pdf')
+    plt.close()
     return()
 
 ###################################################################################################

@@ -465,25 +465,29 @@ def plot_gold_non_split(Fits):
     plt.figure(figsize=figsize)
     i = 0
     for Fit in Fits:
+        x = []
+        y = []
+        yerr = []
         for mass in Fit['masses']:
-            y = 1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).mean
-            yerr = 1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).sdev
-            x = float(mass)**2
-            if Fit['conf'][-1] == 'p':
-                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['conf'],ms=ms,mfc='none')
-            elif Fit['conf'][-1] == 's':
-                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['conf'],ms=ms,mfc='none')
-            else:
-                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['conf'],ms=ms,mfc='none')
+            y.append(1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).mean)# 100 for mev
+            yerr.append(1000*(Fit['GNGsplit_m{0}'.format(mass)]/Fit['a']).sdev)
+            x.append(float(mass)**2)
+        if Fit['conf'][-1] == 'p':
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['label'],ms=ms,mfc='none')
+        elif Fit['conf'][-1] == 's':
+            pass
+            #plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['label'],ms=ms,mfc='none')
+        else:
+            plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['label'],ms=ms,mfc='none')
         i+=1
    
     plt.plot([-0.1,0.9],[0,0],'k--')
     plt.xlim([0,0.85])
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='lower left')
     plt.xlabel('$(am_h)^2$',fontsize=fontsizelab)
-    plt.ylabel('$(M_{H_{\mathrm{non-gold}}}-M_{H_{\mathrm{gold}}})[\mathrm{MeV}]$',fontsize=fontsizelab)
+    plt.ylabel('$(M_{H_{\mathrm{non-Gold}}}-M_{H_{\mathrm{Gold}}})[\mathrm{MeV}]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
@@ -500,34 +504,38 @@ def plot_gold_non_split(Fits):
     i = 0
     for Fit in Fits:
         if Fit['conf'] not in ['VCp','Cp','SFs','Fs']:
-            y = 1000*(Fit['Ksplit']/Fit['a']).mean
-            yerr = 1000*(Fit['Ksplit']/Fit['a']).sdev
-            x = Fit['M_daughter'].mean**2
+            x = []
+            y = []
+            yerr = []
+            for j,twist in enumerate(Fit['twists']):
+                y.append(1000*(Fit['Ksplit'][j]/Fit['a']).mean)
+                yerr.append(1000*(Fit['Ksplit'][j]/Fit['a']).sdev)
+                x.append(Fit['E_daughter_tw{0}_theory'.format(twist)].mean**2)
             if Fit['conf'][-1] == 'p':
-                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['conf'],ms=ms,mfc='none')
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='b',label=Fit['label'],ms=ms,mfc='none')
             elif Fit['conf'][-1] == 's':
-                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['conf'],ms=ms,mfc='none')
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='r',label=Fit['label'],ms=ms,mfc='none')
             else:
-                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['conf'],ms=ms,mfc='none')
-        i+=1
+                plt.errorbar(x,y,yerr=yerr,fmt=symbs[i],color='k',label=Fit['label'],ms=ms,mfc='none')
+            i+=1
    
     plt.plot([-0.1,0.9],[0,0],'k--')
-    plt.xlim([0,0.25])
+    plt.xlim([0,0.6])
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
-    plt.xlabel('$(aM_K)^2$',fontsize=fontsizelab)
-    plt.ylabel('$(M_{K_{\mathrm{non-gold}}}-M_{K_{\mathrm{gold}}})[\mathrm{MeV}]$',fontsize=fontsizelab)
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='lower right')
+    plt.xlabel('$(aE_K)^2$',fontsize=fontsizelab)
+    plt.ylabel('$(E_{K_{\mathrm{non-Gold}}}-E_{K_{\mathrm{Gold}}})[\mathrm{MeV}]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(0.05))
-    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.05))
     plt.axes().yaxis.set_major_locator(MultipleLocator(10))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(5))
     plt.tight_layout()
-    plt.savefig('Plots/Kgold-non-split{0}.pdf'.format(factor))
+    plt.savefig('Plots/EKgold-non-split{0}.pdf'.format(factor))
     plt.close()
     return()
 #####################################################################################################
@@ -2735,6 +2743,9 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     qsq_max = qsqmaxphysBKp.mean
     res = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)*tauBpmGeV*1e7
+    x,xerr = LHCb14A.make_1_y(LHCb14A.Bmup)
+    xLHC = gv.gvar(x[0],xerr[0][0])
+    print("B^+ Tension with LHCb '14A = {0:.2f} sigma".format((res-xLHC).mean/(res-xLHC).sdev))
     res2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps=True,qmax=True)*tauBpmGeV*1e7
     tau_res = integrate_Gamma(p,4*m_tau**2,qsq_max,m_tau,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=150,qmax=True)*tauBpmGeV*1e7
     tau_x,tau_xerr = BaBar16.make_1_y(BaBar16.Btaup)
@@ -2791,6 +2802,9 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     qsq_max = qsqmaxphysBK0.mean
     res = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)*tauB0GeV*1e7
+    x,xerr = LHCb14A.make_1_y(LHCb14A.Bmu0)
+    xLHC = gv.gvar(x[0],xerr[0][0])
+    print("B^0 Tension with LHCb '14A = {0:.2f} sigma".format((res-xLHC).mean/(res-xLHC).sdev))
     res2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps=True,qmax=True)*tauB0GeV*1e7
     plt.errorbar(res.mean,11, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[12,12], color='k',alpha=alpha/2)
