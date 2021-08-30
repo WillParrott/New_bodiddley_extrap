@@ -3,8 +3,30 @@ import numpy as np
 import gvar as gv
 import scipy
 import matplotlib.pyplot as plt
+import collections
 #import cython
+#################################### Matplotlib stuff ######################
+plt.rc("font",**{"size":20})
+plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+plt.rc('text', usetex=True)
+factor = 1.0 #multiplies everything to make smaller for big plots (0.5) usually 1
+figsca = 14  #size for saving figs
+figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
+lw =2*factor
+nopts = 100 #number of points on plot
+ms = 25*factor #markersize
+alpha = 0.4
+fontsizeleg = 25*factor #legend
+fontsizelab = 40*factor #labels
+cols = ['b','r','g','c'] #for each mass
+symbs = ['o','^','*','D','d','s','p','>','<','h']    # for each conf
+lines = ['-','--','-.','-',':','-','--','-.',':','-.'] # for each conf
+major = 15*factor
+minor = 8*factor 
+capsize = 10*factor
 
+
+####################################################################
 #Here we seek to calculate the corrections in appendix B1 and B2 of 1510.02349. Makes use of C++ header files from 0810.4077
 
 #first, corrections to C_9^eff. Currently, the real part of this is of size 4-5.
@@ -12,16 +34,16 @@ import matplotlib.pyplot as plt
 C8 = gv.gvar('-0.152(15)')#from 1510.02349, can't find this in paper we are using
 C8eff = C8 + C3 - 1/6 * C4 + 20 * C5 - 10/3 * C6 
 alpha_s = gv.gvar('0.2253(28)') #Used qcdevol
-lambda_us = 0.02 #what is this number?
+lambda_us = 0.02 #should be (PDG) VusVub/VtsVtb
 fK = gv.gvar('0.1556(4)')# 1509.02220 for fK+ find better value for this?
 N_c = 3 # Assuming this is N_colours
-M_B = MBphysp#get this from p need mean for Ei
-M_K = MKphysp
-w0 = 1/gv.gvar('3(1)') # from Christine's notes. Not sure where this is from originally.
+M_B = (MBphysp + MBphys0)/2#get this from p need mean for Ei
+M_K = (MKphysp + MKphys0)/2
+w0 = 1/gv.gvar('3(1)') # from paper (look up again)
 C_F = 4/3 # see page 44
-a_1 = 1    # get a_1 and a_2 values
-a_2 = 1
-
+a_1 = gv.gvar('0.0453(30)')    # at 4 GeV**2 hep-lat/0606012 updates?
+a_2 = gv.gvar('0.175(50)')     # at 4 GeV**2 0606012 updates?
+print('4m_e^2 = ',4*m_e**2)
 ###################################### A couple of general functions ##########################################
 def mymean(x):
     #returns the mean of a gvar is passed on, or a float if passed a float. Neeeded when function takes both gvars and floats and have if statements about them i.e. if x.mean <0
@@ -29,40 +51,56 @@ def mymean(x):
         return(x.mean)
     else:
         return(x)
-    
+
+def zeros(x):  # takes gvars and sets them to floats if their mean is 0. This hopefully avoids issues with 0(0) 
+    if mymean(x[0]) == 0:
+        x[0] = 0
+    if mymean(x[1]) == 0:
+        x[1] = 0
+    return(x)
+
+def c_arg(topR,topI,botR,botI): #retunrs the real and imaginary parts of a complex argument for example x/x-1
+    denom = botR**2 + botI**2
+    R = (topR*botR + topI*botI)/denom
+    I = (topI*botR - topR*botI)/denom
+    return([R,I])
+
 def check_converged(a):
-    #takes a list of values and looks for relative change to asses if the integral has converged. Needs to check in cases with floats, gvars, gavrs with 0 mean and gvars with 0 sdev. Returns True if the 
+    #takes a list of values and looks for relative change to asses if the integral has converged. Needs to check in cases with floats, gvars, gavrs with 0 mean and gvars with 0 sdev. Returns True if the
     if isinstance(a[-1],gv._gvarcore.GVar):
         if a[-1].mean == 0: # some parts are 0 becase the integral is purely real or imaginary. We bypass this case.
             return(True)
         elif a[-1].sdev == 0:
-            check = (a[-1]-a[-2])/a[-1]
-            if check < 0.001:
+            check = abs((a[-1]-a[-2])/a[-1])
+            if check < 0.001: #absolute value changes by less than 1%
                 return(True)
             else:
                 return(False)
         else:
-            check = (a[-1]-a[-2]).mean/a[-1].sdev
-            if check < 0.02:
+            check = abs((a[-1].mean-a[-2].mean)/a[-1].sdev)
+            if check < 0.05: #changes by % of a sigma - allows for slower/quicker convergence 5% seems fine
                 return(True)
             else:
                 return(False)
     else:
-        check = (a[-1]-a[-2])/a[-1]
-        if check < 0.001:
+        if a[-1] == 0.0:
             return(True)
-        else:
-            return(False)
+        else:    
+            check = abs((a[-1]-a[-2])/a[-1])
+            if check < 0.001: #absolute value changes by less than 1%
+                return(True)
+            else:
+                return(False)
 
 ######################################################################################################################
     
 def make_correction1(qsq): # dominant O(alpha_s) correction to C9eff in B11. Currently missing F1c9 and F2c9 (in C++)
-    F1c9 = 1#make_F1c9(qsq)
-    F2c9 = 1#make_F2c9(qsq)
+    F19R,F19I,F29R,F29I = make_F1c9_F2c9(qsq) 
     F89 = make_F89(qsq)
-    corr = (alpha_s/(4*np.pi)) * (C1*F1c9 + C2*F2c9 + C8*F89 )
-    print('correction O(alpha_s) = ',corr)
-    return(corr)
+    corrR = (alpha_s/(4*np.pi)) * (C1*F19R + C2*F29R + C8*F89 )
+    corrI = (alpha_s/(4*np.pi)) * (C1*F19I + C2*F29I)
+    print('correction O(alpha_s) =  {0} + {1}i'.format(corrR,corrI))
+    return(corrR,corrI)
 
 def make_correction2(qsq): #O(lambda_u^s) correction to C9eff in B11
     hcR,hcI = make_h(qsq,m_c)
@@ -72,21 +110,70 @@ def make_correction2(qsq): #O(lambda_u^s) correction to C9eff in B11
     print('correction O(lambd_us) = {0} + {1}i'.format(corrR,corrI))
     return(corrR,corrI)
 
-#F1c9 and F2c9 are difficult
+def read_file():
+    f = collections.OrderedDict()
+    f['qsqs'] = []
+    f['F19Rs'] = []
+    f['F19Is'] = []
+    f['F29Rs'] = []
+    f['F29Is'] = []
+    data = open('Fits/F19F29_final.txt','r')
+    lines = data.readlines()
+    for line in lines:
+        numbs = line.split()
+        f['qsqs'].append(float(numbs[0])) 
+        f['F19Rs'].append(float(numbs[1]))
+        f['F19Is'].append(float(numbs[2]))
+        f['F29Rs'].append(float(numbs[3]))
+        f['F29Is'].append(float(numbs[4]))
+    data.close()
+    return(f)
+
+F19_dat = read_file()
+
+def make_F1c9_F2c9(qsq):
+    #we have evalauted these where possible for some (not evnely spaced) choice of q^2
+    # Saved in file Fits/F19F29_final.txt in form qsq F19R F19I F29R F29I
+    # We want to read these and lineraly interpolate
+    low = 0
+    high = 25
+    for q in F19_dat['qsqs']:
+        if q <= qsq and q > low:
+            low = q
+        if q >= qsq and q < high:
+            high = q
+    i = F19_dat['qsqs'].index(low)
+    j = F19_dat['qsqs'].index(high)
+    print(qsq,low,high,i,j)
+    if qsq == high:
+        grad = 1
+    else:
+        grad = (qsq - low)/(high-low)
+    F19R = F19_dat['F19Rs'][i] + grad*(F19_dat['F19Rs'][j]-F19_dat['F19Rs'][i])
+    F19I = F19_dat['F19Is'][i] + grad*(F19_dat['F19Is'][j]-F19_dat['F19Is'][i])
+    F29R = F19_dat['F29Rs'][i] + grad*(F19_dat['F29Rs'][j]-F19_dat['F29Rs'][i])
+    F29I = F19_dat['F29Is'][i] + grad*(F19_dat['F29Is'][j]-F19_dat['F29Is'][i])
+    return(F19R,F19I,F29R,F29I)
+
+
 
 def make_F89(qsq):
-    s = qsq/m_b**2
+    s = (qsq/m_b**2)
     B0 = make_B0s(s)
     C0 = make_C0s(s)
-    F =  16/9 * 1/(1-s) * gv.log(s) + 8/9 * (5-2*s)/(1-s)**2 - 8/9 * (4-s)/(1-s)**3 * ( (1+s)*B0 - 2*C0) 
+    F =  16/9 * 1/(1-s) * gv.log(s) + 8/9 * (5-2*s)/(1-s)**2 - 8/9 * (4-s)/(1-s)**3 * ( (1+s)*B0 - 2*C0)
+    print('B0,C0',make_B0s(1),make_C0s(1))
+    print('F89',F,s,(5-2*s)/(1-s)**2,(4-s)/(1-s)**3 * ( (1+s)*B0 - 2*C0))
     return(F)
 
 def make_B0s(s):
     B = -2 * gv.sqrt(4/s -1) * gv.arctan(1/gv.sqrt(4/s - 1))
+    print('B = ',B)
     return(B)
 
 def make_C0s(s):
-    eps = 1e-2
+    s = mymean(s) # the uncertainty here is tiny so we do this to speed up the integral
+    eps = 1e-2 #1e-2 works but very slow for small q^2. Could add more terms to expansion and use larger eps
     def fcn1(x):
         y = 1/(x*(1-s)+1) * gv.log(x**2/(1-x*(1-x)*s))
         return(y)
@@ -95,31 +182,49 @@ def make_C0s(s):
         if x ==0:
             y = 0  
         else:
-            y = (1-x*(1-s)+(x*(1-s))**2 -(x*(1-s))**3) * gv.log(1/(1-x*(1-x)*s)) + (- x*(1-s)  + (x*(1-s))**2 -(x*(1-s))**3) * gv.log(x**2)
+            expansion = 0
+            for i in range(1,10): #include 10 terms
+                expansion += (-1)**i * (x*(1-s))**i # expand 1/(1+x(1-s))about small x
+            y = - (1+expansion) * gv.log((1-x*(1-x)*s)) + 2*expansion * gv.log(x)
         return(y)
     C1 = do_integral(fcn1,eps,1)
     C2 = do_integral(fcn2,0,eps)
     C = C1 + C2 + 2*(eps*gv.log(eps)-eps)
-    #print('eps =',eps,'C0 =',C)
+    print('C = ',C)
     return(C)
 
 
+
 def do_integral(fcn,low,upp): # generic integrator for a real function (one value). Takes the function of the integrand and uses the trapeziodal rule. Starts with 16 iters and doubles until stability condition is met. 
-    integrands = gv.BufferDict()
+    integrands = gv.BufferDict() # Use this to save integrands at certain values, to avoid calculating again
     iters = int(16)
     Test = False
     results = []
     while Test == False:
-        points = np.linspace(low,upp,iters+1) 
+        points = np.linspace(low,upp,iters+1)
         del_qsq =  (upp-low) /iters
-        funcs = fcn(low) + fcn(upp)
+        if low in integrands:
+            l = integrands[low]
+        else:
+            l = fcn(low)
+            integrands[low] = l
+        if upp in integrands:
+            h = integrands[upp]
+        else:
+            h = fcn(upp)
+            integrands[upp] = h
+        funcs = l + h
         for i in range(1,iters):
-            funcs += 2*fcn(points[i])
+            if points[i] in integrands:
+                f = integrands[points[i]]
+            else:
+                f = fcn(points[i])
+                integrands[points[i]] = f
+            funcs += 2*f
         result1 = del_qsq*funcs/2
         results.append(result1)
         iters *= 2
-        #print('iters',int(iters/2))
-        #print(results)
+        print('iters',int(iters/2),results[-2:])
         if len(results)>=2:
             Test = check_converged(results)
                 
@@ -135,12 +240,30 @@ def do_complex_integral(fcn,low,upp): #Same as above but takes functions with re
     while Test == False:
         points = np.linspace(low,upp,iters+1) 
         del_qsq =  (upp-low) /iters
-        lR,lI = fcn(low)
-        hR,hI = fcn(upp)
+        if low in integrandsR:
+            lR = integrandsR[low]
+            lI = integrandsI[low]
+        else:
+            lR,lI = fcn(low)
+            integrandsR[low] = lR
+            integrandsI[low] = lI
+        if upp in integrandsR:
+            hR = integrandsR[upp]
+            hI = integrandsI[upp]
+        else:
+            hR,hI = fcn(upp)
+            integrandsR[upp] = hR
+            integrandsI[upp] = hI
         funcsR = lR+hR
         funcsI = lI+hI
         for i in range(1,iters):
-            fR,fI = fcn(points[i])
+            if points[i] in integrandsR:
+                fR = integrandsR[points[i]]
+                fI = integrandsI[points[i]]
+            else:
+                fR,fI = fcn(points[i])
+                integrandsR[points[i]] = fR
+                integrandsI[points[i]] = fI
             funcsR += 2*fR
             funcsI += 2*fI
         resultR = del_qsq*funcsR/2
@@ -148,7 +271,7 @@ def do_complex_integral(fcn,low,upp): #Same as above but takes functions with re
         resultsR.append(resultR)
         resultsI.append(resultI)
         iters *= 2
-        #print('iters',int(iters/2))
+        print('iters',int(iters/2),resultsR[-2:],resultsI[-2:])
         #print(resultsR)
         #print(resultsI)
         if len(resultsR)>=2:
@@ -156,41 +279,55 @@ def do_complex_integral(fcn,low,upp): #Same as above but takes functions with re
             checkI = check_converged(resultsI)
             if checkR == True and checkI == True:
                 Test = True
-    
+    #print('Final iters',int(iters/2))
     return(resultR,resultI)
 
 
 ######################## Non factorisable bits  Delta C9eff in eq B26 #######################################################
 
 def make_DelC9eff(qsq): #makes whole Del C9 eff
-    fp = 0.3 #change this or remove it from calc so it appears in Y_eff bit. This is just approx fp(0) for now.
-    Del_taupR,Del_taupI = make_Del_taup(qsq) 
-    DelR = (2 * m_b * Del_taupR )/(M_B*fp)
-    DelI = (2 * m_b * Del_taupI )/(M_B*fp)
-    #print(qsq,DelR,DelI)
-    return(DelR,DelI)
+    Del_taupRp,Del_taupIp,Del_taupR0,Del_taupI0 = make_Del_taup(qsq) 
+    DelRp = (2 * m_b * Del_taupRp )/(M_B) # need to divide by f+
+    DelIp = (2 * m_b * Del_taupIp )/(M_B) # need to divide by f+, do this in functionsBK
+    DelR0 = (2 * m_b * Del_taupR0 )/(M_B) # need to divide by f+
+    DelI0 = (2 * m_b * Del_taupI0 )/(M_B) # need to divide by f+, do this in functionsBK
+    print('Del C_9^eff(B^+) * f_+ = {0} + {1}i'.format(DelRp,DelIp))
+    print('Del C_9^eff(B^0) * f_+ = {0} + {1}i'.format(DelR0,DelI0))
+    return(DelRp,DelIp,DelR0,DelI0)
 
 def make_Del_taup(qsq):#Makes Del tau, split into 4 parts plus1 plus2, minus1,minus2 these are the 4 parts B27 can be split into. I.e. plus 1 is the Tp+^(0) bit , plus2 is the alpha_sCF TP+^(nf) bit and same for minus. 
     N = (np.pi**2*fB*fK)/(N_c*M_B) # Factor out front
-    plus1 = 0 # Tp+ ^0 =0
-    print('doing minus1')
+    plus1 = 0 # Tp+ ^0 =0#
     minus1R,minus1I = make_minus1_integral(qsq)
-    print('doing minus2')
     minus2R,minus2I = make_minus2_integral(qsq)
-    print('doing plus2')
+    print('plus')
     plus2R,plus2I = make_plus2_integral(qsq)
-    DelR = N * (plus1 + minus1R + plus2R + minus2R)
-    DelI = N * (plus1 + minus1I + plus2I + minus2I)
-    return(DelR,DelI)
+    eq = 2/3 #put in charge
+    DelRp = N * (plus1 + eq*minus1R + plus2R + eq*minus2R)
+    DelIp = N * (plus1 + eq*minus1I + plus2I + eq*minus2I)
+    eq = -1/3
+    DelR0 = N * (plus1 + eq*minus1R + plus2R + eq*minus2R)
+    DelI0 = N * (plus1 + eq*minus1I + plus2I + eq*minus2I)
+    return(DelRp,DelIp,DelR0,DelI0)
 
-def make_minus1_integral(qsq,charge ='p'):
-    #T_P-^(0) is not a function of u, so we just need to integrate phi_K, which we can do manually, and then perform the omega integral
+def make_Del_bits(qsq,bit):
+    fac = 2 * m_b/M_B
+    N = (np.pi**2*fB*fK)/(N_c*M_B) # Factor out front
+    plus1 = 0 # Tp+ ^0 =0#
+    if bit == 'TP-0':
+        minus1R,minus1I = make_minus1_integral(qsq)
+        return(fac*N*minus1R,fac*N*minus1I)
+    if bit == 'TP-nf':
+        minus2R,minus2I = make_minus2_integral(qsq)
+        return(fac*N*minus2R,fac*N*minus2I)
+    if bit == 'TP+nf':
+        plus2R,plus2I = make_plus2_integral(qsq)
+        return(fac*N*plus2R,fac*N*plus2I)
+
+def make_minus1_integral(qsq):
+    #T_P-^(0) is not a function of u, so we just need to integrate phi_K, which we can do manually, and then perform the omega integral. We leave out e_q which is put in later
     # Different value for + ('p') or 0 charge. Here we take 'p' as default and we can pass the correct one later
-    if charge == 'p':
-        e_q = 2/3
-    elif charge == '0':
-        e_q = -1/3
-    fac = ( e_q * 4 * M_B/m_b ) *  (C3 + 4/3*C4 + 16*C5 + 64/3*C6) 
+    fac = ( 4 * M_B/m_b ) *  (C3 + 4/3*C4 + 16*C5 + 64/3*C6) 
     #u_int_0 = 1
     #u_int_1 = 0 #integral of phi_K over u # C_1^3/2(x) =  3x
     #u_int_2 = 0 #  C_2^3/2(x) = 15/2x^2 -3/2
@@ -202,33 +339,30 @@ def make_minus1_integral(qsq,charge ='p'):
     resultI = fac * integralI
     return(resultR,resultI)
 
-def make_minus2_integral(qsq,charge='p'): #Similar to minus1 but this time TP-^nf has 3 distinct parts
+def make_minus2_integral(qsq): #Similar to minus1 but this time TP-^nf has 3 distinct parts. Do p and 0 above
     overall_fac = alpha_s/(4*np.pi) * C_F
-    if charge == 'p':
-        e_q = 2/3
-    elif charge == '0':
-        e_q = -1/3
     # last term in TP-nf only has w dependence, which is the same as Tp- with int_u =1
     Ei = scipy.special.expi(qsq/(M_B.mean*w0.mean))
     integralR = M_B * gv.exp(-qsq/(M_B*w0))/w0 * (-Ei) # There is an extra factor of M_B in TP-^nf vs that in eq B43 (check)
     integralI = M_B * gv.exp(-qsq/(M_B*w0))/w0 * np.pi
-    fac_last = e_q * 6 * M_B/m_b * 8/27 * (-15/2 * C4 + 12*C5 -32 *C6)
-    lastR = fac_last * integralR
-    lastI = fac_last * integralI
+    fac_last =  6 * M_B/m_b * 8/27 * (-15/2 * C4 + 12*C5 -32 *C6)
+    lastR =  fac_last * integralR
+    lastI =  fac_last * integralI
     #first term is next easiest. Here we need to just integrate over u. The w integral is the same.
-    fac_first = -e_q*8*C8eff
-    
+    fac_first = -8*C8eff
     def first_func(u):
         overall = 6*u*(1-u) * 1/(1 - u + qsq*u/M_B**2) # real
         R0 = overall #0th order, can add others as we wish
-        R = R0 
+        R1 = overall * a_1 * 3*(2*u-1)
+        R2 = overall * a_2 * (15/2 *(2*u-1)**2 -3/2)
+        R = R0 + R1 + R2
         return(R)
         
     u_int = do_integral(first_func,0,1) 
     firstR = fac_first * u_int * integralR # w integral same as usual
     firstI = fac_first * u_int * integralI
     #Middle bit. We again need to do the u integral numerically. w integral is the same. 
-    fac_mid = -e_q * 6 * M_B/m_b
+    fac_mid = -6 * M_B/m_b
     
     def mid_func(u): # for 0th component of u int. Can add others later
         harg = (1-u)*M_B.mean**2 + u*qsq  # make_h doesn't like gvars for qsq
@@ -242,18 +376,20 @@ def make_minus2_integral(qsq,charge='p'): #Similar to minus1 but this time TP-^n
         overallI = 6*u*(1-u)*(fac1*h1I + fac2*h2I + fac3*h3I)
         R0 = overallR
         I0 = overallI
-        R = R0
-        I = I0
+        R1 = overallR * a_1 * 3*(2*u-1)
+        I1 = overallI * a_1 * 3*(2*u-1)
+        R2 = overallR * a_2 * (15/2 * (2*u-1)**2 -3/2)
+        I2 = overallI * a_2 * (15/2 * (2*u-1)**2 -3/2)
+        R = R0 + R1 + R2
+        I = I0 + I1 + I2
         return(R,I)
     
     u_intR,u_intI = do_complex_integral(mid_func,0,1)
     midR = fac_mid * ( u_intR * integralR - u_intI * integralI)
     midI = fac_mid * ( u_intI * integralR + u_intR * integralI)
     ################################################
-    #print('R',qsq,firstR,midR,lastR)
-    #print('I',qsq,firstI,midI,lastI)
     resultR = overall_fac * (lastR + firstR + midR)
-    resultI = overall_fac * (lastI+ firstI + midI)
+    resultI = overall_fac * (lastI + firstI + midI)
     return(resultR,resultI)
 
 def make_plus2_integral(qsq): # This is the trickiest: TP+^nf but has no w dependence so we just need to do the u integral
@@ -267,32 +403,29 @@ def make_plus2_integral(qsq): # This is the trickiest: TP+^nf but has no w depen
         t1R,t1I = make_t_parr(u,m_c,qsq)
         t2R,t2I = make_t_parr(u,m_b,qsq)
         t3R,t3I = make_t_parr(u,0,qsq)
-        if mymean(u) == 1: # in this case we must manually cancal the 1-u in B40 with the ubar in the denom of t_parr
-            overallR = 6*u* (fac1*t1R + fac2*t2R + fac3*t3R)
-            overallI = 6*u* (fac1*t1I + fac2*t2I + fac3*t3I)
-        else:
-            overallR = 6*u*(1-u)* (fac1*t1R + fac2*t2R + fac3*t3R)
-            overallI = 6*u*(1-u)* (fac1*t1I + fac2*t2I + fac3*t3I)
+        overallR = 6*u* (fac1*t1R + fac2*t2R + fac3*t3R)#We manually cancal the 1-u in B40 with the ubar in the denom of t_parr
+        overallI = 6*u* (fac1*t1I + fac2*t2I + fac3*t3I)#We manually cancal the 1-u in B40 with the ubar in the denom of t_parr
         itg0R = overallR #0th order
         itg0I = overallI
-        itgR = itg0R
-        itgI = itg0I
+        itg1R = overallR * a_1 * 3*(2*u-1)
+        itg1I = overallI * a_1 * 3*(2*u-1)
+        itg2R = overallR * a_2 * (15/2 * (2*u-1)**2 -3/2)
+        itg2I = overallI * a_2 * (15/2 * (2*u-1)**2 -3/2)
+        itgR = itg0R + itg1R + itg2R
+        itgI = itg0I + itg1I + itg2I
         return(itgR,itgI)
-    x = []
-    yR = []
-    yI = []
-    for u in np.linspace(0,1,100):
-        x.append(u)
-        r,i = func(u)
-        yR.append(mymean(r))
-        YI.append(mymean(i))
-    plt.figure()
-    plt.plot(x,yR,color='r')
-    plt.plot(x,yI,color='b')
-    plt.savefig('Plots/plus2int.pdf')
-    plt.close()
-    int_uR,int_uI = do_complex_integral(func,0,1)
-    int_wR = 1/w_0  # Trivial integral B42
+    #this integral can be tricky near u = 1, so we help the integrator by adding 0-0.9 + 0.9-0.99 + ...
+    lims  = [0,0.9,0.99,0.999,0.9999,1]
+    int_uR = 0
+    int_uI = 0
+    for i in range(len(lims)-1):
+        low = lims[i]
+        high = lims[i+1]
+        print('Doing int',low,high)
+        R,I = do_complex_integral(func,low,high)
+        int_uR += R
+        int_uI += I
+    int_wR = 1/w0  # Trivial integral B42
     int_wI = 0
     resultR = fac*(int_uR*int_wR - int_uI*int_wI )
     resultI = fac*(int_uR*int_wI + int_uI*int_wR )
@@ -303,20 +436,36 @@ def make_t_parr(u,m,qsq): #t_parrallell function
     if m == 0: #these cancel in I1 
         I1R,I1I = 1.0,0
         B01R,B01I,B02R,B02I = 0,0,0,0 #theses cancel in tparr if m =0
-    elif mymean(u) == 1:
-        I1R,I1I = 1.0,0
-        B01R,B01I,B02R,B02I = 0,0,0,0 #theses cancel in tparr if u=1 
+    elif mymean(u) == 1: # in this case we use the theory for (B0-B0/ubar)
+        I1R,I1I = make_I1(m,u,qsq)
+        beta = 4*m**2/qsq -1
+        if mymean(beta) >=0:
+            arg = gv.sqrt(beta)
+            tanR = gv.arctan(1/arg)
+            tanI = 0
+            theoryR = 4*m**2*(M_B**2-qsq)/qsq**2 * (tanR/arg - 1/(beta + 1)) # my versions
+            theoryI = 0
+        else:
+            arg = gv.sqrt(-beta) #purely imaginary
+            x = [0,-1/arg] # x= 1/arg so just -1/arg x = [xR,xI]
+            tanR,tanI = make_arctan(x)
+            theoryR = 4*m**2*(M_B**2-qsq)/qsq**2 * (tanI/arg - 1/(beta+1) ) # my versions
+            theoryI = 4*m**2*(M_B**2-qsq)/qsq**2 * (-tanR/arg ) # my versions
     else:
         I1R,I1I = make_I1(m,u,qsq)
-        B01R,B01I = make_B0(ubar*M_B**2+u*qsq,m)
+        argB = ubar*M_B**2+u*qsq
+        B01R,B01I = make_B0(argB,m)
         B02R,B02I = make_B0(qsq,m)
     E = (M_B**2 + M_K**2 -qsq)/(2*M_B)
-    if mymean(u) == 1:
-        tR = 2*M_B*I1R/(E) # this creates a problem 1/(1-u) which cancels in the u integral but needs to be addressed manually. We remove u bar here, and in this case we only integrate over 6u * thing. This affects all 
+    if m ==0:
+        tR = 2*M_B/E
         tI = 0
+    elif mymean(u) == 1:
+        tR = 2*M_B*I1R/(E) + (ubar*M_B**2+u*qsq)/E**2 *theoryR# we remove a factor of ubar in the denom as this is multiplied in B40 anyway 
+        tI = 2*M_B*I1I/(E) + (ubar*M_B**2+u*qsq)/E**2 *theoryI
     else:
-        tR = 2*M_B*I1R/(ubar*E) + (ubar*M_B**2+u*qsq)/(ubar**2*E**2) * (B01R-B02R)
-        tI = 2*M_B*I1I/(ubar*E) + (ubar*M_B**2+u*qsq)/(ubar**2*E**2) * (B01I-B02I)
+        tR = 2*M_B*I1R/(E) + (ubar*M_B**2+u*qsq)/(ubar*E**2) * (B01R-B02R)# we remove a factor of ubar in the denom as this is multiplied in B40 anyway 
+        tI = 2*M_B*I1I/(E) + (ubar*M_B**2+u*qsq)/(ubar*E**2) * (B01I-B02I)# we remove a factor of ubar in the denom as this is multiplied in B40 anyway
     return(tR,tI)
 
 def make_B0(qsq,m):
@@ -334,25 +483,26 @@ def make_B0(qsq,m):
     return(BR,BI)
 
 def make_arctan(x):
-    #makes arctan using the fact that arctan(x) = -2i log(1+ix/1-ix) taking complex x = [xR,xI]
-    # 1+ix/1-ix = 1-x[1]+ix[0]/1+x[1]-ix[0] = (1-x[1]+ix[0])(1+x[1]+ix[0])/denom where denom is (1+x[1])**2 + x[0]**2
-    # = -x[0]**2 + 1 - x[1]**2 + 2ix[0]
-    denom = (1+x[1])**2 + x[0]**2 
-    logarg = [(1-x[0]**2-x[1]**2)/denom,2*x[0]/denom]
+    #makes arctan using the fact that arctan(x) = -i/2 log(1+ix/1-ix) taking complex x = [xR,xI]
+    topR = 1 - x[1]
+    topI = x[0]
+    botR = 1 + x[1]
+    botI = -x[0]
+    logarg = c_arg(topR,topI,botR,botI) # Makes into complex number [a,b]
     LR,LI = make_log(logarg)
-    tanR = 2*LI
-    tanI = -2*LR
+    tanR = 0.5*LI
+    tanI = -0.5*LR
     return(tanR,tanI)
 
 def make_I1(m,u,qsq):
     ubar = 1-u
-    xarg = 1/4 - m**2/(ubar*M_B**2-qsq)
+    xarg = 1/4 - m**2/(ubar*M_B**2+u*qsq)
     if mymean(xarg) >=0:
         xpR = 1/2 + (xarg)**(1/2)
         xpI = 0
         xmR = 1/2 - (xarg)**(1/2)
         xmI = 0
-    else:
+    else:   # in this case log(x-1/x) is 0 because |x-1/x| =1. We leave this in as the code has no issue
         xpR = 1/2
         xpI = (-xarg)**(1/2)
         xmR = 1/2
@@ -363,7 +513,7 @@ def make_I1(m,u,qsq):
         ypI = 0
         ymR = 1/2 - (yarg)**(1/2)
         ymI = 0
-    else:
+    else: # in this case log(y-1/y) is 0 because |x-1/x| =1. We leave this in as the code has no issue
         ypR = 1/2
         ypI = (-yarg)**(1/2)
         ymR = 1/2
@@ -372,60 +522,107 @@ def make_I1(m,u,qsq):
     xm = [xmR,xmI]
     yp = [ypR,ypI]
     ym = [ymR,ymI]
-    #print(m,u,qsq,xp,xm,yp,ym)
     L1xpR,L1xpI = make_L1(xp)
     L1xmR,L1xmI = make_L1(xm)
     L1ypR,L1ypI = make_L1(yp)
     L1ymR,L1ymI = make_L1(ym)
-    #print(u,ubar)
-    IR = 1 + 2*m**2/(ubar*(M_B**2-qsq)) * ( L1xpR + L1xmR - L1ypR - L1ymR )
-    II = 1 + 2*m**2/(ubar*(M_B**2-qsq)) * ( L1xpI + L1xmI - L1ypI - L1ymI )
+    if ubar !=0:
+        IR = 1 + 2*m**2/(ubar*(M_B**2-qsq)) * ( L1xpR + L1xmR - L1ypR - L1ymR )
+        II = 2*m**2/(ubar*(M_B**2-qsq)) * ( L1xpI + L1xmI - L1ypI - L1ymI )
+    ##### Need to find this in limit ubar ->0
+    elif ubar == 0:
+        predfac = m**2*(M_B**2-qsq)/qsq**2
+        beta = 1-4*m**2/qsq
+        dLypR,dLypI = make_derivative_L1(yp)
+        dLymR,dLymI = make_derivative_L1(ym)
+        if mymean(beta) >= 0:
+            arg = gv.sqrt(beta)
+            theoryR = predfac/arg * (dLypR-dLymR)
+            theoryI = predfac/arg * (dLypI-dLymI)
+        else:
+            arg = gv.sqrt(-beta)
+            theoryR = predfac/arg * (dLypI-dLymI)
+            theoryI = -predfac/arg * (dLypR-dLymR)
+        IR = 1 + 2*m**2/(M_B**2-qsq) * theoryR
+        II = 2*m**2/(M_B**2-qsq) * theoryI
     return(IR,II)
 
-def make_L1(x): # have to worry about real and imaginay parts, for x =[xreal,ximaginary]
-    if mymean(x[0]) == 0:
-        x[0] = 0
-    if mymean(x[1]) == 0:
-        x[1] = 0
-    logarg1 = [x[0]*(x[0]-1)/(x[0]**2+x[1]**2),-x[1]*(x[0]-1)/(x[0]**2+x[1]**2)] #(x-1)/x  = xR-1/(xR+ixI) * (xR-ixI)/(xR-ixI) = (xR(xR-1) -ixI(xR-1))/xR**2+xI**2
-    logarg2 = [1-x[0],-x[1]] #x-1
-    denom = (x[0]-1)**2 + x[1]**2
-    if mymean(x[0]) == 1 and mymean(x[1]) == 0:
-        dilogarg = [0,0]
-    else:
-        dilogarg = [(x[0]*(x[0]-1)+x[1]**2)/denom,-x[1]/denom] #x/x-1 = (xR+ixI)*(xR-1-ixI)/((xR-1)**2+xi**2) =(xR*(xR-1)+xI**2+ixI(-1))/((xR-1)**2+xI**2)
+def make_derivative_L1(x):#derivative of L1 for finding limit as ubar ->0
+    x = zeros(x)
+    topR = x[0] - 1
+    topI = x[1]
+    botR = x[0]
+    botI = x[1]
+    logarg1 = c_arg(topR,topI,botR,botI) #x-1/x
+    logarg1 = zeros(logarg1)
+    denom = (x[0]-1)**2 +x[1]**2
+    fac = [(x[0]-1)/denom,-x[1]/denom] #1/x-1
     if mymean(x[0]) == 0 and mymean(x[1]) == 0:
-        log1R,log1I = 0,0
-        log2R,log2I = 0,0 #as these will always be multiplied 
+        print("Error, shouldn't be passed 0 here, means m=0")
+    elif x[0] == 0.5:
+        logR,logI =make_log(logarg1,zero=True)
+    else:
+        logR,logI =make_log(logarg1)
+    dLR = fac[0]*logR - fac[1]*logI
+    dLI = fac[0]*logI + fac[1]*logR    
+    return(dLR,dLI)
+    
+
+def make_L1(x): # have to worry about real and imaginay parts, for x =[xreal,ximaginary]
+    x = zeros(x)
+    topR = x[0] - 1
+    topI = x[1]
+    botR = x[0]
+    botI = x[1]
+    logarg1 = c_arg(topR,topI,botR,botI) #x-1/x
+    logarg1 = zeros(logarg1)
+    logarg2 = [1-x[0],-x[1]] #1-x
+    logarg2 = zeros(logarg2)
+    topR = x[0]
+    topI = x[1]
+    botR = x[0] - 1
+    botI = x[1]
+    dilogarg = c_arg(topR,topI,botR,botI) #x/x-1
+    dilogarg = zeros(dilogarg)
+    if mymean(x[0]) == 0 and mymean(x[1]) == 0:
+        log1R,log1I = 0,0 # double check this is correct
+        log2R,log2I = 0,0 #as these will always be multiplied
+        dilogR,dilogI = make_dilog(dilogarg)
+    elif x[0] == 0.5:
+        log1R,log1I =make_log(logarg1,zero=True)
+        log2R,log2I =make_log(logarg2)
+        dilogR,dilogI = make_dilog(dilogarg,zero=True)
     else:
         log1R,log1I =make_log(logarg1)
         log2R,log2I =make_log(logarg2)
-    dilogR,dilogI = make_dilog(dilogarg)
+        dilogR,dilogI = make_dilog(dilogarg)
     LR = (log1R*log2R-log1I*log2I) - np.pi**2/6 + dilogR
-    LI = (log1I*log2R+log1R*log2I) - np.pi**2/6 + dilogI
+    LI = (log1I*log2R+log1R*log2I) + dilogI
     return(LR,LI)
 
-def make_dilog(x):
-    if mymean(x[0]) == 0:
-        x[0] = 0
-    if mymean(x[1]) == 0:
-        x[1] = 0
+def make_dilog(x,zero=False):
+    #Pass this zero because if x[0] =0.5 |x| =1, but it may come out as 0.999999999 and so end up in the wrong part of this.
+    x = zeros(x)
     #if |x|<1 we can simply proceed as usual. If not, we use an identity to relate to dilog(1/x).
-    if mymean(x[0]**2 + x[1]**2) < 1:
+    if mymean(x[0]) == 1 and mymean(x[1]) ==0: # fixed value at x = 1
+        LR = np.pi**2/6
+        LI = 0
+    elif mymean(x[0]**2 + x[1]**2) < 1 and zero == False: # if zero = true the |x| = 1
         LR,LI = make_dilog_small_x(x)
-    else:#LI(z) = -pi**2/6 -ln**2(-z)/2 - Li(1/z)
+    else:#LI(z) = -pi**2/6 -ln**2(-z)/2 - Li(1/z) so if x[0] =1 ln(x) need to be passed zero= True 
         xinv = [x[0]/(x[0]**2+x[1]**2),-x[1]/(x[0]**2+x[1]**2)]
-        logR,logI = make_log([-x[0],-x[1]])
+        logR,logI = make_log([-x[0],-x[1]],zero=zero)
         log2R = logR**2 - logI**2
         log2I = 2*logR*logI
-        LiR,LiI = make_dilog_small_x(xinv)
+        LiR,LiI = make_dilog_small_x(xinv,zero=zero)
         LR = -np.pi**2/6 - log2R/2 - LiR
-        LI = - log2I/2 - LiI 
+        LI = - log2I/2 - LiI
     return(LR,LI)
 
-def make_dilog_small_x(x): # x is complex in general and is passed in form x = [xR,xI]
-    if mymean(x[0]**2+x[1]**2) > 1:
-        print('Error x in dilog greater than 1 x =',x)
+def make_dilog_small_x(x,zero=False): # x is complex in general and is passed in form x = [xR,xI] works for |x|<1
+    x = zeros(x)
+    if mymean(x[0]**2+x[1]**2) > 1 and zero == False:
+        print('Error x in dilog greater than and shouldnt be 1 x =',x,'|x| =', x[0]**2+x[1]**2)        
     LRs = []
     LIs = []
     LR = 0
@@ -433,46 +630,57 @@ def make_dilog_small_x(x): # x is complex in general and is passed in form x = [
     Test = False
     i = 1
     while Test == False:
-        xiR,xiI = make_power(x,i)# i is power
+        xiR,xiI = make_power(x,i,zero=zero)# i is power
         LR += xiR/i**2
         LI += xiI/i**2
         LRs.append(LR)
         LIs.append(LI)
         i+=1
-        #print('dilog ints',int(i-1))
-        #print(LRs)
-        #print(LIs)
         if len(LRs) >= 2:
             checkR = check_converged(LRs)
             checkI = check_converged(LIs)
             if checkR == True and checkI == True:
                 Test = True
-    #print('Final L',L)
     return(LR,LI)
 
-def make_log(x): # x is complex in general and is passed in form x = [xR,xI]
+def make_log(x,zero=False): # x is complex in general and is passed in form x = [xR,xI]. Zero == True allows us to set A=1 exactly when x+-[0] = 0.5 and log (x-1/x)
     #log(z) = log(Ae^{itheta}) = log(A)+itheta
-    if mymean(x[0]) == 0:
-        x[0] = 0
-    if mymean(x[1]) == 0:
-        x[1] = 0
+    x = zeros(x)
     A = gv.sqrt(x[0]**2+x[1]**2)
-    theta = gv.arctan(x[1]/x[0])
-    if mymean(x[0])<0:
-        if mymean(x[1]) >0:
-            theta += np.pi 
+    if zero == True:
+        A = 1
+    if x[0] == 0:
+        if mymean(x[1])>0:
+            theta = np.pi/2
         else:
-            theta -= np.pi   # this should mean that theta is always in range -pi to pi. 
-    LR = gv.log(A)
+            theta = -np.pi/2
+    elif x[1] == 0:
+        if mymean(x[0])>0:
+            theta = 0
+        else:
+            theta = np.pi
+    else:
+        theta = gv.arctan(x[1]/x[0])
+        if mymean(x[0])<0:
+            if mymean(x[1]) >=0:
+                theta += np.pi 
+            else:
+                theta -= np.pi   # this should mean that theta is always in range -pi to pi.
+    if mymean(A) == 1: # removes case of zero log with vanishing uncertainty
+        LR = 0
+    else:
+        LR = gv.log(A)
     LI = theta
     return(LR,LI)
 
-def make_power(x,k): #returns real and impaginary parts of x^k
+def make_power(x,k,zero=False): #returns real and impaginary parts of x^k
     #write x =Ae^{itheta}
     A = gv.sqrt(x[0]**2+x[1]**2)
+    if zero ==True:
+        A = 1
     theta = gv.arctan(x[1]/x[0])
     if mymean(x[0])<0:
-        if mymean(x[1]) >0:
+        if mymean(x[1]) >=0:
             theta += np.pi
         else:
             theta -= np.pi    # this should mean that theta is always in range -pi to pi. 
@@ -482,7 +690,348 @@ def make_power(x,k): #returns real and impaginary parts of x^k
     xiR = A_new * gv.cos(theta_new)
     xiI = A_new * gv.sin(theta_new)
     return(xiR,xiI)
+
+def save_results():
+    saved_result = collections.OrderedDict()
+    saved_result['qsq'] = []
+    saved_result['DelC9Rp'] = []
+    saved_result['DelC9Ip'] = []
+    saved_result['DelC9R0'] = []
+    saved_result['DelC9I0'] = []
+    saved_result['OalphasR'] = []
+    saved_result['OalphasI'] = []
+    saved_result['OlambR'] = []
+    saved_result['OlambI'] = []
+
+    for qsq in np.linspace(1e-6,23,250): # evalutes over range of q^2 values. In current 'troubleshooting mode' will crash after first one
+        print('################### qsq =',qsq)
+        print('Del9')
+        DRp,DIp,DR0,DI0 = make_DelC9eff(qsq)
+        print('Alpha')
+        alR,alI = make_correction1(qsq) # working
+        print('lamb')
+        lamR,lamI = make_correction2(qsq) # working
+        saved_result['qsq'].append(qsq)
+        saved_result['DelC9Rp'].append(DRp)
+        saved_result['DelC9Ip'].append(DIp)
+        saved_result['DelC9R0'].append(DR0)
+        saved_result['DelC9I0'].append(DI0)
+        saved_result['OalphasR'].append(alR)
+        saved_result['OalphasI'].append(alI)
+        saved_result['OlambR'].append(lamR)
+        saved_result['OlambI'].append(lamI)
+
+    #gv.dump(saved_result,'Fits/C9_corrections.pickle')
+    return()
+#save_results()
+
+def unmake_gvar_vec(vec):
+    #A function which extracts the mean and standard deviation of a list of gvars
+    mean = []
+    sdev = []
+    for element in vec:
+        mean.append(element.mean)
+        sdev.append(element.sdev)
+    return(mean,sdev)
+
+####################################################################################################
+
+def make_upp_low(vec):
+    #A function which extracts the upper and lower error bars of a list of gvars
+    upp = []
+    low = []
+    for element in vec:
+        upp.append(element.mean + element.sdev)
+        low.append(element.mean - element.sdev)
+    return(upp,low)
+
+def do_plots():
+    x = []
+    Tm0R = []
+    Tm0I = []
+    TmnfR = []
+    TmnfI = []
+    TpnfR = []
+    TpnfI = []
+    alphaR = []
+    alphaI = []
+    lambdaR = []
+    lambdaI = []
+    TotC9Rp = []
+    TotC9Ip = []
+    TotC9R0 = []
+    TotC9I0 = []    
+    for qsq in np.linspace(1e-4,qsqmaxphysBK.mean,300):
+        print('################### qsq =',qsq)
+        Rp = 0
+        Ip = 0
+        R0 = 0
+        I0 = 0
+        x.append(qsq)
+        R,I = make_Del_bits(qsq,'TP-0')
+        Rp += 2/3 *R
+        Ip += 2/3 *I
+        R0 += -1/3 *R
+        I0 += -1/3 *I 
+        Tm0R.append(R)
+        Tm0I.append(I)
+        R,I = make_Del_bits(qsq,'TP-nf')
+        Rp += 2/3 *R
+        Ip += 2/3 *I
+        R0 += -1/3 *R
+        I0 += -1/3 *I 
+        TmnfR.append(R)
+        TmnfI.append(I)
+        R,I = make_Del_bits(qsq,'TP+nf')
+        Rp += R
+        Ip += I
+        R0 += R
+        I0 += I 
+        TpnfR.append(R)
+        TpnfI.append(I)
+        R,I = make_correction1(qsq)
+        alphaR.append(-R) # minus because subtracts
+        alphaI.append(-I)
+        R,I = make_correction2(qsq)
+        lambdaR.append(R)
+        lambdaI.append(I)
+        TotC9Rp.append(Rp)
+        TotC9Ip.append(Ip)
+        TotC9R0.append(R0)
+        TotC9I0.append(I0)
+    Tm0Rm,Tm0Rs = unmake_gvar_vec(Tm0R)
+    Tm0Ru,Tm0Rl = make_upp_low(Tm0R)
+    TmnfRm,TmnfRs = unmake_gvar_vec(TmnfR)
+    TmnfRu,TmnfRl = make_upp_low(TmnfR)
+    TpnfRm,TpnfRs = unmake_gvar_vec(TpnfR)
+    TpnfRu,TpnfRl = make_upp_low(TpnfR)    
+    plt.figure(figsize=figsize)
+    plt.plot(x, Tm0Rm, color='r',label=r'$(f_+/e_q)\mathrm{Re}[\Delta C_9^{\mathrm{eff}}(T_{K,-}^{(0)})]$')
+    plt.fill_between(x,Tm0Rl,Tm0Ru, color='r',alpha=alpha)
+    plt.plot(x, TmnfRm, color='b',label=r'$(f_+/e_q) \mathrm{Re}[\Delta C_9^{\mathrm{eff}}(T_{K,-}^{(nf)})]$')
+    plt.fill_between(x,TmnfRl,TmnfRu, color='b',alpha=alpha)
+    plt.plot(x, TpnfRm, color='g',label=r'$f_+\mathrm{Re}[\Delta C_9^{\mathrm{eff}}(T_{K,+}^{(nf)})]$')
+    plt.fill_between(x,TpnfRl,TpnfRu, color='g',alpha=alpha)
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower right')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
+    plt.plot([-10,30],[0,0],linestyle='--',color='k')
+    plt.axes().set_ylim([-0.25,0.25])
+    plt.axes().set_xlim([-1,24])
+    plt.tight_layout()
+    plt.savefig('Plots/ReDelC9.pdf')
+    plt.close()
+
+    Tm0Im,Tm0Is = unmake_gvar_vec(Tm0I)
+    Tm0Iu,Tm0Il = make_upp_low(Tm0I)
+    TmnfIm,TmnfIs = unmake_gvar_vec(TmnfI)
+    TmnfIu,TmnfIl = make_upp_low(TmnfI)
+    TpnfIm,TpnfIs = unmake_gvar_vec(TpnfI)
+    TpnfIu,TpnfIl = make_upp_low(TpnfI)   
+    plt.figure(figsize=figsize)
+    plt.plot(x, Tm0Im, color='r',label=r'$(f_+/e_q)\mathrm{Im}[\Delta C_9^{\mathrm{eff}}(T_{K,-}^{(0)})]$')
+    plt.fill_between(x,Tm0Il,Tm0Iu, color='r',alpha=alpha)
+    plt.plot(x, TmnfIm, color='b',label=r'$(f_+/e_q)\mathrm{Im}[\Delta C_9^{\mathrm{eff}}(T_{K,-}^{(nf)})]$')
+    plt.fill_between(x,TmnfIl,TmnfIu, color='b',alpha=alpha)
+    plt.plot(x, TpnfIm, color='g',label=r'$f_+\mathrm{Im}[\Delta C_9^{\mathrm{eff}}(T_{K,+}^{(nf)})]$')
+    plt.fill_between(x,TpnfIl,TpnfIu, color='g',alpha=alpha)
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='lower right')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_T(q$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.plot([-10,30],[0,0],linestyle='--',color='k')
+    plt.axes().set_ylim([-0.8,0.1])
+    plt.axes().set_xlim([-1,24])
+    plt.tight_layout()
+    plt.savefig('Plots/ImDelC9.pdf')
+    plt.close()
+
+    alRm,alRs = unmake_gvar_vec(alphaR)
+    alRu,alRl = make_upp_low(alphaR)
+    alIm,alIs = unmake_gvar_vec(alphaI)
+    alIu,alIl = make_upp_low(alphaI)
     
-for qsq in range(1,2):
-    make_DelC9eff(qsq)
-    #make_correction1(qsq)
+    laRm,laRs = unmake_gvar_vec(lambdaR)
+    laRu,laRl = make_upp_low(lambdaR)
+    laIm,laIs = unmake_gvar_vec(lambdaI)
+    laIu,laIl = make_upp_low(lambdaI)
+    plt.figure(figsize=figsize)
+    plt.plot(x, alRm, color='k',label=r'$\mathrm{Re}[C_9^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
+    plt.fill_between(x,alRu,alRl, color='k',alpha=alpha)
+    plt.plot(x, alIm, color='r',label=r'$\mathrm{Im}[C_9^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
+    plt.fill_between(x,alIu,alIl, color='r',alpha=alpha)
+    
+    plt.plot(x, laRm, color='b',label=r'$\mathrm{Re}[C_9^{\mathrm{eff}}(\mathcal{O}(\lambda_u^{(s)}))]$')
+    plt.fill_between(x,laRu,laRl, color='b',alpha=alpha)
+    plt.plot(x, laIm, color='g',label=r'$\mathrm{Im}[C_9^{\mathrm{eff}}(\mathcal{O}(\lambda_u^{(s)}))]$')
+    plt.fill_between(x,laIu,laIl, color='g',alpha=alpha)
+   
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    #plt.ylabel(r'$f_T(q$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.plot([-10,30],[0,0],linestyle='--',color='k')
+    plt.axes().set_ylim([-0.6,0.5])
+    plt.axes().set_xlim([-1,24])
+    plt.tight_layout()
+    plt.savefig('Plots/C9effOalOla.pdf')
+    plt.close()
+
+    Rpm,Rps = unmake_gvar_vec(TotC9Rp)
+    R0m,R0s = unmake_gvar_vec(TotC9R0)
+    Ipm,Ips = unmake_gvar_vec(TotC9Ip)
+    I0m,I0s = unmake_gvar_vec(TotC9I0)
+    
+    Rpu,Rpl = make_upp_low(TotC9Rp)
+    R0u,R0l = make_upp_low(TotC9R0)
+    Ipu,Ipl = make_upp_low(TotC9Ip)
+    I0u,I0l = make_upp_low(TotC9I0)
+    plt.figure(figsize=figsize)
+    plt.plot(x, Rpm, color='r',label=r'$f_+\mathrm{Re}[\Delta C_9^{\mathrm{eff}}(B^+)]$')
+    plt.fill_between(x,Rpl,Rpu, color='r',alpha=alpha)
+    plt.plot(x, R0m, color='k',label=r'$f_+\mathrm{Re}[\Delta C_9^{\mathrm{eff}}(B^0)]$')
+    plt.fill_between(x,R0l,R0u, color='k',alpha=alpha)
+    
+    plt.plot(x, Ipm, color='b',label=r'$f_+\mathrm{Im}[\Delta C_9^{\mathrm{eff}}(B^+)]$')
+    plt.fill_between(x,Ipl,Ipu, color='b',alpha=alpha)
+    plt.plot(x, I0m, color='g',label=r'$f_+\mathrm{Im}[\Delta C_9^{\mathrm{eff}}(B^0)]$')
+    plt.fill_between(x,I0l,I0u, color='g',alpha=alpha)
+     
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.plot([-10,30],[0,0],linestyle='--',color='k')
+    plt.axes().set_ylim([-0.8,0.7])
+    plt.axes().set_xlim([-1,24])
+    plt.tight_layout()
+    plt.savefig('Plots/TotalDelC9eff.pdf')
+    plt.close()
+    return()
+
+#do_plots()
+
+
+
+
+def plot_F1_F2():
+    F1R = []
+    F2R = []
+    F1I = []
+    F2I = []
+    s = []
+    for qsq in np.linspace(1e-4,23,200):
+        F19R,F19I,F29R,F29I = make_F1c9_F2c9(qsq)
+        s.append(qsq/m_b.mean**2)
+        F1R.append(F19R)
+        F1I.append(F19I)
+        F2R.append(F29R)
+        F2I.append(F29I)
+
+    
+    plt.figure(figsize=figsize)
+    plt.plot(s, F1R, color='r')     
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
+    plt.xlabel('$s$',fontsize=fontsizelab)
+    plt.ylabel('Re$[F_1^{(9)}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    #plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    #plt.axes().set_xlim([0.4,1])
+    plt.tight_layout()
+    plt.savefig('Plots/ReF19.pdf')
+    plt.close()
+
+    plt.figure(figsize=figsize)
+    plt.plot(s, F1I, color='r')     
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
+    plt.xlabel('$s$',fontsize=fontsizelab)
+    plt.ylabel('Im$[F_1^{(9)}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    #plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    #plt.axes().set_xlim([0.4,1])
+    plt.tight_layout()
+    plt.savefig('Plots/ImF19.pdf')
+    plt.close()
+
+    plt.figure(figsize=figsize)
+    plt.plot(s, F2R, color='r')     
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
+    plt.xlabel('$s$',fontsize=fontsizelab)
+    plt.ylabel('Re$[F_2^{(9)}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    #plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+   # plt.axes().set_xlim([0.4,1])
+    plt.tight_layout()
+    plt.savefig('Plots/ReF29.pdf')
+    plt.close()
+
+    plt.figure(figsize=figsize)
+    plt.plot(s, F2I, color='r')     
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
+    plt.xlabel('$s$',fontsize=fontsizelab)
+    plt.ylabel('Im$[F_2^{(9)}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    #plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    #plt.axes().set_xlim([0.4,1])
+    plt.tight_layout()
+    plt.savefig('Plots/ImF29.pdf')
+    plt.close()
+
+    return()
+
+plot_F1_F2()

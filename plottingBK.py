@@ -18,22 +18,12 @@ import os.path
 import pickle
 from collections import defaultdict
 
-################# plots ######################
-# speed of light (we use theory value but worth checking this) ###done
-# data and f0/fp with and without pole in z and qsq individually ###done
-# f0/fp together in qsq ### done 
-# error in qsq #done 
-# f0(0) fp(max) and f0(max) in Mh   #done
-# ratio in E compared with expectation #done 
-# ratio in qsq compared with HQET #done 
-# beta and delta   # done 
-# f0 fp with data at different lattice spacings #done 
-################## table outputs ############################
-# aMh (aq)^2 aEeta S V N f0 fp on each lattice spacing
-# ans and pole masses
-# dict of different lattice spacings #done 
 ################### global variables ##########################################
 factor = 1.0 #multiplies everything to make smaller for big plots (0.5) usually 1
+if factor ==1.0:
+    faclab = '1'
+elif factor == 0.5:
+    faclab = '5'
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor
@@ -350,7 +340,7 @@ def speed_of_light(Fits):
     #plt.xlim([0,0.2])
     #plt.ylim([0.9,1.2])
     plt.tight_layout()
-    plt.savefig('Plots/speedoflight{0}.pdf'.format(factor))
+    plt.savefig('Plots/speedoflight{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -407,7 +397,7 @@ def ensemble_error_breakdown():
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.ylim([0,1.2])
     plt.tight_layout()
-    plt.savefig('Plots/BKensemble_error_breakdown{0}.pdf'.format(factor))
+    plt.savefig('Plots/BKensemble_error_breakdown{0}.pdf'.format(faclab))
     plt.close()
     
     f00 = []
@@ -458,7 +448,7 @@ def ensemble_error_breakdown():
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.ylim([0,1.2])
     plt.tight_layout()
-    plt.savefig('Plots/DKensemble_error_breakdown{0}.pdf'.format(factor))
+    plt.savefig('Plots/DKensemble_error_breakdown{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -499,7 +489,7 @@ def plot_gold_non_split(Fits):
     plt.axes().yaxis.set_major_locator(MultipleLocator(5))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(1))
     plt.tight_layout()
-    plt.savefig('Plots/Bgold-non-split{0}.pdf'.format(factor))
+    plt.savefig('Plots/Bgold-non-split{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(figsize=figsize)
@@ -537,7 +527,7 @@ def plot_gold_non_split(Fits):
     plt.axes().yaxis.set_major_locator(MultipleLocator(10))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(5))
     plt.tight_layout()
-    plt.savefig('Plots/EKgold-non-split{0}.pdf'.format(factor))
+    plt.savefig('Plots/EKgold-non-split{0}.pdf'.format(faclab))
     plt.close()
     return()
 #####################################################################################################
@@ -580,7 +570,7 @@ def Z_V_plots(Fits,fs_data):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.02))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
     plt.tight_layout()
-    plt.savefig('Plots/Z_Vinamhsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/Z_Vinamhsq{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -676,7 +666,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0poleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0poleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(3,figsize=figsize)
@@ -700,7 +690,7 @@ def f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0poleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0poleinz{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -758,7 +748,7 @@ def fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
     plt.xlim([0,1])
     #plt.xlim([0,0.06])
     plt.tight_layout()
-    plt.savefig('Plots/fpV0V1diff{0}.pdf'.format(factor))
+    plt.savefig('Plots/fpV0V1diff{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -885,7 +875,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
     plt.ylim([0.2,3.4])
     plt.tight_layout()
-    plt.savefig('Plots/fppoleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/fppoleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(5,figsize=figsize)
@@ -908,7 +898,7 @@ def fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
     plt.ylim([0.2,3.4])
     plt.tight_layout()
-    plt.savefig('Plots/fppoleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/fppoleinz{0}.pdf'.format(faclab))
     plt.close()
     #return(average_t_0_cases)
     return()
@@ -996,7 +986,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
     plt.tight_layout()
-    plt.savefig('Plots/fTpoleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/fTpoleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(figsize=figsize)
@@ -1022,7 +1012,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
     plt.tight_layout()
-    plt.savefig('Plots/fTfpratinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/fTfpratinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(7,figsize=figsize)
@@ -1044,7 +1034,7 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
     plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
     plt.tight_layout()
-    plt.savefig('Plots/fTpoleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/fTpoleinz{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -1157,7 +1147,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0nopoleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0nopoleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(9,figsize=figsize)
@@ -1182,7 +1172,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/f0nopoleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0nopoleinz{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -1310,7 +1300,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.ylim([0.2,1.2])
     plt.tight_layout()
-    plt.savefig('Plots/fpnopoleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/fpnopoleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(11,figsize=figsize)
@@ -1333,7 +1323,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.ylim([0.2,1.2])
     plt.tight_layout()
-    plt.savefig('Plots/fpnopoleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/fpnopoleinz{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -1421,7 +1411,7 @@ def fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
-    plt.savefig('Plots/fTnopoleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/fTnopoleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(13,figsize=figsize)
@@ -1443,7 +1433,7 @@ def fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
-    plt.savefig('Plots/fTnopoleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/fTnopoleinz{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -1497,7 +1487,7 @@ def ff_ratios_qsq_MH(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):#from he
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel('$M_H[\mathrm{GeV}]$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/f0overfpheat{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0overfpheat{0}.pdf'.format(faclab))
     plt.close()
 
     plt.figure(figsize=figsize)
@@ -1512,7 +1502,7 @@ def ff_ratios_qsq_MH(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):#from he
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel('$M_H[\mathrm{GeV}]$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/fToverfpheat{0}.pdf'.format(factor))
+    plt.savefig('Plots/fToverfpheat{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -1572,7 +1562,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/f0fpfTinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0fpfTinqsq{0}.pdf'.format(faclab))
     plt.close()
 
     yTpmean,yTperr = unmake_gvar_vec(fToverfp) # this is from hep-ph/9812358
@@ -1604,7 +1594,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/fToverfp{0}.pdf'.format(factor))
+    plt.savefig('Plots/fToverfp{0}.pdf'.format(faclab))
     plt.close()
 
     Bsdata  = gv.load('Fits/Bsetas_for_BK.pickle')
@@ -1667,7 +1657,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/f0fpandBsetasinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0fpandBsetasinqsq{0}.pdf'.format(faclab))
     plt.close()
 
     plt.figure(figsize=figsize)
@@ -1692,7 +1682,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/fTandBcDsinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/fTandBcDsinqsq{0}.pdf'.format(faclab))
     plt.close()
 
     
@@ -1745,7 +1735,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/f0fpandDsetasinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0fpandDsetasinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -1793,7 +1783,7 @@ def Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.ylim([0.3,1.3])
     plt.xlim([E[nopts-1],E[0]])
     plt.tight_layout()
-    plt.savefig('Plots/Hill1920{0}.pdf'.format(factor))
+    plt.savefig('Plots/Hill1920{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -1936,7 +1926,7 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     ##################################
     plt.axes().set_ylim([0,4.0])
     plt.tight_layout()
-    plt.savefig('Plots/f0fpfTinmh{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0fpfTinmh{0}.pdf'.format(faclab))
     plt.close()
 
 
@@ -1976,7 +1966,7 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().set_ylim([0.2,0.8])
     plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')#handles=handles,labels=labels)
     plt.tight_layout()
-    plt.savefig('Plots/xvsnoxinmh{0}.pdf'.format(factor))
+    plt.savefig('Plots/xvsnoxinmh{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -2041,7 +2031,7 @@ def beta_delta_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,loc='upper center',ncol=2)
     ##################################
     plt.tight_layout()
-    plt.savefig('Plots/betadeltainmh{0}.pdf'.format(factor))
+    plt.savefig('Plots/betadeltainmh{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -2100,7 +2090,7 @@ def B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
     plt.axes().set_ylim([0,1.7])
     plt.tight_layout()
-    plt.savefig('Plots/Bbybinexp{0}.pdf'.format(factor))
+    plt.savefig('Plots/Bbybinexp{0}.pdf'.format(faclab))
     plt.close()
     ##############################################Theor ###########################################################
     # 4 = 1206.0273 5 = 1212.2321 8 = 1211.0234
@@ -2142,7 +2132,7 @@ def B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
     plt.axes().set_ylim([0,2.5])
     plt.tight_layout()
-    plt.savefig('Plots/Bbybintheory{0}.pdf'.format(factor))
+    plt.savefig('Plots/Bbybintheory{0}.pdf'.format(faclab))
     plt.close()
     ############################################ other stuff #################
     x = [1,2,3,4,5,6]#np.arange(len(B))
@@ -2215,7 +2205,7 @@ def B_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=legend_elements,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
     plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/RandFbybin{0}.pdf'.format(factor))
+    plt.savefig('Plots/RandFbybin{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -2291,7 +2281,7 @@ def tau_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #plt.legend(handles=legend_elements,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
     plt.xlabel('Bins $[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/Taustuffbybin{0}.pdf'.format(factor))
+    plt.savefig('Plots/Taustuffbybin{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -2329,7 +2319,7 @@ def dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2): # results f
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
     #plt.axes().set_ylim([0,1.7])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2bybinp{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2bybinp{0}.pdf'.format(faclab))
     plt.close()
 
     plt.figure(figsize=figsize)
@@ -2353,7 +2343,7 @@ def dBdq2_by_bin(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2): # results f
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
     #plt.axes().set_ylim([0,1.7])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2bybin0{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2bybin0{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -2406,7 +2396,7 @@ def dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
     plt.axes().set_ylim([-0.02,0.55])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2_emup{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2_emup{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -2454,7 +2444,7 @@ def dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
     plt.axes().set_ylim([-0.1,0.65])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2_emu0{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2_emu0{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -2517,7 +2507,7 @@ def dBdq2_emu(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
     plt.axes().set_ylim([-0.01,0.51])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2_emu{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2_emu{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -2571,7 +2561,7 @@ def dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
     plt.axes().set_ylim([-0.02,0.5])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2_the_p{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2_the_p{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -2623,7 +2613,7 @@ def dBdq2_the_0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
     plt.axes().set_ylim([-0.01,0.49])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2_the_0{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2_the_0{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -2682,7 +2672,7 @@ def dBdq2_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
     plt.axes().set_ylim([-0.01,0.49])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2_the{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2_the{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -2762,7 +2752,7 @@ def dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_ylim([0,0.25])
     plt.axes().set_xlim([12.5,23])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2_the_tau{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2_the_tau{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -2802,10 +2792,11 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     res = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)*tauBpmGeV*1e7
     x,xerr = LHCb14A.make_1_y(LHCb14A.Bmup)
     xLHC = gv.gvar(x[0],xerr[0][0])
-    print("B^+ Tension with LHCb '14A = {0:.2f} sigma".format((res-xLHC).mean/(res-xLHC).sdev))
+    VtbVts_me = gv.sqrt(xLHC/(res/VtbVts**2))
+    print("B^+ Tension with LHCb '14A = {0:.2f} sigma  => V_tb*V_ts*e3 = {1}".format((res-xLHC).mean/(res-xLHC).sdev,10**3*VtbVts_me))
     res2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps=True,qmax=True)*tauBpmGeV*1e7
     res3 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps='LHCbp',qmax=True)*tauBpmGeV*1e7
-    print('My B^+ correction factor: {0}',res/res3)
+    print('My B^+ correction factor: {0}'.format(res/res3))
     tau_res = integrate_Gamma(p,4*m_tau**2,qsq_max,m_tau,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=150,qmax=True)*tauBpmGeV*1e7
     tau_x,tau_xerr = BaBar16.make_1_y(BaBar16.Btaup)
     print('Btau',tau_res,'BaBar16','{0}+{1}-{2}'.format(tau_x[0]*1e7,tau_xerr[1][0]*1e7,tau_xerr[0][0]*1e7))
@@ -2831,7 +2822,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #plt.plot([1,1.1],[7.5,7.5],color='k')
     #plt.plot([1,1],[7.5,8.5],color='k')
     plt.tight_layout()
-    plt.savefig('Plots/Bp_exp{0}.pdf'.format(factor))
+    plt.savefig('Plots/Bp_exp{0}.pdf'.format(faclab))
     plt.close()
 
     ########################## 0 ##########################################################
@@ -2889,7 +2880,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #plt.plot([1,1.1],[7.5,7.5],color='k')
     #plt.plot([1,1],[7.5,8.5],color='k')
     plt.tight_layout()
-    plt.savefig('Plots/B0_exp{0}.pdf'.format(factor))
+    plt.savefig('Plots/B0_exp{0}.pdf'.format(faclab))
     plt.close()
 
     ########################## both  ##########################################################
@@ -2948,7 +2939,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #plt.plot([1,1.1],[7.5,7.5],color='k')
     #plt.plot([1,1],[7.5,8.5],color='k')
     plt.tight_layout()
-    plt.savefig('Plots/B_exp{0}.pdf'.format(factor))
+    plt.savefig('Plots/B_exp{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -3035,7 +3026,7 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().xaxis.set_major_locator(MultipleLocator(1))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.5))
     plt.tight_layout()
-    plt.savefig('Plots/Bemu_the{0}.pdf'.format(factor))
+    plt.savefig('Plots/Bemu_the{0}.pdf'.format(faclab))
     plt.close()
 
     ########################## tau ##########################################################
@@ -3117,7 +3108,7 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
-    plt.savefig('Plots/Btau_the{0}.pdf'.format(factor))
+    plt.savefig('Plots/Btau_the{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -3194,7 +3185,7 @@ def nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
     plt.tight_layout()
-    plt.savefig('Plots/nuinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/nuinqsq{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -3264,7 +3255,7 @@ def Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_ylim([0.6,2.0])
     plt.axes().set_xlim([12.5,23])
     plt.tight_layout()
-    plt.savefig('Plots/Rbybin_the_tau{0}.pdf'.format(factor))
+    plt.savefig('Plots/Rbybin_the_tau{0}.pdf'.format(faclab))
     plt.close()
 
     ##################### mu e ###########################################
@@ -3335,7 +3326,7 @@ def Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_ylim([-5,11.2])
     plt.axes().set_xlim([-0.1,23])
     plt.tight_layout()
-    plt.savefig('Plots/Rbybin_the_emu{0}.pdf'.format(factor))
+    plt.savefig('Plots/Rbybin_the_emu{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -3417,7 +3408,7 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #plt.plot([1,1.1],[7.5,7.5],color='k')
     #plt.plot([1,1],[7.5,8.5],color='k')
     plt.tight_layout()
-    plt.savefig('Plots/Rmueexp{0}.pdf'.format(factor))
+    plt.savefig('Plots/Rmueexp{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -3479,7 +3470,7 @@ def R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.05))
     plt.tight_layout()
-    plt.savefig('Plots/R_the{0}.pdf'.format(factor))
+    plt.savefig('Plots/R_the{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -3537,7 +3528,7 @@ def F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_xlim([0,qsqmaxphysBK.mean])
     
     plt.tight_layout()
-    plt.savefig('Plots/F_H{0}.pdf'.format(factor))
+    plt.savefig('Plots/F_H{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -3607,7 +3598,7 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().xaxis.set_major_locator(MultipleLocator(5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
     plt.tight_layout()
-    plt.savefig('Plots/FH_the_e{0}.pdf'.format(factor))
+    plt.savefig('Plots/FH_the_e{0}.pdf'.format(faclab))
     plt.close()
     ####### mu ###################################
     m_lep = m_mu
@@ -3663,7 +3654,7 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().xaxis.set_major_locator(MultipleLocator(5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
     plt.tight_layout()
-    plt.savefig('Plots/FH_the_mu{0}.pdf'.format(factor))
+    plt.savefig('Plots/FH_the_mu{0}.pdf'.format(faclab))
     plt.close()
     ####### tau ###################################
     m_lep = m_tau
@@ -3723,7 +3714,7 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.02))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.01))
     plt.tight_layout()
-    plt.savefig('Plots/FH_the_tau{0}.pdf'.format(factor))
+    plt.savefig('Plots/FH_the_tau{0}.pdf'.format(faclab))
     plt.close()
     return()
 #############################################################################################################
@@ -3787,7 +3778,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_ylim([-0.01,2.7])
     plt.axes().set_xlim([-0.2,qsqmaxphysBK.mean+0.2])
     plt.tight_layout()
-    plt.savefig('Plots/FHbybin_the_e{0}.pdf'.format(factor))
+    plt.savefig('Plots/FHbybin_the_e{0}.pdf'.format(faclab))
     plt.close()
 
     ############### mu ##############
@@ -3870,7 +3861,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_ylim([-0.01,11.0])
     plt.axes().set_xlim([-0.2,qsqmaxphysBK.mean+0.2])
     plt.tight_layout()
-    plt.savefig('Plots/FHbybin_the_mu{0}.pdf'.format(factor))
+    plt.savefig('Plots/FHbybin_the_mu{0}.pdf'.format(faclab))
     plt.close()
 
     ############### emu ##############
@@ -3933,7 +3924,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_ylim([-0.2,11.1])
     plt.axes().set_xlim([-0.2,qsqmaxphysBK.mean+0.2])
     plt.tight_layout()
-    plt.savefig('Plots/FHbybin_the_emu{0}.pdf'.format(factor))
+    plt.savefig('Plots/FHbybin_the_emu{0}.pdf'.format(faclab))
     plt.close()'''
 
     ####################### tau ################################################
@@ -3989,7 +3980,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().set_ylim([0.81,0.94])
     plt.axes().set_xlim([12.9,qsqmaxphysBK.mean+0.2])
     plt.tight_layout()
-    plt.savefig('Plots/FHbybin_the_tau{0}.pdf'.format(factor))
+    plt.savefig('Plots/FHbybin_the_tau{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -4009,16 +4000,18 @@ def table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del):
     for n in range(Npow):
         if n == 0:
             atab.write('      {0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same)))
+            list0.append(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same))
+            listT.append(make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same))
         else:
             atab.write('{0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same)))
-        list0.append(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same))
-        listp.append(make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,0,fpf0same))
-        listT.append(make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same))
+            list0.append(make_an_BK(n,Nijk,Nm,addrho,p,'0',Fit,mass,0,fpf0same))
+            listp.append(make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,0,fpf0same))
+            listT.append(make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same))
     #old_MBsstar = p['MBsstarphys']
     MBsstar = make_MHsstar(p['MBphys'],p)
     #print('Old-new',old_MBsstar,MBsstar)
     MBs0 = p['MBphys']+Del
-    for n in range(Npow):           
+    for n in range(1,Npow):           
         atab.write('{0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'p',Fit,mass,0,fpf0same)))
     for n in range(Npow):           
         atab.write('{0}&'.format(make_an_BK(n,Nijk,Nm,addrho,p,'T',Fit,mass,0,fpf0same)))
@@ -4030,14 +4023,14 @@ def table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho,Del):
     list0.append(MBsstar)
     list0.append(logs)
     covar = gv.evalcorr(list0)
-    for i in range(3*Npow+3):
+    for i in range(3*Npow+2):
             atab.write('\n      ')
             for k in range(i):
                 atab.write('&')
-            for j in range(i,3*Npow+3):
+            for j in range(i,3*Npow+2):
                 #print(covar[i][j])
                 atab.write('{0:.5f}'.format(covar[i][j]))
-                if j != 3*Npow+2:
+                if j != 3*Npow+1:
                     atab.write('&')
                 else:
                     atab.write('\\\\ [0.5ex]')
@@ -4277,7 +4270,7 @@ def error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,const2):
     ax3b.set_yticks(points)
     ax3b.set_yticklabels(rootpoints)
     plt.tight_layout()
-    plt.savefig('Plots/f0fpfTerr{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0fpfTerr{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -4334,7 +4327,7 @@ def DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,co
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
     plt.tight_layout()
-    plt.savefig('Plots/DKfTpoleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/DKfTpoleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(figsize=figsize)
@@ -4356,7 +4349,7 @@ def DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,co
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.01))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.005))
     plt.tight_layout()
-    plt.savefig('Plots/DKfTfpratinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/DKfTfpratinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(figsize=figsize)
@@ -4376,7 +4369,7 @@ def DK_fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,co
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
     plt.tight_layout()
-    plt.savefig('Plots/DKfTpoleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/DKfTpoleinz{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -4573,7 +4566,7 @@ def new_f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/newf0poleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/newf0poleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(20,figsize=figsize)
@@ -4597,7 +4590,7 @@ def new_f0_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.04))
     plt.tight_layout()
-    plt.savefig('Plots/newf0poleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/newf0poleinz{0}.pdf'.format(faclab))
     plt.close()
     return()
 ###############################################################################################################
@@ -4609,9 +4602,9 @@ def make_emu_bins(m_l,B=False):
         qsq_max = qsqmaxphysBKp.mean
     if B == False:
         qsq_max = qsqmaxphysBK.mean
-    bins = [[4*m_l**2,qsq_max],[4*m_l**2,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsq_max],[1,6],[0.1,2]]# for Bemu 
+    #bins = [[4*m_l**2,qsq_max],[4*m_l**2,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsq_max],[1,6],[0.1,2]]# for Bemu 
     #bins = [[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[11,11.8]]#
-    #bins = [[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
+    bins = [[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
     return(bins)
 ###############################################################################################################
 def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
@@ -5769,7 +5762,7 @@ def HQET_ratio_in_qsq(pfit,Fits,Del,Nijk,Npow,addrho,fpf0same,t_0):
     plt.axes().set_ylim([0.8,2.8])
     plt.axes().set_xlim([0,(MBsphys**2).mean])
     plt.tight_layout()
-    plt.savefig('Plots/HQETrat{0}.pdf'.format(factor))
+    plt.savefig('Plots/HQETrat{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -5821,7 +5814,7 @@ def Hill_ratios_in_E(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().set_xlim([Emin.mean,Emax.mean])
     plt.tight_layout()
-    plt.savefig('Plots/HillratinE{0}.pdf'.format(factor))
+    plt.savefig('Plots/HillratinE{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -5871,7 +5864,7 @@ def Hill_ratios_in_lowE(pfit,Fits,Del,t_0,Nijk,Npow,addrho,fpf0same):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.axes().set_xlim([Emin.mean,Emax.mean])
     plt.tight_layout()
-    plt.savefig('Plots/HillratinlowE{0}.pdf'.format(factor))
+    plt.savefig('Plots/HillratinlowE{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -6211,7 +6204,7 @@ def old_error_plot(pfit,prior,Fits,Nijk,Npow,f,t_0,Del,addrho,fpf0same):
     ax2b.set_yticks(points)
     ax2b.set_yticklabels(rootpoints)
     plt.tight_layout()
-    plt.savefig('Plots/f0fpluserr{0}.pdf'.format(factor))
+    plt.savefig('Plots/f0fpluserr{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -6291,7 +6284,7 @@ def old_dBdq2_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')
     plt.axes().set_ylim([-2,42])
     plt.tight_layout()
-    plt.savefig('Plots/dBdq2{0}.pdf'.format(factor))
+    plt.savefig('Plots/dBdq2{0}.pdf'.format(faclab))
     plt.close()
     
     return()
@@ -6378,7 +6371,7 @@ def old_fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,a
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
-    plt.savefig('Plots/fTnopoleinqsq{0}.pdf'.format(factor))
+    plt.savefig('Plots/fTnopoleinqsq{0}.pdf'.format(faclab))
     plt.close()
     
     plt.figure(13,figsize=figsize)
@@ -6400,7 +6393,7 @@ def old_fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,a
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.tight_layout()
-    plt.savefig('Plots/fTnopoleinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/fTnopoleinz{0}.pdf'.format(faclab))
     plt.close()
     return()
 
@@ -6436,7 +6429,63 @@ def p_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
     #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
     #plt.ylim([0.2,3.4])
     plt.tight_layout()
-    plt.savefig('Plots/pinz{0}.pdf'.format(factor))
+    plt.savefig('Plots/pinz{0}.pdf'.format(faclab))
+    plt.close()
+    return()
+
+def plot_h():
+    plt.figure(figsize=figsize)
+    x = []
+    yR = []
+    yI = []
+    m = m_c.mean
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
+        x.append(q2)
+        hR,hI = make_h(q2,m)
+        yR.append(hR)
+        yI.append(hI)
+    plt.plot(x,yR, color='r',label=r'$m_c$')
+    plt.plot(x,yI, color='r',linestyle='--',label=r'$m_c$')
+
+    x = []
+    yR = []
+    yI = []
+    m = m_b.mean
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
+        x.append(q2)
+        hR,hI = make_h(q2,m)
+        yR.append(hR)
+        yI.append(hI)
+    plt.plot(x,yR, color='b',label=r'$m_b$')
+    plt.plot(x,yI, color='b',linestyle='--',label=r'$m_b$')
+
+    x = []
+    yR = []
+    yI = []
+    m = 0.0
+    for q2 in np.linspace(4*m_e**2,qsqmaxphysBK.mean,nopts): #q2 now in GeV
+        x.append(q2)
+        hR,hI = make_h(q2,m)
+        yR.append(hR)
+        yI.append(hI)
+    plt.plot(x,yR, color='k',label=r'$0$')
+    plt.plot(x,yI, color='k',linestyle='--',label=r'$0$')
+
+    
+    plt.legend(fontsize=fontsizeleg,frameon=False)
+    plt.xlabel('$q^2$',fontsize=fontsizelab)
+    plt.ylabel(r'$h(q^2,m)$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
+    #plt.ylim([0.2,3.4])
+    plt.tight_layout()
+    plt.savefig('Plots/hinqsq{0}.pdf'.format(faclab))
     plt.close()
     return()
 

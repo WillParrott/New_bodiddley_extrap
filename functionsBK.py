@@ -844,7 +844,10 @@ def make_fT_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
 def run_mu(p_in,M_H):
     #decides sliding mu value to run to in range M_b = 4.8 GeV to 2 GeV
     mu = 2 + (4.8-2)/(p_in['MBphys'].mean-p_in['MDphys'].mean) * (M_H - p_in['MDphys'].mean)
-    
+    factor = runfT(mu)
+    return(factor)
+
+def runfT(mu):
     p = gv.BufferDict()
     p['alphas5gev'] = gv.gvar('0.2128(25)') # Fron Dan via Judd
     mhrun = 4.8 #pole m_b mass used by dan
@@ -853,7 +856,6 @@ def run_mu(p_in,M_H):
     runner = qcdevol.T_msb((1.,mhrun),alpha=Alpha) # create instance of msbar tensor renormalisation running, 1. is value at 2GeV (since I used the 2GeV smom numbers from Dan)
     factor = runner(mu)
     return(factor)
-
 #######################################################################################################
 
 def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,constraint,const2):
@@ -939,12 +941,15 @@ def make_p_physical_point_BK(pfit,Fits,B=False):
         if B == 'p':
             p['MK_{0}'.format(fit)] =  MKphysav # only appears in ff
             p['MKphys'] = pfit['MKphysp']
+            p['charge'] = 'p'
         elif B == '0':
             p['MK_{0}'.format(fit)] =  MKphysav
             p['MKphys'] = pfit['MKphys0']
+            p['charge'] = '0'
         elif B == False:
             p['MK_{0}'.format(fit)] = MKphysav
             p['MKphys'] = MKphysav
+            p['charge'] = 'both'
         #p['LQCD_{0}'.format(fit)] = LQCD
         p['Metac_{0}'.format(fit)] = pfit['Metacphys']
         p['Metas_{0}'.format(fit)] = pfit['Metasphys']
@@ -1221,30 +1226,16 @@ def make_beta_delta_BK(Fits,t_0,Nijk,Npow,Nm,addrho,p,fpf0same,MH,const2):
     return(alpha,delta,invbeta)
 
 
-##############################################################################################################
-
-def make_h(qsq,m):
-    x = 4 * m**2/qsq
-    if x > 1:
-        hR = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(x-1) * gv.arctan(1/(gv.sqrt(x-1))))
-        hI = 0
-    elif x == 0:
-        h = 4/9 * (2/3 + 1j*np.pi)
-        hR =  h.real
-        hI = h.imag
-    elif x <= 1:
-        #h = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x)) - 1j*np.pi/2 ))
-        hR = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x))  ))
-        hI =  4/9 * (2 + x) *  gv.sqrt(1-x) *  np.pi/2 
-    return(hR,hI)
-
 
 ##############################################################################################################
 alphaEW = 1/gv.gvar('127.952(9)')#PDG  #1/gv.gvar('128.957(20)')  #1/0.027515±0.000149 0807.4206 at M_Z**2
 #alphae = 1/gv.gvar('127.952(9)') #PDG is this correct? At M_Z
 VtbVts = gv.gvar('0.04185(93)')#1907.01025
-m_c = gv.gvar('1.27(2)')#pdg
-m_b = gv.gvar('4.18(3)')#pdg
+#m_c = gv.gvar('1.27(2)')#pdg
+#m_b = gv.gvar('4.18(3)')#pdg
+m_bMSbar = gv.gvar('4.18(3)')#1510.02349 for now
+m_b = gv.gvar('4.91(12)')#pole mass 1510.02349 for now
+m_c = gv.gvar('1.77(14)')#pole mass 1510.02349 for now
 C1 = gv.gvar('-0.294(9)')#gv.gvar('-0.257(5)') new ones from 1606.00916
 C2 = gv.gvar('1.017(1)')#gv.gvar('1.009(20)')
 C3 = gv.gvar('-0.0059(2)')#  gv.gvar('-0.0050(1)')
@@ -1253,31 +1244,107 @@ C5 = 0.0004#0
 C6 = gv.gvar('0.0011(1)')#0.001  # all the same up to C6 
 C7eff = gv.gvar('-0.2957(5)')#gv.gvar('-0.304(6)')
 C10eff = gv.gvar('-4.193(33)')#gv.gvar('-4.103(82)')
-C9effbase = gv.gvar('4.114(14)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded. 
+C9effbase = gv.gvar('4.114(14)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
+mu_scale = 4.2 #scale we use in GeV. This is the scale our Wilson coefficients are given in. We run f_T to this scale too.
 #############################################################################################################
+
+def make_h(qsq,m):
+    # remeber to use 1510.0234 i.i log(mu^2/m^2) = -log(m^2/mu^2) in my case
+    x = 4 * m**2/qsq 
+    if x > 1:
+        hR = -4/9 * (gv.log(m**2/mu_scale**2) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(x-1) * gv.arctan(1/(gv.sqrt(x-1))))
+        hI = 0
+    elif x == 0:
+        h = 4/9 * (2/3 + gv.log(mu_scale**2/qsq) + 1j*np.pi)
+        hR =  h.real
+        hI = h.imag
+    elif x <= 1:
+        #h = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x)) - 1j*np.pi/2 ))
+        hR = -4/9 * (gv.log(m**2/mu_scale**2) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x))  ))
+        hI =  4/9 * (2 + x) *  gv.sqrt(1-x) *  np.pi/2 
+    return(hR,hI)
+
+##############################################################################################################
+C9effs = gv.BufferDict() # store C9eff for various q^2 values, to avoid costly recalculation
+C9corrections = gv.load('Fits/C9_corrections.pickle')
+
+def make_C9eff(qsq,fp,charge): #modified by corrections in 1510.02349
+    if '{0}_{1}'.format(qsq,charge) in C9effs:
+        [C9effR,C9effI] = C9effs['{0}_{1}'.format(qsq,charge)]
+    else:
+        hR0,hI0 = make_h(qsq,0)
+        hRc,hIc = make_h(qsq,m_c)
+        hRb,hIb = make_h(qsq,m_b)
+        YR = 4/3 * C3 + 64/9 * C5 + 64/27 * C6 - hR0/2 * (C3 + 4/3 * C4 + 16 * C5 + 64/3 * C6) + hRc * (4/3 * C1 + C2 + 6 * C3 + 60 * C5) - hRb/2 * (7 * C3 + 4/3 * C4 + 76 * C5 + 64/3 * C6)
+        YI = 4/3 * C3 + 64/9 * C5 + 64/27 * C6 - hI0/2 * (C3 + 4/3 * C4 + 16 * C5 + 64/3 * C6) + hIc * (4/3 * C1 + C2 + 6 * C3 + 60 * C5) - hIb/2 * (7 * C3 + 4/3 * C4 + 76 * C5 + 64/3 * C6)
+        C9effR = C9effbase + YR
+        C9effI = YI
+        #print('############# charge {0} qsq = {1}'.format(charge,qsq))
+        #print('Before',C9effR,C9effI)
+        #several_corrections to C9eff, we lineraly interpolate these
+        #################
+        low = 0
+        high = 25
+        for q in C9corrections['qsq']:
+            if q <= qsq and q > low:
+                low = q
+            if q >= qsq and q < high:
+                high = q
+        i = C9corrections['qsq'].index(low)
+        j = C9corrections['qsq'].index(high)
+        if qsq == high:
+            grad = 1
+        else:
+            grad = (qsq - low)/(high-low)
+        def value(tag):
+            val = C9corrections[tag][i] + grad*(C9corrections[tag][j]-C9corrections[tag][i])
+            return(val)
+        DelC9Rp = value('DelC9Rp')
+        DelC9Ip = value('DelC9Ip')
+        DelC9R0 = value('DelC9R0')
+        DelC9I0 = value('DelC9I0')
+        OalphasR = value('OalphasR')
+        OalphasI = value('OalphasI')
+        OlambR = value('OlambR')
+        OlambI = value('OlambI')
+        if qsq >= 4*m_c.mean**2: #cut off at 4*m_c**2
+            DelC9Rp = 0
+            DelC9Ip = 0
+            DelC9R0 = 0
+            DelC9I0 = 0
+        if charge == 'p':
+            C9effR += -OalphasR + OlambR + DelC9Rp/fp # didn't include fp in DelC9
+            C9effI += -OalphasI + OlambI + DelC9Ip/fp
+        if charge == '0':
+            C9effR += -OalphasR + OlambR + DelC9R0/fp
+            C9effI += -OalphasI + OlambI + DelC9I0/fp
+        if charge == 'both':
+            C9effR += -OalphasR + OlambR + (DelC9R0 + DelC9Rp)/(2*fp)
+            C9effI += -OalphasI + OlambI + (DelC9I0 + DelC9Ip)/(2*fp)
+        ##########################
+        #print('After ',C9effR,C9effI)
+        C9effs['{0}_{1}'.format(qsq,charge)] = [C9effR,C9effI]
+        
+    return(C9effR,C9effI)
+
+def make_lambda(a,b,c):
+    return(a**4 + b**4 + c**4 - 2*(a**2*b**2 + a**2*c**2 + b**2*c**2))
 
 def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     # h is complex -> C9 eff complex, and thus FV
-    hR0,hI0 = make_h(qsq,0)
-    hRc,hIc = make_h(qsq,m_c)
-    hRb,hIb = make_h(qsq,m_b)
-    YR = 4/3 * C3 + 64/9 * C5 + 64/27 * C6 - hR0/2 * (C3 + 4/3 * C4 + 16 * C5 + 64/3 * C6) + hRc * (4/3 * C1 + C2 + 6 * C3 + 60 * C5) - hRb/2 * (7 * C3 + 4/3 * C4 + 76 * C5 + 64/3 * C6)
-    YI = 4/3 * C3 + 64/9 * C5 + 64/27 * C6 - hI0/2 * (C3 + 4/3 * C4 + 16 * C5 + 64/3 * C6) + hIc * (4/3 * C1 + C2 + 6 * C3 + 60 * C5) - hIb/2 * (7 * C3 + 4/3 * C4 + 76 * C5 + 64/3 * C6)
-
-    C9effR = C9effbase + YR 
-    C9effI = YI
-    
+    run_fac = runfT(mu_scale)#runs fT to same scale as Wilson coeffs
     f0 = isocorr*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
     fp = isocorr*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
-    fT = isocorr*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    fT = run_fac*isocorr*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    C9effR,C9effI = make_C9eff(qsq,fp,p['charge'])
     FA = C10eff*fp
-    FVR = C9effR*fp + 2*m_b*C7eff*fT/(p['MBphys']+p['MKphys'])
+    FVR = C9effR*fp + 2*m_bMSbar*C7eff*fT/(p['MBphys']+p['MKphys'])#use m_bMSbar here pole mass elsewhere
     FVI = C9effI*fp #+ 2*m_b*C7eff*fT/(p['MBphys']+p['MKphys'])    # this was in here. Mistake?
     FP = -m_l*C10eff*(fp - (p['MBphys']**2-p['MKphys']**2)*(f0-fp)/qsq)
     #print('FA',FA,FVR,FVI,FP)
     ######################################################
     betal = gv.sqrt(1-4*m_l**2/qsq)
-    lam = qsq**2 + p['MBphys']**4 + p['MKphys']**4 - 2*(p['MBphys']**2*p['MKphys']**2 + qsq*p['MBphys']**2 + qsq*p['MKphys']**2)
+    lam = make_lambda(gv.sqrt(qsq),p['MBphys'],p['MKphys'])
     if lam.mean == 0:
         lam = 0
     C = GF**2 * alphaEW**2 * VtbVts**2 * betal * gv.sqrt(lam) / (2**9 * np.pi**5 * p['MBphys']**3)
@@ -1382,7 +1449,7 @@ def integrate_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,con
     threshold = 10 * 4*m_e**2 # want to focus on region where Beta <1  split into 3 firstly 10 * limit, then work in powers of 10 up to 1.0 that 100000*threshold gives~ 0.1
     lower_threshold = 4*m_mu**2
     if qsq_min < lower_threshold:
-        print('SPLITTING INTEGRAL','m_l = ',m_l,'qsq_min = ',qsq_min,'qsq_max = ',qsq_max)
+        #print('SPLITTING INTEGRAL','m_l = ',m_l,'qsq_min = ',qsq_min,'qsq_max = ',qsq_max)
         parts = ['A','B','C','D','F','G','H','I','J','K','L']
         i = 0 
         low = qsq_min
@@ -1390,7 +1457,7 @@ def integrate_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,con
         tops = []
         bots = []
         while upp < qsq_max:
-            print('PART {0}: qsq = {1} to {2}'.format(parts[i],low,upp))
+            #print('PART {0}: qsq = {1} to {2}'.format(parts[i],low,upp))
             t,b = do_integral_FH(p,low,upp,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,split=True)
             tops.append(t)
             bots.append(b)
@@ -1398,17 +1465,17 @@ def integrate_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,con
             upp *= 10
             i += 1
         upp = qsq_max
-        print('PART {0}: qsq = {1} to {2}'.format(parts[i],low,upp))
+        #print('PART {0}: qsq = {1} to {2}'.format(parts[i],low,upp))
         t,b = do_integral_FH(p,low,upp,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,split=True)
         tops.append(t)
         bots.append(b)
         result = sum(tops)/sum(bots)
-        print('tops',tops)
-        print('bots',bots)
-        print('Result:',result)
+        #print('tops',tops)
+        #print('bots',bots)
+        #print('Result:',result)
     else:
         result = do_integral_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-    print('MY METHOD RESULT: ',result)
+    #print('MY METHOD RESULT: ',result)
     ############## check with vegas ########################################################
     #def top(qsq):
     #    al,cl = make_al_cl(p,qsq[0],m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
@@ -1494,8 +1561,8 @@ def do_integral_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,c
 Xt = gv.gvar('1.469(17)')#1009.0947 check for update
 sinthw2 = gv.gvar('0.23121(4)')# PDG
 ########################### PDG says Vub =3.82(24)*1e-3 Vus = 0.2245(8) 
-VubVusfK = gv.gvar('3.72(16)*1e-3') * gv.gvar('35.090(57)*1e-3') #GeV
-fB = gv.gvar('189.4(1.4)*1e-3')#GeV B+ from 1702.09262   #gv.gvar('190.5(4.2)*1e-3') #GeV
+VubVusfK = gv.gvar('3.70(16)*1e-3') * gv.gvar('35.090(57)*1e-3') #GeV Vub from PDG/HFLAV
+fB = gv.gvar('189.4(1.4)*1e-3')#GeV B+ from 1712.09262   #gv.gvar('190.5(4.2)*1e-3') #GeV
 Gammatau = (1/gv.gvar('290.3(5)*1e-3')) * 6.582119569*1e-13  # ps converted to GeV
 
 def integrate_fp_B(p,qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,iters=None,qmax=False):
@@ -1552,6 +1619,27 @@ def neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     BBpLD = ( (GF**2 * VubVusfK * fB )**2 * 2 * np.pi * m_tau * (p['MBphys']**2 - m_tau**2)**2 * (p['MKphys']**2 - m_tau**2)**2 ) / (256 * np.pi**3 * p['MBphys']**3 * Gammatau * GammaB ) 
     print('B^+ -> K^+ nu nu (LD) {0} x 10^-7 c.f. 6.22(60)'.format(BBpLD/1e-7))
     print('B^+ -> K^+ nu nu (SD+LD) {0} x 10^-6'.format((BBp+BBpLD)/1e-6))
+    return()
+
+
+######################### Now to look at B to K l1 l2 outlined in 1602.00881 #################
+
+def BtoKl1l2(p,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1,m2,qsq): #tauB0 specified, presumably different for B^+?
+    lam1 = make_lambda(gv.sqrt(qsq),m1,m1)
+    lam2 = make_lambda(gv.sqrt(qsq),p['MBphys'],p['MKphys'])
+    N_K2p = tauB0 * alphaEW **2 * GF**2 * VtbVts**2 * lam1**0.5 * lam2**0.5/( 512 * np.pi**5 * p['MBphys']**3 * qsq)
+    run_fac = runfT(mu_scale)#runs fT to same scale as Wilson coeffs
+    f0 = isocorr*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    fp = isocorr*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    fT = run_fac*isocorr*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    psi7 = 2*m_b**2*fT**2/(p['MBphys']+p['MKphys'])**2 * lam2 * (1 - (m1-m2)**2/qsq - lam1/(3*qsq**2))
+    psi9 =  1/2 * f0**2 * (m1-m2)**2 * (p['MBphys']**2-p['MKphys']**2)**2/qsq * (1 - (m1+m2)**2/qsq) + 1/2 * fp**2 * lam2 * (1 - (m1-m2)**2/qsq - lam1/(3*qsq**2))
+    psi10 =  1/2 * f0**2 * (m1+m2)**2 * (p['MBphys']**2-p['MKphys']**2)**2/qsq * (1 - (m1-m2)**2/qsq) + 1/2 * fp**2 * lam2 * (1 - (m1+m2)**2/qsq - lam1/(3*qsq**2))
+    psi79 = 2 * m_b * fp * fT /(p['MBphys']+p['MKphys']) * lam2 * (1 - (m1-m2)**2/qsq - lam1/(3*qsq**2))
+    psiS = qsq * f0**2/(2*(m_b-m_s)**2) * (p['MBphys']**2-p['MKphys']**2)**2 * (1 - (m1+m2)**2/qsq) #get value for m_s
+    psiP = qsq * f0**2/(2*(m_b-m_s)**2) * (p['MBphys']**2-p['MKphys']**2)**2 * (1 - (m1-m2)**2/qsq) #get value for m_s
+    psi10P =  f0**2/(m_b-m_s) * (m1+m2) * (p['MBphys']**2-p['MKphys']**2)**2 * (1 - (m1-m2)**2/qsq) #get value for m_s
+    psi9S =  f0**2/(m_b-m_s) * (m1-m2) * (p['MBphys']**2-p['MKphys']**2)**2 * (1 - (m1+m2)**2/qsq) #get value for m_s
     return()
 
 #####################################################################
