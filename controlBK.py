@@ -27,6 +27,7 @@ VCp['m_s'] = '0.0678'
 VCp['m_c'] = '0.8605' 
 VCp['m_ssea'] = 0.0647
 VCp['m_lsea'] = 0.00235
+VCp['m_csea'] = 0.831
 VCp['L'] = 32
 VCp['w0/a'] = gv.gvar('1.1367(5)')
 VCp['parent-Tag'] = 'D_G5-G5_m{1}'
@@ -44,6 +45,7 @@ Cp['m_s'] = '0.0527'
 Cp['m_c'] = '0.643'
 Cp['m_ssea'] = 0.0507
 Cp['m_lsea'] = 0.00184
+Cp['m_csea'] = 0.628
 Cp['L'] = 48
 Cp['w0/a'] = gv.gvar('1.4149(6)')
 Cp['parent-Tag'] = 'D_G5-G5_m{1}'
@@ -63,6 +65,7 @@ Fp['m_s'] = '0.036'
 Fp['m_c'] = '0.433'
 Fp['m_ssea'] = 0.0363
 Fp['m_lsea'] = 0.0012
+Fp['m_csea'] = 0.432
 #F['tp'] = 96
 Fp['L'] = 64
 Fp['w0/a'] = gv.gvar('1.9518(7)')
@@ -81,6 +84,7 @@ VC['m_s'] = '0.0705'
 VC['m_c'] = '0.888' 
 VC['m_ssea'] = 0.065
 VC['m_lsea'] = 0.013
+VC['m_csea'] = 0.838
 VC['L'] = 16
 VC['w0/a'] = gv.gvar('1.1119(10)')
 VC['parent-Tag'] = 'D_G5-G5_m{1}'
@@ -99,6 +103,7 @@ C['m_s'] = '0.0545'
 C['m_c'] = '0.664'
 C['m_ssea'] = 0.0509
 C['m_lsea'] = 0.00102
+C['m_csea'] = 0.635
 C['L'] = 24
 C['w0/a'] = gv.gvar('1.3826(11)')
 C['parent-Tag'] = 'D_G5-G5_m{1}'
@@ -117,6 +122,7 @@ F['m_s'] = '0.0376'
 F['m_c'] = '0.449'
 F['m_ssea'] = 0.037
 F['m_lsea'] = 0.0074
+F['m_csea'] = 0.440
 #F['tp'] = 96
 F['L'] = 32
 F['w0/a'] = gv.gvar('1.9006(20)')
@@ -137,6 +143,7 @@ SF['m_s'] = '0.0234'
 SF['m_c'] = '0.274'
 SF['m_ssea'] = 0.024
 SF['m_lsea'] = 0.0048
+SF['m_csea'] = 0.286
 #SF['tp'] = 144
 SF['L'] = 48
 SF['w0/a'] = gv.gvar('2.896(6)')
@@ -157,6 +164,7 @@ UF['m_s'] = '0.0165'
 UF['m_c'] = '0.194'
 UF['m_ssea'] = 0.0158
 UF['m_lsea'] = 0.00316
+UF['m_csea'] = 0.188
 #UF['tp'] = 192
 UF['L'] = 64
 UF['w0/a'] = gv.gvar('3.892(12)')
@@ -186,6 +194,7 @@ Fs['m_s'] = '0.0376'
 Fs['m_c'] = '0.449'
 Fs['m_ssea'] = 0.037
 Fs['m_lsea'] = 0.0074
+Fs['m_csea'] = 0.440
 #F['tp'] = 96
 Fs['L'] = 32
 Fs['w0/a'] = F['w0/a']#gv.gvar('1.9006(20)')
@@ -211,6 +220,7 @@ SFs['m_s'] = '0.0234'
 SFs['m_c'] = '0.274'
 SFs['m_ssea'] = 0.024
 SFs['m_lsea'] = 0.0048
+SFs['m_csea'] = 0.286
 #SF['tp'] = 144
 SFs['L'] = 48
 SFs['w0/a'] = SF['w0/a']#gv.gvar('2.896(6)')
@@ -294,7 +304,7 @@ di0000pri = '0.0({0})'.format(1.0*prifac)# HQET terms
 d000lnpri = '0.0({0})'.format(1.0*prifac)# NOTE actually di00ln i.e. all non disc terms
 di100npri = '0.0({0})'.format(0.3*prifac) #covers any j=1 or k=1 but not both suppressed as O(a^2)
 rhopri ='0.0({0})'.format(1.0*prifac)
-cpri = '0.0(0.5)'
+cpri = '0.0(0.5)' # doesn't work for charm, hard coded in prior
 cvalpri ='0.0(1.0)'
 Kwikfit = False
 Npow = 3 #3
@@ -360,31 +370,35 @@ pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0
 fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ################
 #ensemble_error_breakdown()
-dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_emu(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the_0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#p_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
-neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_emu(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2,corrections=False)
 #Bnu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+do_phi_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+##########################
+#p_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 ###############################
 #speed_of_light(Fits)
 #ff_ratios_qsq_MH(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)

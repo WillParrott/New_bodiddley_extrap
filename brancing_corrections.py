@@ -31,11 +31,10 @@ capsize = 10*factor
 
 #first, corrections to C_9^eff. Currently, the real part of this is of size 4-5.
 #The largest correction is alpha_s/4pi (C1*F_1,c(9) + C2*F_2,c(9) + C8F_8^(9)]
-C8 = gv.gvar('-0.152(15)')#from 1510.02349, can't find this in paper we are using
-C8eff = C8 + C3 - 1/6 * C4 + 20 * C5 - 10/3 * C6 
+#C8 = gv.gvar('-0.152(15)')#from 1510.02349, can't find this in paper we are using
+C8 = C8eff - (C3 - 1/6 * C4 + 20 * C5 - 10/3 * C6 )
 alpha_s = gv.gvar('0.2253(28)') #Used qcdevol
-lambda_us = 0.02 #should be (PDG) VusVub/VtsVtb
-fK = gv.gvar('0.1556(4)')# 1509.02220 for fK+ find better value for this?
+lambda_us = gv.gvar('0.01980(62)') #should be (PDG) VusVub/VtsVtb
 N_c = 3 # Assuming this is N_colours
 M_B = (MBphysp + MBphys0)/2#get this from p need mean for Ei
 M_K = (MKphysp + MKphys0)/2
@@ -117,10 +116,13 @@ def read_file():
     f['F19Is'] = []
     f['F29Rs'] = []
     f['F29Is'] = []
-    data = open('Fits/F19F29_final.txt','r')
+    data = open('Fits/F19F29_new.txt','r')
+    #data = open('Fits/F19F29_c02removed.txt','r')
+    #data = open('Fits/F19F29_b02removed.txt','r')
     lines = data.readlines()
     for line in lines:
         numbs = line.split()
+        #print(numbs)
         f['qsqs'].append(float(numbs[0])) 
         f['F19Rs'].append(float(numbs[1]))
         f['F19Is'].append(float(numbs[2]))
@@ -144,7 +146,6 @@ def make_F1c9_F2c9(qsq):
             high = q
     i = F19_dat['qsqs'].index(low)
     j = F19_dat['qsqs'].index(high)
-    print(qsq,low,high,i,j)
     if qsq == high:
         grad = 1
     else:
@@ -162,13 +163,11 @@ def make_F89(qsq):
     B0 = make_B0s(s)
     C0 = make_C0s(s)
     F =  16/9 * 1/(1-s) * gv.log(s) + 8/9 * (5-2*s)/(1-s)**2 - 8/9 * (4-s)/(1-s)**3 * ( (1+s)*B0 - 2*C0)
-    print('B0,C0',make_B0s(1),make_C0s(1))
-    print('F89',F,s,(5-2*s)/(1-s)**2,(4-s)/(1-s)**3 * ( (1+s)*B0 - 2*C0))
     return(F)
 
 def make_B0s(s):
     B = -2 * gv.sqrt(4/s -1) * gv.arctan(1/gv.sqrt(4/s - 1))
-    print('B = ',B)
+    #print('B = ',B)
     return(B)
 
 def make_C0s(s):
@@ -190,7 +189,7 @@ def make_C0s(s):
     C1 = do_integral(fcn1,eps,1)
     C2 = do_integral(fcn2,0,eps)
     C = C1 + C2 + 2*(eps*gv.log(eps)-eps)
-    print('C = ',C)
+    #print('C = ',C)
     return(C)
 
 
@@ -296,7 +295,7 @@ def make_DelC9eff(qsq): #makes whole Del C9 eff
     return(DelRp,DelIp,DelR0,DelI0)
 
 def make_Del_taup(qsq):#Makes Del tau, split into 4 parts plus1 plus2, minus1,minus2 these are the 4 parts B27 can be split into. I.e. plus 1 is the Tp+^(0) bit , plus2 is the alpha_sCF TP+^(nf) bit and same for minus. 
-    N = (np.pi**2*fB*fK)/(N_c*M_B) # Factor out front
+    N = (np.pi**2*fBp*fKp)/(N_c*M_B) # Factor out front
     plus1 = 0 # Tp+ ^0 =0#
     minus1R,minus1I = make_minus1_integral(qsq)
     minus2R,minus2I = make_minus2_integral(qsq)
@@ -312,7 +311,7 @@ def make_Del_taup(qsq):#Makes Del tau, split into 4 parts plus1 plus2, minus1,mi
 
 def make_Del_bits(qsq,bit):
     fac = 2 * m_b/M_B
-    N = (np.pi**2*fB*fK)/(N_c*M_B) # Factor out front
+    N = (np.pi**2*fBp*fKp)/(N_c*M_B) # Factor out front just use + for this 
     plus1 = 0 # Tp+ ^0 =0#
     if bit == 'TP-0':
         minus1R,minus1I = make_minus1_integral(qsq)
@@ -690,6 +689,7 @@ def make_power(x,k,zero=False): #returns real and impaginary parts of x^k
     xiR = A_new * gv.cos(theta_new)
     xiI = A_new * gv.sin(theta_new)
     return(xiR,xiI)
+##########################################
 
 def save_results():
     saved_result = collections.OrderedDict()
@@ -703,7 +703,7 @@ def save_results():
     saved_result['OlambR'] = []
     saved_result['OlambI'] = []
 
-    for qsq in np.linspace(1e-6,23,250): # evalutes over range of q^2 values. In current 'troubleshooting mode' will crash after first one
+    for qsq in np.linspace(1e-6,23,1000): # evalutes over range of q^2 values. 
         print('################### qsq =',qsq)
         print('Del9')
         DRp,DIp,DR0,DI0 = make_DelC9eff(qsq)
@@ -724,6 +724,8 @@ def save_results():
     #gv.dump(saved_result,'Fits/C9_corrections.pickle')
     return()
 #save_results()
+
+###########################################
 
 def unmake_gvar_vec(vec):
     #A function which extracts the mean and standard deviation of a list of gvars
@@ -761,7 +763,7 @@ def do_plots():
     TotC9Ip = []
     TotC9R0 = []
     TotC9I0 = []    
-    for qsq in np.linspace(1e-4,qsqmaxphysBK.mean,300):
+    for qsq in np.linspace(5,20,100):
         print('################### qsq =',qsq)
         Rp = 0
         Ip = 0
@@ -1034,4 +1036,4 @@ def plot_F1_F2():
 
     return()
 
-plot_F1_F2()
+#plot_F1_F2()

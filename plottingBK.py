@@ -1622,28 +1622,30 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     Bcypsupp,Bcypslow = make_upp_low(Bcfps)
     BcyTsmean,BcyTserr = unmake_gvar_vec(BcfTs)
     BcyTsupp,BcyTslow = make_upp_low(BcfTs)
-    
+    Al = 0.75
+    As = 0.5
+    Ac = 0.25
     plt.figure(figsize=figsize)
     plt.plot(qsq, y0mean, color='b',linestyle='-',label='$f_0(q^2)~B\to K$')
-    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
+    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=Al)
     plt.plot(qsq, ypmean, color='r',linestyle='-',label='$f_+(q^2)~B\to K$')
-    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
+    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=Al)
     #plt.plot(qsq, yTmean, color='g',linestyle='-',label='$f_T(q^2)~B\to K$')
     #plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=alpha)
     
     plt.plot(qsqs, y0smean, color='b',linestyle='--',label='$f_0(q^2)~B_s\to\eta_s$')
-    plt.fill_between(qsqs,y0slow,y0supp,facecolor='none', edgecolor='b', hatch='X',alpha=alpha)
+    plt.fill_between(qsqs,y0slow,y0supp,color='b',alpha=As)
     plt.plot(qsqs, ypsmean, color='r',linestyle='--',label='$f_+(q^2)~B_s\to\eta_s$')
-    plt.fill_between(qsqs,ypslow,ypsupp, facecolor='none', edgecolor='r', hatch='X',alpha=alpha)
+    plt.fill_between(qsqs,ypslow,ypsupp, color='r',alpha=As)
 
     plt.plot(Bcqsqs, Bcy0smean, color='b',linestyle='-.',label='$f_0(q^2)~B_c\to D_s$')
-    plt.fill_between(Bcqsqs,Bcy0slow,Bcy0supp,facecolor='none', edgecolor='b', hatch='+',alpha=alpha)
+    plt.fill_between(Bcqsqs,Bcy0slow,Bcy0supp,color='b',alpha=Ac)
     plt.plot(Bcqsqs, Bcypsmean, color='r',linestyle='-.',label='$f_+(q^2)~B_c\to D_s$')
-    plt.fill_between(Bcqsqs,Bcypslow,Bcypsupp, facecolor='none', edgecolor='r', hatch='+',alpha=alpha)
+    plt.fill_between(Bcqsqs,Bcypslow,Bcypsupp, color='r',alpha=Ac)
     #plt.plot(Bcqsqs, BcyTsmean, color='g',linestyle='-.',label='$f_T(q^2)~B_c\to D_s$')
     #plt.fill_between(Bcqsqs,BcyTslow,BcyTsupp, facecolor='none', edgecolor='g', hatch='+',alpha=alpha)
 
-    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0~B\to K$'),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B\to K$'),Patch(facecolor='none', edgecolor='b',hatch='X',label=r'$f_0~B_s\to\eta_s$'),Patch(facecolor='none', edgecolor='r',hatch='X',label=r'$f_+~B_s\to\eta_s$'),Patch(facecolor='none', edgecolor='b',hatch='+',label=r'$f_0~B_c\to D_s$'),Patch(facecolor='none', edgecolor='r',hatch='+',label=r'$f_+~B_c\to D_s$')]
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0~B\to K$',alpha=Al),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B\to K$',alpha=Al),Patch(facecolor='b', edgecolor='b',label=r'$f_0~B_s\to\eta_s$',alpha=As),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B_s\to\eta_s$',alpha=As),Patch(facecolor='b', edgecolor='b',label=r'$f_0~B_c\to D_s$',alpha=Ac),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B_c\to D_s$',alpha=Ac)]
     plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -1663,12 +1665,12 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.figure(figsize=figsize)
     
     plt.plot(qsq, yTmean, color='g',linestyle='-',label='$f_T(q^2)~B\to K$')
-    plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=alpha)
+    plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=Al)
 
     plt.plot(Bcqsqs, BcyTsmean, color='g',linestyle='-.',label='$f_T(q^2)~B_c\to D_s$')
-    plt.fill_between(Bcqsqs,BcyTslow,BcyTsupp, facecolor='none', edgecolor='g', hatch='+',alpha=alpha)
+    plt.fill_between(Bcqsqs,BcyTslow,BcyTsupp, color='g',alpha=Ac)
 
-    handles = [ Patch(facecolor='g', edgecolor='g',label=r'$f_T~B\to K$'),Patch(facecolor='none', edgecolor='g',hatch='+',label=r'$f_T~B_c\to D_s$')]
+    handles = [ Patch(facecolor='g', edgecolor='g',label=r'$f_T~B\to K$',alpha=Al),Patch(facecolor='g', edgecolor='g',label=r'$f_T~B_c\to D_s$',alpha=Ac)]
     plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -1712,16 +1714,16 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     
     plt.figure(figsize=figsize)
     plt.plot(qsq, y0mean, color='b',linestyle='-',label='$f_0(q^2)~D\to K$')
-    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
+    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=Al)
     plt.plot(qsq, ypmean, color='r',linestyle='-',label='$f_+(q^2)~D\to K$')
-    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
+    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=Al)
     
     plt.plot(qsqs, y0smean, color='b',linestyle='--',label='$f_0(q^2)~D_s\to\eta_s$')
-    plt.fill_between(qsqs,y0slow,y0supp,facecolor='none', edgecolor='b', hatch='X',alpha=alpha)
+    plt.fill_between(qsqs,y0slow,y0supp,color='b',alpha=As)
     plt.plot(qsqs, ypsmean, color='r',linestyle='--',label='$f_+(q^2)~D_s\to\eta_s$')
-    plt.fill_between(qsqs,ypslow,ypsupp, facecolor='none', edgecolor='r', hatch='X',alpha=alpha)
+    plt.fill_between(qsqs,ypslow,ypsupp, color='r',alpha=As)
 
-    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0~D\to K$'),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D\to K$'),Patch(facecolor='none', edgecolor='b',hatch='X',label=r'$f_0~D_s\to\eta_s$'),Patch(facecolor='none', edgecolor='r',hatch='X',label=r'$f_+~D_s\to\eta_s$')]
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0~D\to K$',alpha=Al),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D\to K$',alpha=Al),Patch(facecolor='b', edgecolor='b',label=r'$f_0~D_s\to\eta_s$',alpha=As),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D_s\to\eta_s$',alpha=As)]
     plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -4859,8 +4861,54 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     return()
 
 #################################################################################################################
-
-
+def headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True):
+    print('###### Headline results Corrections = ',corrections)
+    m_lep = m_e # just does the bins 
+    bins = [[1.1,6],[15,22]]
+    ########################## e p########################################
+    m_lep = m_e
+    p = make_p_physical_point_BK(pfit,Fits,B='p')
+    line3 = '     $10^7\\mathcal{B}(B^+\\to K^+e^+e^-)$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True,corrections=corrections)*tauBpmGeV*1e7
+        if qsq_min == 1.1:
+            exp = gv.gvar(1.401,np.sqrt(0.074**2+0.064**2))
+            print('B^+->K^+e^+e^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+        else:
+            print('B^+->K^+e^+e^- ({0},{1}) = {2}'.format(qsq_min,qsq_max,B))
+    
+    ########################## mu p########################################
+    m_lep = m_mu
+    p = make_p_physical_point_BK(pfit,Fits,B='p')
+    line3 = '     $10^7\\mathcal{B}(B^+\\to K^+\\mu^+\\mu^-)$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True,corrections=corrections)*tauBpmGeV*1e7
+        if qsq_min == 1.1:
+            exp = gv.gvar(1.186,np.sqrt(0.034**2+0.059**2))
+            print('B^+->K^+mu^+mu^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+        else:
+            exp = gv.gvar(0.847,np.sqrt(0.028**2+0.042**2))
+            print('B^+->K^+mu^+mu^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+    ####################### mu 0 ##########################################
+    p = make_p_physical_point_BK(pfit,Fits,B='0')
+    line3 = '     $10^7\\mathcal{B}(B^0\\to K^0\\mu^+\\mu^-)$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True,corrections=corrections)*tauB0GeV*1e7
+        if qsq_min == 1.1:
+            exp = gv.gvar(0.92,np.sqrt(0.17**2+0.044**2))
+            print('B^0->K^0mu^+mu^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+        else:
+            exp = gv.gvar(0.67,np.sqrt(0.11**2+0.035**2))
+            print('B^0->K^0mu^+mu^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+    
+    return()
+#################################################################################################################
 
 def Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     m_lep = m_mu # just does the bins 
@@ -5599,6 +5647,331 @@ def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.close()
     return()
 ##########################################################################################
+def do_phi_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    #note that only psi10P and psi9S are sensitive to the ordering of m1 and m2
+    charge ='0'
+    m1tag = 'e'
+    m2tag = 'mu'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    m1tag = 'e'
+    m2tag = 'tau'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    m1tag = 'mu'
+    m2tag = 'tau'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    charge ='p'
+    m1tag = 'e'
+    m2tag = 'mu'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    m1tag = 'e'
+    m2tag = 'tau'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    m1tag = 'mu'
+    m2tag = 'tau'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    return()
+
+def plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge):
+    p = make_p_physical_point_BK(pfit,Fits,B=charge)
+    m1 = globals()['m_{0}'.format(m1tag)]
+    m2 = globals()['m_{0}'.format(m2tag)]
+    low = (m1+m2)**2
+    upp = ((p['MBphys']-p['MKphys'])**2).mean
+    #do integrals
+    def func_ak(qsq):
+        psi7,psi9,psi10,psi79,psiS,psiP,psi10P,psi9S,N_K2 = BtoKl1l2(p,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1,m2,qsq)
+        return(N_K2*psi9*1e9)
+    aK = do_integral(func_ak,low,upp)
+    print('{0}, {1} charge {2} a_K = {3}'.format(m1tag,m2tag,charge,aK) )
+
+    def func_bk(qsq):
+        psi7,psi9,psi10,psi79,psiS,psiP,psi10P,psi9S,N_K2 = BtoKl1l2(p,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1,m2,qsq)
+        return(N_K2*psi10*1e9)
+    bK = do_integral(func_bk,low,upp)
+    print('{0}, {1} charge {2} b_K = {3}'.format(m1tag,m2tag,charge,bK) )
+
+    def func_ek(qsq):
+        psi7,psi9,psi10,psi79,psiS,psiP,psi10P,psi9S,N_K2 = BtoKl1l2(p,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1,m2,qsq)
+        return(N_K2*psiS*1e9)
+    eK = do_integral(func_ek,low,upp)
+    print('{0}, {1} charge {2} e_K = {3}'.format(m1tag,m2tag,charge,eK) )
+
+    def func_fk(qsq):
+        psi7,psi9,psi10,psi79,psiS,psiP,psi10P,psi9S,N_K2 = BtoKl1l2(p,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1,m2,qsq)
+        return(N_K2*psiP*1e9)
+    fK = do_integral(func_fk,low,upp)
+    print('{0}, {1} charge {2} f_K = {3}'.format(m1tag,m2tag,charge,fK) )
+    #make plots
+    qsq = []
+    phi9 = []
+    phi10 = []
+    phiS = []
+    phiP = []
+    for q2 in np.linspace(low,upp,nopts):
+        psi7,psi9,psi10,psi79,psiS,psiP,psi10P,psi9S,N_K2 = BtoKl1l2(p,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1,m2,q2)
+        qsq.append(q2)
+        phi9.append(N_K2*psi9*1e9)
+        phi10.append(N_K2*psi10*1e9)
+        phiS.append(N_K2*psiS*1e9)
+        phiP.append(N_K2*psiP*1e9)
+
+    plt.figure(figsize=figsize)
+    y = phi9
+    ymean,yerr = unmake_gvar_vec(y)
+    yupp,ylow = make_upp_low(y)
+    plt.plot(qsq, ymean, color='r',label='$\phi_9$')
+    plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
+    y = phi10
+    ymean,yerr = unmake_gvar_vec(y)
+    yupp,ylow = make_upp_low(y)
+    plt.plot(qsq, ymean, color='b',label='$\phi_10$')
+    plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(fontsize=fontsizeleg,frameon=False,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel(r'$\phi_{9,10}(q^2)\times10^{9}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('Plots/phi910{0}{1}{2}{3}.pdf'.format(m1tag,m2tag,charge,faclab))
+    plt.close()
+    
+
+    plt.figure(figsize=figsize)
+    y = phiS
+    ymean,yerr = unmake_gvar_vec(y)
+    yupp,ylow = make_upp_low(y)
+    plt.plot(qsq, ymean, color='r',label='$\phi_S$')
+    plt.fill_between(qsq,ylow,yupp, color='r',alpha=alpha)
+    y = phiP
+    ymean,yerr = unmake_gvar_vec(y)
+    yupp,ylow = make_upp_low(y)
+    plt.plot(qsq, ymean, color='b',label='$\phi_P$')
+    plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(fontsize=fontsizeleg,frameon=False,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.ylabel(r'$\phi_{S,P}(q^2)\times10^{9}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.tight_layout()
+    plt.savefig('Plots/phiSP{0}{1}{2}{3}.pdf'.format(m1tag,m2tag,charge,faclab))
+    plt.close()
+    return()
+
+
+
+#############################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
