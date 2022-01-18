@@ -868,9 +868,29 @@ def make_p_Mh_BK(pfit,Fits,MH):
     return(p)
 
 ######################################################################################################
-
-
-def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+######################################################################################################
+def errs_per_ens(res,dat):
+    output = ''
+    temp = []
+    tempk = []
+    for key in dat:
+        temp.append(res.partialsdev(dat[key]))
+        tempk.append(key)
+    temp2 = np.sort(temp)[::-1]
+    for i in temp2:
+        key = tempk[temp.index(i)]
+        output = '{0} {1}:{2:.4f}'.format(output,key,i)
+    return(output)
+######################################################################################################
+def fs_at_lims_DK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    dict_for_plot = collections.OrderedDict()
+    data_for_err = collections.OrderedDict()
+    for Fit in Fits:
+        data_for_err[Fit['conf']] = []
+        for key in f:
+            if '_{0}_'.format(Fit['conf']) in key:
+                data_for_err[Fit['conf']].append(f[key])
+    ##########################################################
     p = make_p_physical_point_DK(pfit,Fits)
     qsq0 = 0
     f00 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq0,t_0,Fits[0]['masses'][0],fpf0same,0)
@@ -883,6 +903,17 @@ def fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('f_+(0) = {0}  error: {1:.2%}'.format(fp0,fp0.sdev/fp0.mean))
     print('f_0(max) = {0}  error: {1:.2%}'.format(f0max,f0max.sdev/f0max.mean))
     print('f_+(max) = {0}  error: {1:.2%}'.format(fpmax,fpmax.sdev/fpmax.mean))
+    #############################################
+    print(errs_per_ens(f00,data_for_err))
+    print(errs_per_ens(fp0,data_for_err))
+    print(errs_per_ens(f0max,data_for_err))
+    print(errs_per_ens(fpmax,data_for_err))
+    dict_for_plot['DKf00'] = errs_per_ens(f00,data_for_err)
+    dict_for_plot['DKfp0'] = errs_per_ens(fp0,data_for_err)
+    dict_for_plot['DKf0max'] = errs_per_ens(f0max,data_for_err)
+    dict_for_plot['DKfpmax'] = errs_per_ens(fpmax,data_for_err)
+    gv.dump(dict_for_plot,'Fits/DKerror_breakdown_data.pickle')
+    #############################################
     a0 = []
     ap = []
     for n in range(Npow):

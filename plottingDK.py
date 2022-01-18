@@ -1708,7 +1708,7 @@ def plot_AFB(pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2):
         lamb = make_lambda(p['MDphysav']**2,p['MKphysav']**2,qsq)
         h0 = gv.sqrt(lamb/qsq) * fp
         ht = fac_mu * f0 * ((p['MDphysav']**2 - p['MKphysav']**2)/gv.sqrt(qsq)) 
-        FB = 3/2 * (epsmu * h0 * ht)/( (1 + epsmu) * h0**2 + 3/2 * epsmu * ht**2 )
+        FB = 3/2 * (epsmu * h0 * ht)/( (1 + epsmu) * h0**2 + 3/2 * epsmu * ht**2 )# maybe should be fac of 2 in epsmu?
         #if qsq == qsqmaxphysDK.mean:
         #    integrand = epsmu*(1-epsmu)**2/(epse*(1-epse)**2)
         return(FB)
@@ -2221,7 +2221,56 @@ def results_tables(fs_data,Fit):
 
 
 
+def ensemble_error_breakdown():
+    #Only works if all ensembes used.
+    data = gv.load('Fits/DKerror_breakdown_data.pickle')
+    f00 = []
+    f0max = []
+    fpmax = []
+    for lab in [' VCp:',' Cp:',' Fp:',' VC:',' C:',' F:',' SF:',' UF:']: # spaces important to distunguish 'F:' from 'SF:'
+        f00.append(float(data['DKf00'].split(lab)[1][:6])**2)
+        f0max.append(float(data['DKf0max'].split(lab)[1][:6])**2)
+        fpmax.append(float(data['DKfpmax'].split(lab)[1][:6])**2)
+    f00 = np.array(f00)/sum(f00)
+    f0max = np.array(f0max)/sum(f0max)
+    fpmax = np.array(fpmax)/sum(fpmax)
+    VCp = np.array([f00[0],f0max[0],fpmax[0]])
+    Cp = np.array([f00[1],f0max[1],fpmax[1]])
+    Fp = np.array([f00[2],f0max[2],fpmax[2]])
+    VC = np.array([f00[3],f0max[3],fpmax[3]])
+    C = np.array([f00[4],f0max[4],fpmax[4]])
+    F = np.array([f00[5],f0max[5],fpmax[5]])
+    SF = np.array([f00[6],f0max[6],fpmax[6]])
+    UF = np.array([f00[7],f0max[7],fpmax[7]])
+    x = range(3)
+    plt.figure(figsize=figsize)
+    plt.bar(x,VCp, color='r',alpha=0.33,label='Set 1')
+    plt.bar(x,Cp,bottom=VCp, color='r',alpha=0.66,label='Set 2')
+    plt.bar(x,Fp,bottom=VCp+Cp, color='r',alpha=1.0,label='Set 3')
+    plt.bar(x,VC,bottom=VCp+Cp+Fp, color='purple',alpha=0.33,label='Set 4')
+    plt.bar(x,C,bottom=VCp+Cp+Fp+VC, color='purple',alpha=0.66,label='Set 5')
+    plt.bar(x,F,bottom=VCp+Cp+Fp+VC+C, color='purple',alpha=1.0,label='Set 6')
+    plt.bar(x,SF,bottom=VCp+Cp+Fp+VC+C+F, color='b',alpha=0.5,label='Set 7')
+    plt.bar(x,UF,bottom=VCp+Cp+Fp+VC+C+F+SF, color='b',alpha=1.0,label='Set 8')
+    plt.gca().set_xticks(x)
+    plt.gca().set_xticklabels([r'$f_{0/+}(0)$',r'$f_0(q^2_{\mathrm{max}})$',r'$f_+(q^2_{\mathrm{max}})$'])
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,ncol=4,fontsize=fontsizeleg,frameon=False,loc='upper center')
+    plt.ylabel('$\sigma_i^2/\sum_i\sigma_i^2$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.ylim([0,1.2])
+    plt.tight_layout()
+    plt.savefig('DKPlots/ensemble_error_breakdown.pdf')
+    plt.close()
+    return()
 
+#####################################################################################################
 
 
 

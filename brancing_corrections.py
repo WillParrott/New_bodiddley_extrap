@@ -98,7 +98,7 @@ def make_correction1(qsq): # dominant O(alpha_s) correction to C9eff in B11. Cur
     F89 = make_F89(qsq)
     corrR = (alpha_s/(4*np.pi)) * (C1*F19R + C2*F29R + C8*F89 )
     corrI = (alpha_s/(4*np.pi)) * (C1*F19I + C2*F29I)
-    print('correction O(alpha_s) =  {0} + {1}i'.format(corrR,corrI))
+    print('C9eff correction O(alpha_s) =  {0} + {1}i'.format(corrR,corrI))
     return(corrR,corrI)
 
 def make_correction2(qsq): #O(lambda_u^s) correction to C9eff in B11
@@ -106,17 +106,27 @@ def make_correction2(qsq): #O(lambda_u^s) correction to C9eff in B11
     h0R,h0I = make_h(qsq,0)
     corrR = lambda_us * (hcR-h0R)*(4/3 *C1 + C2)
     corrI = lambda_us * (hcI-h0I)*(4/3 *C1 + C2)
-    print('correction O(lambd_us) = {0} + {1}i'.format(corrR,corrI))
+    print('C9eff correction O(lambd_us) = {0} + {1}i'.format(corrR,corrI))
     return(corrR,corrI)
 
-def read_file():
+def make_correction3(qsq): #this is the O(alpha_s) correction to C7eff which is as defined in FNAL)
+    F17R,F17I = make_F1c7(qsq)
+    F87R,F87I = make_F87(qsq)
+    corrR = (alpha_s/(4*np.pi)) * ((C1-6*C2)*F17R + C8*F87R)
+    corrI = (alpha_s/(4*np.pi)) * ((C1-6*C2)*F17I + C8*F87I)
+    print('C7eff correction O(alpha_s) =  {0} + {1}i'.format(corrR,corrI))
+    return(corrR,corrI)
+
+def read_fileF171929():
     f = collections.OrderedDict()
     f['qsqs'] = []
+    f['F17Rs'] = []
+    f['F17Is'] = []
     f['F19Rs'] = []
     f['F19Is'] = []
     f['F29Rs'] = []
     f['F29Is'] = []
-    data = open('Fits/F19F29_new.txt','r')
+    data = open('Fits/F17F19F29.txt','r')
     #data = open('Fits/F19F29_c02removed.txt','r')
     #data = open('Fits/F19F29_b02removed.txt','r')
     lines = data.readlines()
@@ -124,14 +134,31 @@ def read_file():
         numbs = line.split()
         #print(numbs)
         f['qsqs'].append(float(numbs[0])) 
-        f['F19Rs'].append(float(numbs[1]))
-        f['F19Is'].append(float(numbs[2]))
-        f['F29Rs'].append(float(numbs[3]))
-        f['F29Is'].append(float(numbs[4]))
+        f['F17Rs'].append(float(numbs[1]))
+        f['F17Is'].append(float(numbs[2]))
+        f['F19Rs'].append(float(numbs[3]))
+        f['F19Is'].append(float(numbs[4]))
+        f['F29Rs'].append(float(numbs[5]))
+        f['F29Is'].append(float(numbs[6]))
     data.close()
     return(f)
 
-F19_dat = read_file()
+#def read_fileF17():
+#    f = collections.OrderedDict()
+#    f['qsqs'] = []
+#    f['F17Rs'] = []
+#    f['F17Is'] = []
+#    data = open('Fits/F17_new.txt','r')
+#    lines = data.readlines()
+#    for line in lines:
+#        numbs = line.split()
+#        f['qsqs'].append(float(numbs[0])) 
+#        f['F17Rs'].append(float(numbs[1]))
+#        f['F17Is'].append(float(numbs[2]))
+#    data.close()
+#    return(f)
+
+F19_dat = read_fileF171929()
 
 def make_F1c9_F2c9(qsq):
     #we have evalauted these where possible for some (not evnely spaced) choice of q^2
@@ -156,7 +183,31 @@ def make_F1c9_F2c9(qsq):
     F29I = F19_dat['F29Is'][i] + grad*(F19_dat['F29Is'][j]-F19_dat['F29Is'][i])
     return(F19R,F19I,F29R,F29I)
 
+def make_F1c7(qsq):
+    low = 0
+    high = 25
+    for q in F19_dat['qsqs']:
+        if q <= qsq and q > low:
+            low = q
+        if q >= qsq and q < high:
+            high = q
+    i = F19_dat['qsqs'].index(low)
+    j = F19_dat['qsqs'].index(high)
+    if qsq == high:
+        grad = 1
+    else:
+        grad = (qsq - low)/(high-low)
+    F17R = F19_dat['F17Rs'][i] + grad*(F19_dat['F17Rs'][j]-F19_dat['F17Rs'][i])
+    F17I = F19_dat['F17Is'][i] + grad*(F19_dat['F17Is'][j]-F19_dat['F17Is'][i])
+    return(F17R,F17I)
 
+def make_F87(qsq):
+    s = (qsq/m_b**2)
+    B0 = make_B0s(s)
+    C0 = make_C0s(s)
+    R = -32/9 * gv.log(mu_scale/m_b) - 8/9 * s/(1-s) * gv.log(s) - 4/9 * (11-16*s+8*s**2)/(1-s)**2 + 4/9 * 1/(1-s)**3 * ((9*s-5*s**2+2*s**3)*B0 - (4+2*s)*C0)
+    I = -8/9 * np.pi
+    return(R,I)
 
 def make_F89(qsq):
     s = (qsq/m_b**2)
@@ -698,32 +749,34 @@ def save_results():
     saved_result['DelC9Ip'] = []
     saved_result['DelC9R0'] = []
     saved_result['DelC9I0'] = []
-    saved_result['OalphasR'] = []
-    saved_result['OalphasI'] = []
-    saved_result['OlambR'] = []
-    saved_result['OlambI'] = []
+    saved_result['C9OalphasR'] = []
+    saved_result['C9OalphasI'] = []
+    saved_result['C7OalphasR'] = []
+    saved_result['C7OalphasI'] = []
+    saved_result['C9OlambR'] = []
+    saved_result['C9OlambI'] = []
 
-    for qsq in np.linspace(1e-6,23,1000): # evalutes over range of q^2 values. 
+    for qsq in np.linspace(1e-6,23.5,1000): # evalutes over range of q^2 values. 
         print('################### qsq =',qsq)
-        print('Del9')
         DRp,DIp,DR0,DI0 = make_DelC9eff(qsq)
-        print('Alpha')
-        alR,alI = make_correction1(qsq) # working
-        print('lamb')
-        lamR,lamI = make_correction2(qsq) # working
+        alR,alI = make_correction1(qsq) 
+        lamR,lamI = make_correction2(qsq) 
+        C7alR,C7alI = make_correction3(qsq) 
         saved_result['qsq'].append(qsq)
         saved_result['DelC9Rp'].append(DRp)
         saved_result['DelC9Ip'].append(DIp)
         saved_result['DelC9R0'].append(DR0)
         saved_result['DelC9I0'].append(DI0)
-        saved_result['OalphasR'].append(alR)
-        saved_result['OalphasI'].append(alI)
-        saved_result['OlambR'].append(lamR)
-        saved_result['OlambI'].append(lamI)
+        saved_result['C9OalphasR'].append(alR)
+        saved_result['C9OalphasI'].append(alI)
+        saved_result['C7OalphasR'].append(C7alR)
+        saved_result['C7OalphasI'].append(C7alI)
+        saved_result['C9OlambR'].append(lamR)
+        saved_result['C9OlambI'].append(lamI)
 
-    #gv.dump(saved_result,'Fits/C9_corrections.pickle')
+    gv.dump(saved_result,'Fits/C9_corrections.pickle')
     return()
-#save_results()
+
 
 ###########################################
 
@@ -759,11 +812,13 @@ def do_plots():
     alphaI = []
     lambdaR = []
     lambdaI = []
+    C7alphaR = []
+    C7alphaI = []
     TotC9Rp = []
     TotC9Ip = []
     TotC9R0 = []
     TotC9I0 = []    
-    for qsq in np.linspace(5,20,100):
+    for qsq in np.linspace(4*m_e**2,qsqmaxphysBK.mean,1000):
         print('################### qsq =',qsq)
         Rp = 0
         Ip = 0
@@ -794,6 +849,9 @@ def do_plots():
         R,I = make_correction1(qsq)
         alphaR.append(-R) # minus because subtracts
         alphaI.append(-I)
+        R,I = make_correction3(qsq)
+        C7alphaR.append(-R) # minus because subtracts
+        C7alphaI.append(-I)
         R,I = make_correction2(qsq)
         lambdaR.append(R)
         lambdaI.append(I)
@@ -820,13 +878,13 @@ def do_plots():
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(2))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
     plt.plot([-10,30],[0,0],linestyle='--',color='k')
     plt.axes().set_ylim([-0.25,0.25])
-    plt.axes().set_xlim([-1,24])
+    plt.axes().set_xlim([0,corrcut])
     plt.tight_layout()
     plt.savefig('Plots/ReDelC9.pdf')
     plt.close()
@@ -853,13 +911,13 @@ def do_plots():
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(2))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.plot([-10,30],[0,0],linestyle='--',color='k')
     plt.axes().set_ylim([-0.8,0.1])
-    plt.axes().set_xlim([-1,24])
+    plt.axes().set_xlim([0,corrcut])
     plt.tight_layout()
     plt.savefig('Plots/ImDelC9.pdf')
     plt.close()
@@ -868,6 +926,11 @@ def do_plots():
     alRu,alRl = make_upp_low(alphaR)
     alIm,alIs = unmake_gvar_vec(alphaI)
     alIu,alIl = make_upp_low(alphaI)
+    
+    C7alRm,C7alRs = unmake_gvar_vec(C7alphaR)
+    C7alRu,C7alRl = make_upp_low(C7alphaR)
+    C7alIm,C7alIs = unmake_gvar_vec(C7alphaI)
+    C7alIu,C7alIl = make_upp_low(C7alphaI)
     
     laRm,laRs = unmake_gvar_vec(lambdaR)
     laRu,laRl = make_upp_low(lambdaR)
@@ -878,6 +941,11 @@ def do_plots():
     plt.fill_between(x,alRu,alRl, color='k',alpha=alpha)
     plt.plot(x, alIm, color='r',label=r'$\mathrm{Im}[C_9^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
     plt.fill_between(x,alIu,alIl, color='r',alpha=alpha)
+
+    plt.plot(x, C7alRm, color='c',label=r'$\mathrm{Re}[C_7^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
+    plt.fill_between(x,C7alRu,C7alRl, color='c',alpha=alpha)
+    plt.plot(x, C7alIm, color='purple',label=r'$\mathrm{Im}[C_7^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
+    plt.fill_between(x,C7alIu,C7alIl, color='purple',alpha=alpha)
     
     plt.plot(x, laRm, color='b',label=r'$\mathrm{Re}[C_9^{\mathrm{eff}}(\mathcal{O}(\lambda_u^{(s)}))]$')
     plt.fill_between(x,laRu,laRl, color='b',alpha=alpha)
@@ -898,7 +966,7 @@ def do_plots():
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.plot([-10,30],[0,0],linestyle='--',color='k')
-    plt.axes().set_ylim([-0.6,0.5])
+    plt.axes().set_ylim([-0.6,0.6])
     plt.axes().set_xlim([-1,24])
     plt.tight_layout()
     plt.savefig('Plots/C9effOalOla.pdf')
@@ -924,7 +992,7 @@ def do_plots():
     plt.plot(x, I0m, color='g',label=r'$f_+\mathrm{Im}[\Delta C_9^{\mathrm{eff}}(B^0)]$')
     plt.fill_between(x,I0l,I0u, color='g',alpha=alpha)
      
-    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower right')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -935,14 +1003,14 @@ def do_plots():
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.plot([-10,30],[0,0],linestyle='--',color='k')
-    plt.axes().set_ylim([-0.8,0.7])
-    plt.axes().set_xlim([-1,24])
+    plt.axes().set_ylim([-0.5,0.5])
+    plt.axes().set_xlim([0,corrcut])
     plt.tight_layout()
     plt.savefig('Plots/TotalDelC9eff.pdf')
     plt.close()
     return()
 
-#do_plots()
+
 
 
 
@@ -1036,4 +1104,7 @@ def plot_F1_F2():
 
     return()
 
+
+#save_results()
+#do_plots()
 #plot_F1_F2()

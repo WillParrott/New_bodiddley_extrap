@@ -252,7 +252,8 @@ pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0
 
 
 
-fs_at_lims_DK(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+fs_at_lims_DK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+ensemble_error_breakdown()
 spline_fs_at_lims_DK(pfit_sp,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 
 #ff_comp(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)

@@ -155,7 +155,8 @@ UF = collections.OrderedDict()
 UF['conf']='UF'
 UF['label'] = 'Set 8'
 #UF['filename'] = 'Corrfits/UFunbinned-run-KBscalarvectortensor_375cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV243340sep_mass_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.143_smTrue_Stmin2_Ttmin2_Vtmin2.pickle'
-UF['filename'] = 'Corrfits/UFnewVx_unbinned0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTVX243340sep_mass_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.140_smTrue_Stmin2_Ttmin2_Vtmin2_Xtmin2.pickle'
+#UF['filename'] = 'Corrfits/UFrun-KBscalarvectortensor_375cfgs_neg0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTV243340unchained_Nexp4_sfac1.0_pfac1.0_Q1.00_chi0.088_smTrue_Stmin1_Ttmin1_Vtmin1.pickle' # this one for binned comparison
+UF['filename'] = 'Corrfits/UFnewVx_unbinned0.1940.450.60.800.7061.5292.2354.705BGBNGKGKNGSTVX243340sep_mass_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.140_smTrue_Stmin2_Ttmin2_Vtmin2_Xtmin2.pickle' # this is normal one 
 UF['masses'] = ['0.194','0.45','0.6','0.8']
 UF['Zdisc'] = [0.99997,0.99928,0.99783,0.99377]
 UF['twists'] = ['0','0.706','1.529','2.235','4.705']
@@ -335,11 +336,11 @@ for Fit in Fits:
         
 for Fit in Fits:
     make_fs(Fit,fs_data[Fit['conf']],thpts,Z_T)
-    #results_tables(fs_data[Fit['conf']],Fit)
+    results_tables(fs_data[Fit['conf']],Fit)
     #mass_corr_plots(Fit,fs_data[Fit['conf']],thpts,F,fs_data['F'])
 #check_poles(Fits) Not working atm
 #plot_gold_non_split(Fits)
-#fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #Z_V_plots(Fits,fs_data)
 ################################ Test average #####################################
 average_t_0_cases = gv.BufferDict()
@@ -387,16 +388,16 @@ fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2,corrections=False)
+#Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Bnu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-do_phi_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#do_phi_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ##########################
 #p_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 ###############################

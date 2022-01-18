@@ -19,7 +19,7 @@ import pickle
 from collections import defaultdict
 
 ################### global variables ##########################################
-factor = 1.0 #multiplies everything to make smaller for big plots (0.5) usually 1
+factor = 0.5 #multiplies everything to make smaller for big plots (0.5) usually 1
 if factor ==1.0:
     faclab = '1'
 elif factor == 0.5:
@@ -27,7 +27,7 @@ elif factor == 0.5:
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor
-nopts = 100 #number of points on plot
+nopts = 500 #number of points on plot
 ms = 25*factor #markersize
 alpha = 0.4
 fontsizeleg = 25*factor #legend
@@ -750,6 +750,69 @@ def fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
     plt.tight_layout()
     plt.savefig('Plots/fpV0V1diff{0}.pdf'.format(faclab))
     plt.close()
+    #######################################
+    i = 0
+    plt.figure(figsize=figsize)
+    plotfits = []
+    for Fit in Fits:
+        if Fit['conf'] not in ['UFs']:
+            plotfits.append(Fit)
+    for Fit in plotfits:
+        if Fit['conf' ] == 'F':
+            F = Fit
+        if Fit['conf' ] == 'SF':
+            SF = Fit
+        j = 0
+        for mass in Fit['masses']:
+            qsq = []
+            y0 = []
+            y1 = []
+            mom = []
+            for twist in Fit['twists']:                    
+                if fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
+                    q2 = fs_data[Fit['conf']]['qsq_m{0}_tw{1}'.format(mass,twist)]
+                    V1 = fs_data[Fit['conf']]['fp2_m{0}_tw{1}'.format(mass,twist)]
+                    V0 = fs_data[Fit['conf']]['fp_m{0}_tw{1}'.format(mass,twist)]
+                    #print(gv.evalcorr([V1,V0]))
+                    y0.append(V0)
+                    y1.append(V1)
+                    qsq.append(q2)
+                    mom.append((Fit['momenta'][Fit['twists'].index(twist)])**2)
+                    #print('PLOT',Fit['conf'],(Fit['momenta'][Fit['twists'].index(twist)])**2)
+
+            y0,y0err = unmake_gvar_vec(y0)
+            y1,y1err = unmake_gvar_vec(y1)
+            qsq,qsqerr = unmake_gvar_vec(qsq)
+            if y0 != []:
+                if Fit['conf' ] == 'SF':
+                    plt.errorbar(np.array(qsq)-0.0065, y0, yerr=y0err, color=cols[j], fmt=symbs[i],ms=ms,label=('{0} m{1}'.format(Fit['label'],mass)))
+                    plt.errorbar(np.array(qsq)+0.0065, y1, yerr=y1err, color=cols[j], fmt=symbs[i],ms=ms,mfc='none',capsize=capsize)
+                elif Fit['conf' ] == 'UF':
+                    plt.errorbar(np.array(qsq)+0.0065, y0, yerr=y0err, color=cols[j], fmt=symbs[i],ms=ms,label=('{0} m{1}'.format(Fit['label'],mass)))
+                    plt.errorbar(np.array(qsq)-0.0065, y1, yerr=y1err, color=cols[j], fmt=symbs[i],ms=ms,mfc='none',capsize=capsize)
+                #plt.errorbar(mom, y, yerr=yerr, color=cols[j], fmt=symbs[i],ms=ms, mfc='none',label=('{0} m{1}'.format(Fit['label'],mass)),capsize=capsize)
+            j += 1
+        i += 1
+    #plt.plot([0,30],[1,1],color='k',linestyle='--')
+    handles, labels = plt.gca().get_legend_handles_labels()
+    handles = [h[0] for h in handles]
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
+    plt.xlabel('$(aq)^2$',fontsize=fontsizelab)
+    #plt.xlabel(r'$(|a\vec{p}_K|^2)$',fontsize=fontsizelab)
+    plt.ylabel(r'$f_+$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.xlim([0,1])
+    plt.ylim([0.5,3.2])
+    plt.tight_layout()
+    plt.savefig('Plots/fpV0V1{0}.pdf'.format(faclab))
+    plt.close()
     
     return()
 
@@ -1041,10 +1104,12 @@ def fT_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const
 ################################################################################################
 
 def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
+    #binned = collections.OrderedDict() ####
     i = 0
     plotfits = []
     for Fit in Fits:
         if Fit['conf'] not in ['UFs']:
+            #if Fit['conf'] not in ['VCp','Cp','Fp','VC','C','UF','UFs']: ####
             plotfits.append(Fit)
     for Fit in plotfits:
         if Fit['conf' ] == 'F':
@@ -1096,6 +1161,8 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
                 pole = 1-(q2/MHs0**2)
                 y2.append((pole*make_f0_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass))).mean)
             qsq,qsqerr = unmake_gvar_vec(qsq)
+            #binned['{0}'.format(mass)] = y ####
+            #binned['{0}_z'.format(mass)] = z ####
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
             
@@ -1109,6 +1176,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
             
             j += 1
         i += 1
+    #gv.dump(binned,'Fits/S_binned_for_comp.pickle') ####
     qsq = []
     z = []
     y = []
@@ -1153,11 +1221,6 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.figure(9,figsize=figsize)
     plt.plot(z,ymean, color='b')
     plt.fill_between(z,ylow,yupp, color='b',alpha=alpha)
-   # if dataf0maxBsEtas != None and adddata:
-   #     pole = 1 - qsqmaxphysBK/(MBsphys+Del)**2
-   #     plt.errorbar( make_z(qsqmaxphysBK,t_0,MBsphys,Metasphys).mean, (pole*dataf0maxBsEtas).mean, xerr=make_z(qsqmaxphysBK,t_0,MBsphys,Metasphys).sdev, yerr=(pole*dataf0maxBsEtas).sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$\mathrm{arXiv:} 1510.07446$')
-   # if dataf00BsEtas != None and adddata:
-  #      plt.errorbar(make_z(0,t_0,MBsphys,Metasphys).mean, dataf00BsEtas.mean,xerr = make_z(0,t_0,MBsphys,Metasphys).sdev ,yerr=dataf00BsEtas.sdev, color='k', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
@@ -1174,15 +1237,19 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     plt.tight_layout()
     plt.savefig('Plots/f0nopoleinz{0}.pdf'.format(faclab))
     plt.close()
+
     return()
 
 ################################################################################################
 
 def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,const2):
+    #binned = collections.OrderedDict() ####
     i = 0
     plotfits = []
     for Fit in Fits:
         if Fit['conf'] not in ['UFs']:
+            #if Fit['conf'] not in ['VCp','Cp','Fp','VC','C','F','SF','Fs','SFs']: ####
+            #if Fit['conf'] not in ['VCp','Cp','Fp','VC','C','UF','UFs']: ####
             plotfits.append(Fit)
     for Fit in plotfits:
         if Fit['conf' ] == 'F':
@@ -1245,6 +1312,8 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
                 pole = 1-(q2/MHsstar**2)
                 y2.append((pole*make_fp_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass),const2=const2)).mean)
             qsq,qsqerr = unmake_gvar_vec(qsq)
+            #binned['{0}'.format(mass)] = y ####
+            #binned['{0}_z'.format(mass)] = z ####
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
             qsq3,qsq3err = unmake_gvar_vec(qsq3)
@@ -1263,6 +1332,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
             
             j += 1
         i += 1
+    #gv.dump(binned,'Fits/V_binned_for_comp.pickle') ####
     qsq = []
     z = []
     y = []
@@ -1330,10 +1400,12 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
 ###############################################################################
 
 def fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata):
+    #binned =collections.OrderedDict() ####
     i = 0
     plotfits = []
     for Fit in Fits:
         if Fit['conf'] not in ['VCp','Cp','Fs','SFs','UFs']:
+            #if Fit['conf'] not in ['VC','C','F','SF']: ####
             plotfits.append(Fit)
     for Fit in plotfits:
         fit = Fit['conf']
@@ -1363,6 +1435,8 @@ def fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
                 pole = 1-(q2/MHsstar**2)
                 y2.append((pole*make_fT_BK(Nijk,Npow,Nm,addrho,pfit,Fit,q2,t_0,mass,fpf0same,float(mass))).mean)
             qsq,qsqerr = unmake_gvar_vec(qsq)
+            #binned['{0}'.format(mass)] = y ####
+            #binned['{0}_z'.format(mass)] = z ####
             z,zerr = unmake_gvar_vec(z)
             y,yerr = unmake_gvar_vec(y)
             
@@ -1376,6 +1450,7 @@ def fT_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
             
             j += 1
         i += 1
+    #gv.dump(binned,'Fits/T_binned_for_comp.pickle') ####
     qsq = []
     z = []
     y = []
@@ -1539,7 +1614,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.fill_between(qsq,y0low,y0upp, color='b',alpha=alpha)
     plt.plot(qsq, ypmean, color='r',linestyle='-',label='$f_+(q^2)$')
     plt.fill_between(qsq,yplow,ypupp, color='r',alpha=alpha)
-    plt.plot(qsq, yTmean, color='g',linestyle='-',label='$f_T(q^2)$')
+    plt.plot(qsq, yTmean, color='g',linestyle='-',label='$f_T(q^2,\mu=4.8~\mathrm{GeV})$')
     plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=alpha)
     #plt.plot
     #plt.errorbar(0,0.319, yerr=0.066,fmt='r*',ms=ms,mfc='none')#,label = r'arXiv:1306.2384',lw=lw)
@@ -1561,6 +1636,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
+    plt.ylim([0,3])
     plt.tight_layout()
     plt.savefig('Plots/f0fpfTinqsq{0}.pdf'.format(faclab))
     plt.close()
@@ -1573,11 +1649,11 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.figure(figsize=figsize)
     plt.plot(qsq, y0pmean, color='b',linestyle='-',label='$f_0/f_+$')
     plt.fill_between(qsq,y0plow,y0pupp, color='b',alpha=alpha)
-    plt.plot(qsq, ycompmean, color='b',linestyle=':',label=r'$1-\frac{q^2}{M_B^2-M_K^2}$')
+    plt.plot(qsq, ycompmean, color='b',linestyle='--',lw=lw,label=r'$1-\frac{q^2}{M_B^2-M_K^2}$')
     
     plt.plot(qsq, yTpmean, color='g',linestyle='-',label='$f_T/f_+$')
     plt.fill_between(qsq,yTplow,yTpupp, color='g',alpha=alpha)
-    plt.plot([0,qsqmaxphysBK.mean],[1+(p['MKphys']/p['MBphys']).mean,1+(p['MKphys']/p['MBphys']).mean],color='g',linestyle=':',label=r'$1+\frac{M_K}{M_B}$')
+    plt.plot([0,qsqmaxphysBK.mean],[1+(p['MKphys']/p['MBphys']).mean,1+(p['MKphys']/p['MBphys']).mean],color='g',linestyle='--',lw=lw,label=r'$1+\frac{M_K}{M_B}$')
     #plt.plot
     handles, labels = plt.gca().get_legend_handles_labels()
     #handles = [h[0] for h in handles]
@@ -1658,6 +1734,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
+    plt.ylim([0,3])
     plt.tight_layout()
     plt.savefig('Plots/f0fpandBsetasinqsq{0}.pdf'.format(faclab))
     plt.close()
@@ -1670,7 +1747,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.plot(Bcqsqs, BcyTsmean, color='g',linestyle='-.',label='$f_T(q^2)~B_c\to D_s$')
     plt.fill_between(Bcqsqs,BcyTslow,BcyTsupp, color='g',alpha=Ac)
 
-    handles = [ Patch(facecolor='g', edgecolor='g',label=r'$f_T~B\to K$',alpha=Al),Patch(facecolor='g', edgecolor='g',label=r'$f_T~B_c\to D_s$',alpha=Ac)]
+    handles = [ Patch(facecolor='g', edgecolor='g',label=r'$f_T(\mu=4.8~\mathrm{GeV})~B\to K$',alpha=Al),Patch(facecolor='g', edgecolor='g',label=r'$f_T(\mu=4.8~\mathrm{GeV})~B_c\to D_s$',alpha=Ac)]
     plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -1683,6 +1760,7 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
     #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
+    plt.ylim([0,3])
     plt.tight_layout()
     plt.savefig('Plots/fTandBcDsinqsq{0}.pdf'.format(faclab))
     plt.close()
@@ -1696,11 +1774,19 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
         qsq.append(q2)
         y0.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
         yp.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2))
+     
     Dsdata  = gv.load('Fits/Dsetas_for_DK.pickle')
     qsqs = list(Dsdata['qsq'])
     qsq = np.array(qsq)
     f0s = list(Dsdata['f0'])
     fps = list(Dsdata['fp'])
+    #y0_Dsmax = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqs[-1],t_0,Fits[0]['masses'][0],fpf0same,0)
+
+    Bcdata  = gv.load('Fits/data_BcBs.pickle')
+    qsqb = list(Bcdata['qsq'])
+    f0b = list(Bcdata['f0_ctos'])
+    fpb = list(Bcdata['fp_ctos'])
+    #y0_Bcmax = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqc[-1],t_0,Fits[0]['masses'][0],fpf0same,0)
 
     y0mean,y0err = unmake_gvar_vec(y0)
     y0upp,y0low = make_upp_low(y0)
@@ -1711,6 +1797,12 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     y0supp,y0slow = make_upp_low(f0s)
     ypsmean,ypserr = unmake_gvar_vec(fps)
     ypsupp,ypslow = make_upp_low(fps)
+
+    y0bmean,y0berr = unmake_gvar_vec(f0b)
+    y0bupp,y0blow = make_upp_low(f0b)
+    ypbmean,ypberr = unmake_gvar_vec(fpb)
+    ypbupp,ypblow = make_upp_low(fpb)
+    
     
     plt.figure(figsize=figsize)
     plt.plot(qsq, y0mean, color='b',linestyle='-',label='$f_0(q^2)~D\to K$')
@@ -1723,7 +1815,14 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.plot(qsqs, ypsmean, color='r',linestyle='--',label='$f_+(q^2)~D_s\to\eta_s$')
     plt.fill_between(qsqs,ypslow,ypsupp, color='r',alpha=As)
 
-    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0~D\to K$',alpha=Al),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D\to K$',alpha=Al),Patch(facecolor='b', edgecolor='b',label=r'$f_0~D_s\to\eta_s$',alpha=As),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D_s\to\eta_s$',alpha=As)]
+    plt.plot(qsqb, y0bmean, color='b',linestyle=':',label='$f_0(q^2)~B_c\to B_s$')
+    plt.fill_between(qsqb,y0blow,y0bupp,color='b',alpha=Ac)
+    plt.plot(qsqb, ypbmean, color='r',linestyle=':',label='$f_+(q^2)~B_c\to B_s$')
+    plt.fill_between(qsqb,ypblow,ypbupp, color='r',alpha=Ac)
+    #print('f_0 D_s -> eta_s at q^2_max = ',f0s[-1])#need to be clear about what this is saying
+    #print('f_0 D -> K at q^2_max = ',y0_Dsmax)
+    #print('f_0 Bc -> Bs at q^2_max = ',y0_Bcmax)
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0~D\to K$',alpha=Al),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D\to K$',alpha=Al),Patch(facecolor='b', edgecolor='b',label=r'$f_0~D_s\to\eta_s$',alpha=As),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D_s\to\eta_s$',alpha=As),Patch(facecolor='b', edgecolor='b',label=r'$f_0~B_c\to B_s$',alpha=Ac),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B_c\to B_s$',alpha=Ac)]
     plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -1762,11 +1861,11 @@ def Hill_eq_19_20(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     e20mean,e20err = unmake_gvar_vec(e20)
     e20upp,e20low = make_upp_low(e20)
     plt.figure(10,figsize=figsize)
-    plt.plot(E, e19mean, color='b',linestyle='-',label='Hill Eq. (19)')
+    plt.plot(E, e19mean, color='b',linestyle='-',label='Eq. (28)')
     plt.fill_between(E,e19low,e19upp, color='b',alpha=alpha)
-    plt.plot(E, e20mean, color='r',linestyle='-',label='Hill Eq. (20)')
+    plt.plot(E, e20mean, color='r',linestyle='-',label='Eq. (29)')
     plt.fill_between(E,e20low,e20upp, color='r',alpha=alpha)
-    plt.plot([0,3],[expectation.mean,expectation.mean],label=r'$\frac{M_B}{M_B+M_K}$',color='k')
+    plt.plot([0,3],[expectation.mean,expectation.mean],linestyle='--',lw=lw,label=r'$\frac{M_B}{M_B+M_K}$',color='k')
     #print('expectation',expectation)
     handles, labels = plt.gca().get_legend_handles_labels()
     #handles = [h[0] for h in handles]
@@ -1917,9 +2016,9 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #FNAL
     plt.errorbar(p['MBphys'].mean-0.05,0.332, yerr=0.038,fmt='k^',ms=ms,mfc='none',lw=lw,capsize=capsize,label="FNAL '15")#1509.06235
     plt.errorbar(p['MBphys'].mean-0.05,0.850, yerr=0.021,fmt='b^',ms=ms,mfc='none',lw=lw,capsize=capsize,label="FNAL '15")#1509.06235
-    plt.errorbar(p['MBphys'].mean-0.05,2.678, yerr=0.068,fmt='r^',ms=ms,mfc='none',lw=lw,capsize=capsize,label="FNAL '15")#1509.06235
     plt.errorbar(p['MBphys'].mean-0.05,0.276, yerr=0.066,fmt='g^',ms=ms,mfc='none',lw=lw,capsize=capsize,label="FNAL '15")#1509.06235
-    plt.errorbar(p['MBphys'].mean-0.05,2.708, yerr=0.092,fmt='^',color='purple',ms=ms,mfc='none',lw=lw,capsize=capsize,label="FNAL '15")#1509.06235
+    plt.errorbar(p['MBphys'].mean-0.05,2.708, yerr=0.099,fmt='^',color='purple',ms=ms,mfc='none',lw=lw,capsize=capsize,label="FNAL '15")#1509.06235
+    plt.errorbar(p['MBphys'].mean-0.05,2.678, yerr=0.071,fmt='r^',ms=ms,mfc='none',lw=lw,capsize=capsize,label="FNAL '15")#1509.06235
 ###########################################
     #LCSR
     plt.errorbar(p['MBphys'].mean,0.27, yerr=0.08,fmt='kd',ms=ms,mfc='none',lw=lw,capsize=capsize,label="Gubernari et al. '15")#1811.00983
@@ -2751,7 +2850,7 @@ def dBdq2_the_tau(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='lower center')
-    plt.axes().set_ylim([0,0.25])
+    plt.axes().set_ylim([0,0.3])
     plt.axes().set_xlim([12.5,23])
     plt.tight_layout()
     plt.savefig('Plots/dBdq2_the_tau{0}.pdf'.format(faclab))
@@ -2804,17 +2903,18 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('Btau',tau_res,'BaBar16','{0}+{1}-{2}'.format(tau_x[0]*1e7,tau_xerr[1][0]*1e7,tau_xerr[0][0]*1e7))
     plt.errorbar(res.mean,14, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[16,16], color='k',alpha=alpha/2)
-    plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[16,16], edgecolor='k',fc='none',alpha=alpha,hatch='X')    
+    #plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[16,16], edgecolor='k',fc='none',alpha=alpha,hatch='X')
+    print('Bp difference without vetoed regions', res,res2,res2/res *100,"%")
     labs.append("HPQCD '21")
-    plt.text(2.3,9.0,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab, va='center')
-    plt.text(2.3,4.0,r'$B^+\to{}K^+\mu^+\mu^-$',fontsize=fontsizelab, va='center')
-    plt.text(2.3,12.5,r'$B^+\to{}K^+\ell^+\ell^-$',fontsize=fontsizelab, va='center')
+    plt.text(2.1,9.0,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab, va='center')
+    plt.text(2.1,4.0,r'$B^+\to{}K^+\mu^+\mu^-$',fontsize=fontsizelab, va='center')
+    plt.text(2.1,12.5,r'$B^+\to{}K^+\ell^+\ell^-$',fontsize=fontsizelab, va='center')
     plt.xlabel(r'$10^{7}\mathcal{B}^{(+)}$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([2.2,7.0])
+    plt.xlim([2.0,7.7])
     plt.ylim([0.5,14.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -2864,15 +2964,15 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[12,12], color='k',alpha=alpha/2)
     plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[12,12], edgecolor='k',fc='none',alpha=alpha,hatch='X') 
     labs.append("HPQCD '21")
-    plt.text(6.15,6.5,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab, va='center')
-    plt.text(6.15,3.0,r'$B^0\to{}K^0\mu^+\mu^-$',fontsize=fontsizelab, va='center')
-    plt.text(6.15,9,r'$B^0\to{}K^0\ell^+\ell^-$',fontsize=fontsizelab, va='center')
+    plt.text(7,6.5,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab, va='center')
+    plt.text(7,3.0,r'$B^0\to{}K^0\mu^+\mu^-$',fontsize=fontsizelab, va='center')
+    plt.text(7,9,r'$B^0\to{}K^0\ell^+\ell^-$',fontsize=fontsizelab, va='center')
     plt.xlabel(r'$10^{7}\mathcal{B}^{(0)}$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([-0.5,9.3])
+    plt.xlim([-0.5,10.0])
     plt.ylim([0.5,11.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -2931,7 +3031,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([1.5,6.6])
+    plt.xlim([1.5,7.1])
     plt.ylim([0.5,9.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -3103,7 +3203,7 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([0.7,1.9])
+    plt.xlim([0.7,2.1])
     plt.ylim([0.5,10.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -3455,6 +3555,7 @@ def R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     resmue = (resmue-1)*100
     restaumu = (restaumu1top/restaumu1bot +restaumu2top/restaumu2bot)/2
     restaumu =restaumu-1
+    print("Rtaumu-1 tension with HPQCD '13: {0:.2f}".format((restaumu-R).mean/(restaumu-R).sdev))
     plt.errorbar(resmue.mean,2, xerr=resmue.sdev,ms=ms,fmt='*',color='b',capsize=capsize,lw=lw)
     labs.append("HPQCD '21")
     plt.errorbar(restaumu.mean,4, xerr=restaumu.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
@@ -3570,11 +3671,12 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.errorbar(x,3, xerr=xerr,ms=ms,fmt=the.sym,color='r' ,capsize=capsize,lw=lw)
     
     #plt.plot([0,0],[-1,10],color='k',linestyle='--')
-    plt.plot([30,150],[2.5,2.5],color='k')
+    plt.plot([30,300],[2.5,2.5],color='k')
     #plt.plot([0,30],[4.5,4.5],color='k')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     qsq_max = qsqmaxphysBKp.mean
     qsq_min = 4*m_lep**2
+    #qsq_min = 4*m_mu**2 # added as test 
     res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     plt.errorbar(res.mean,4, xerr=res.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
     labs.append("HPQCD '21")
@@ -3593,12 +3695,12 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([60,105])
+    plt.xlim([30,100])
     plt.ylim([0.5,4.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
-    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
-    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(20))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(10))
     plt.tight_layout()
     plt.savefig('Plots/FH_the_e{0}.pdf'.format(faclab))
     plt.close()
@@ -4081,42 +4183,96 @@ def DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho):
 def results_tables(fs_data,Fit):
     table = open('Tables/{0}table.txt'.format(Fit['conf']),'w')
     lines = collections.OrderedDict()
-    for mass in Fit['masses']:
-        table.write('      \hline \n')
-        #table.write('      &{0}'.format(mass))
-        #lines[0] = '      \multirow\\{{3}\\}\\{\\}\\{{0}\\}&\multirow{{3}}{}{{1}}&\multirow{{3}}{}{{2}}'.format(Fit['label'].split(' ')[1],mass,Fit['M_parent_m{0}'.format(mass)],len(Fit['twists'])+1)
-        lines[0] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + Fit['label'].split(' ')[1] + '}'
-        lines[1] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + str(mass) + '}'
-        lines[2] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + str(Fit['M_parent_m{0}'.format(mass)]) + '}'
-        for i in range(3,len(Fit['twists'])):
-            lines[i] = '      '
-        for tw,twist in enumerate(Fit['twists']):
-            lines[tw] = '{0}&{1}&{2}&{3}&{4}'.format(lines[tw],fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['E_daughter_tw{0}_theory'.format(twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)])
-            if 'X_m{0}_tw{1}'.format(mass,twist) in Fit:
-                lines[tw] = '{0}&{1}'.format(lines[tw],Fit['X_m{0}_tw{1}'.format(mass,twist)])
-            else:
-                lines[tw] = '{0}&-'.format(lines[tw])
-            if 'T_m{0}_tw{1}'.format(mass,twist) in Fit:
-                lines[tw] = '{0}&{1}'.format(lines[tw],Fit['T_m{0}_tw{1}'.format(mass,twist)])
-            else:
-                lines[tw] = '{0}&-'.format(lines[tw])
-            lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['f0_m{0}_tw{1}'.format(mass,twist)])
-            if fs_data['fp_m{0}_tw{1}'.format(mass,twist)] != None:
-                lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fp_m{0}_tw{1}'.format(mass,twist)])
-            else:
-                lines[tw] = '{0}&-'.format(lines[tw])
-            if fs_data['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
-                lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fp2_m{0}_tw{1}'.format(mass,twist)])
-            else:
-                lines[tw] = '{0}&-'.format(lines[tw])
-            if fs_data['fT_m{0}_tw{1}'.format(mass,twist)] != None:
-                lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fT_m{0}_tw{1}'.format(mass,twist)])
-            else:
-                lines[tw] = '{0}&-'.format(lines[tw])
-            lines[tw] = '{0}\\\\ [1ex]\n'.format(lines[tw])
-            table.write(lines[tw])
+    if Fit['conf'] in ['SF','UF']: #where we have V^1 data
+        for mass in Fit['masses']:
+            table.write('      \hline \n')
+            #table.write('      &{0}'.format(mass))
+            #lines[0] = '      \multirow\\{{3}\\}\\{\\}\\{{0}\\}&\multirow{{3}}{}{{1}}&\multirow{{3}}{}{{2}}'.format(Fit['label'].split(' ')[1],mass,Fit['M_parent_m{0}'.format(mass)],len(Fit['twists'])+1)
+            lines[0] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + Fit['label'].split(' ')[1] + '}'
+            lines[1] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + str(mass) + '}'
+            lines[2] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + str(Fit['M_parent_m{0}'.format(mass)]) + '}'
+            for i in range(3,len(Fit['twists'])):
+                lines[i] = '      '
+            for tw,twist in enumerate(Fit['twists']):
+                lines[tw] = '{0}&{1}&{2}&{3}'.format(lines[tw],fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)])
+                if 'X_m{0}_tw{1}'.format(mass,twist) in Fit:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],Fit['X_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}&-'.format(lines[tw])
+                if 'T_m{0}_tw{1}'.format(mass,twist) in Fit:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],Fit['T_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}&-'.format(lines[tw])
+                lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['f0_m{0}_tw{1}'.format(mass,twist)])
+                if fs_data['fp_m{0}_tw{1}'.format(mass,twist)] != None:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fp_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}&-'.format(lines[tw])
+                if fs_data['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fp2_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}&-'.format(lines[tw])
+                if fs_data['fT_m{0}_tw{1}'.format(mass,twist)] != None:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fT_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}&-'.format(lines[tw])
+                lines[tw] = '{0}\\\\ [1ex]\n'.format(lines[tw])
+                table.write(lines[tw])
+    else: #where we have no V^1 data
+        for mass in Fit['masses']:
+            table.write('      \hline \n')
+            #table.write('      &{0}'.format(mass))
+            #lines[0] = '      \multirow\\{{3}\\}\\{\\}\\{{0}\\}&\multirow{{3}}{}{{1}}&\multirow{{3}}{}{{2}}'.format(Fit['label'].split(' ')[1],mass,Fit['M_parent_m{0}'.format(mass)],len(Fit['twists'])+1)
+            lines[0] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + Fit['label'].split(' ')[1] + '}'
+            lines[1] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + str(mass) + '}'
+            lines[2] = '      \multirow{' + str((len(Fit['twists'])+1)/3) + '}' + '{*}{' + str(Fit['M_parent_m{0}'.format(mass)]) + '}'
+            for i in range(3,len(Fit['twists'])):
+                lines[i] = '      '
+            for tw,twist in enumerate(Fit['twists']):
+                lines[tw] = '{0}&{1}&{2}&{3}'.format(lines[tw],fs_data['qsq_m{0}_tw{1}'.format(mass,twist)],Fit['S_m{0}_tw{1}'.format(mass,twist)],Fit['V_m{0}_tw{1}'.format(mass,twist)])
+                if 'X_m{0}_tw{1}'.format(mass,twist) in Fit:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],Fit['X_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}'.format(lines[tw])
+                if 'T_m{0}_tw{1}'.format(mass,twist) in Fit:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],Fit['T_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}&-'.format(lines[tw])
+                lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['f0_m{0}_tw{1}'.format(mass,twist)])
+                if fs_data['fp_m{0}_tw{1}'.format(mass,twist)] != None:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fp_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}&-'.format(lines[tw])
+                if fs_data['fp2_m{0}_tw{1}'.format(mass,twist)] != None:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fp2_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}'.format(lines[tw])
+                if fs_data['fT_m{0}_tw{1}'.format(mass,twist)] != None:
+                    lines[tw] = '{0}&{1}'.format(lines[tw],fs_data['fT_m{0}_tw{1}'.format(mass,twist)])
+                else:
+                    lines[tw] = '{0}&-'.format(lines[tw])
+                lines[tw] = '{0}\\\\ [1ex]\n'.format(lines[tw])
+                table.write(lines[tw])
                 
-       
+        
+    table.close()
+    make_EKtable(fs_data,Fit)
+    return()
+
+def make_EKtable(fs_data,Fit):
+    table = open('Tables/Ek_{0}.txt'.format(Fit['conf']),'w')
+    lines = collections.OrderedDict()
+    table.write('      \hline \n')
+    lines[0] = '      \multirow{' + str((len(Fit['twists'])+1)) + '}' + '{*}{' + Fit['label'].split(' ')[1] + '}'
+    for i in range(1,len(Fit['twists'])):
+        lines[i] = '      '
+    for tw,twist in enumerate(Fit['twists']):
+        ap = Fit['momenta'][tw]
+        EK_the = Fit['E_daughter_tw{0}_theory'.format(twist)]
+        EK_fit = Fit['E_daughter_tw{0}_fit'.format(twist)]
+        lines[tw] = '{0}&{1}&{2:.4f}&{3}&{4}'.format(lines[tw],twist,ap,EK_the,EK_fit)
+        lines[tw] = '{0}\\\\ [1ex]\n'.format(lines[tw])
+        table.write(lines[tw])
     table.close()
     return()
 
@@ -4606,7 +4762,8 @@ def make_emu_bins(m_l,B=False):
         qsq_max = qsqmaxphysBK.mean
     #bins = [[4*m_l**2,qsq_max],[4*m_l**2,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsq_max],[1,6],[0.1,2]]# for Bemu 
     #bins = [[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[11,11.8]]#
-    bins = [[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
+    #bins = [[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
+    bins = [[4*m_l**2,qsq_max],[1,6],[15,22],[0.1,2],[2,4],[4,6],[6,8],[15,17],[17,19],[19,22]]
     return(bins)
 ###############################################################################################################
 def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
@@ -5206,7 +5363,7 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ####################### e 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     bins = make_emu_bins(m_lep,B='0')
-    line3 = '     $10^3F_H^{\\ell(+)}$ &'
+    line3 = '     $10^3F_H^{\\ell(0)}$ &'
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -5219,7 +5376,7 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## e ###########################################
-    line3 = '     $10^3F_H^{\\ell(+)}$ &'
+    line3 = '     $10^3F_H^{\\ell}$ &'
     bins = make_emu_bins(m_lep)
     for element in bins:
         qsq_min = element[0]
@@ -5662,13 +5819,13 @@ def do_phi_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     charge ='p'
     m1tag = 'e'
     m2tag = 'mu'
-    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    #plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
     m1tag = 'e'
     m2tag = 'tau'
-    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    #plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
     m1tag = 'mu'
     m2tag = 'tau'
-    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    #plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
     return()
 
 def plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge):
@@ -5724,11 +5881,11 @@ def plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m
     y = phi10
     ymean,yerr = unmake_gvar_vec(y)
     yupp,ylow = make_upp_low(y)
-    plt.plot(qsq, ymean, color='b',label='$\phi_10$')
+    plt.plot(qsq, ymean, color='b',label='$\phi_{10}$')
     plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
     #handles, labels = plt.gca().get_legend_handles_labels()
     #handles = [h[0] for h in handles]
-    plt.legend(fontsize=fontsizeleg,frameon=False,loc='upper left')
+    plt.legend(fontsize=fontsizeleg,frameon=False)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$\phi_{9,10}(q^2)\times10^{9}$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -5757,7 +5914,7 @@ def plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m
     plt.fill_between(qsq,ylow,yupp, color='b',alpha=alpha)
     #handles, labels = plt.gca().get_legend_handles_labels()
     #handles = [h[0] for h in handles]
-    plt.legend(fontsize=fontsizeleg,frameon=False,loc='upper left')
+    plt.legend(fontsize=fontsizeleg,frameon=False)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.ylabel(r'$\phi_{S,P}(q^2)\times10^{9}$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
