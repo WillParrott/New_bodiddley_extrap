@@ -71,13 +71,14 @@ def check_converged(a):
             return(True)
         elif a[-1].sdev == 0:
             check = abs((a[-1]-a[-2])/a[-1])
-            if check < 0.001: #absolute value changes by less than 1%
+            if check < 0.001: #absolute value changes by less than 0.1%
                 return(True)
             else:
                 return(False)
         else:
-            check = abs((a[-1].mean-a[-2].mean)/a[-1].sdev)
-            if check < 0.05: #changes by % of a sigma - allows for slower/quicker convergence 5% seems fine
+            check1 = abs((a[-1].mean-a[-2].mean)/a[-1].sdev)
+            check2 = abs((a[-1].sdev-a[-2].sdev)/a[-1].sdev)
+            if check1 < 0.01 and check2 < 0.01: #changes by % of a sigma - allows for slower/quicker convergence 5% seems fine
                 return(True)
             else:
                 return(False)
@@ -86,7 +87,7 @@ def check_converged(a):
             return(True)
         else:    
             check = abs((a[-1]-a[-2])/a[-1])
-            if check < 0.001: #absolute value changes by less than 1%
+            if check < 0.001: #absolute value changes by less than 0.1%
                 return(True)
             else:
                 return(False)
@@ -818,7 +819,7 @@ def do_plots():
     TotC9Ip = []
     TotC9R0 = []
     TotC9I0 = []    
-    for qsq in np.linspace(4*m_e**2,qsqmaxphysBK.mean,1000):
+    for qsq in np.linspace(4*m_e**2,qsqmaxphysBK.mean,200):
         print('################### qsq =',qsq)
         Rp = 0
         Ip = 0
@@ -937,19 +938,19 @@ def do_plots():
     laIm,laIs = unmake_gvar_vec(lambdaI)
     laIu,laIl = make_upp_low(lambdaI)
     plt.figure(figsize=figsize)
-    plt.plot(x, alRm, color='k',label=r'$\mathrm{Re}[C_9^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
+    plt.plot(x, alRm, color='k',label=r'$\mathrm{Re}[\delta C_9^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
     plt.fill_between(x,alRu,alRl, color='k',alpha=alpha)
-    plt.plot(x, alIm, color='r',label=r'$\mathrm{Im}[C_9^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
+    plt.plot(x, alIm, color='r',label=r'$\mathrm{Im}[\delta C_9^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
     plt.fill_between(x,alIu,alIl, color='r',alpha=alpha)
 
-    plt.plot(x, C7alRm, color='c',label=r'$\mathrm{Re}[C_7^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
+    plt.plot(x, C7alRm, color='c',label=r'$\mathrm{Re}[\delta C_7^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
     plt.fill_between(x,C7alRu,C7alRl, color='c',alpha=alpha)
-    plt.plot(x, C7alIm, color='purple',label=r'$\mathrm{Im}[C_7^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
+    plt.plot(x, C7alIm, color='purple',label=r'$\mathrm{Im}[\delta C_7^{\mathrm{eff}}(\mathcal{O}(\alpha_s))]$')
     plt.fill_between(x,C7alIu,C7alIl, color='purple',alpha=alpha)
     
-    plt.plot(x, laRm, color='b',label=r'$\mathrm{Re}[C_9^{\mathrm{eff}}(\mathcal{O}(\lambda_u^{(s)}))]$')
+    plt.plot(x, laRm, color='b',label=r'$\mathrm{Re}[\delta C_9^{\mathrm{eff}}(\mathcal{O}(\lambda_u^{(s)}))]$')
     plt.fill_between(x,laRu,laRl, color='b',alpha=alpha)
-    plt.plot(x, laIm, color='g',label=r'$\mathrm{Im}[C_9^{\mathrm{eff}}(\mathcal{O}(\lambda_u^{(s)}))]$')
+    plt.plot(x, laIm, color='g',label=r'$\mathrm{Im}[\delta C_9^{\mathrm{eff}}(\mathcal{O}(\lambda_u^{(s)}))]$')
     plt.fill_between(x,laIu,laIl, color='g',alpha=alpha)
    
     #handles, labels = plt.gca().get_legend_handles_labels()
@@ -966,7 +967,7 @@ def do_plots():
     plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
     plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
     plt.plot([-10,30],[0,0],linestyle='--',color='k')
-    plt.axes().set_ylim([-0.6,0.6])
+    plt.axes().set_ylim([-0.8,0.8])
     plt.axes().set_xlim([-1,24])
     plt.tight_layout()
     plt.savefig('Plots/C9effOalOla.pdf')
@@ -1106,5 +1107,5 @@ def plot_F1_F2():
 
 
 #save_results()
-#do_plots()
+do_plots()
 #plot_F1_F2()

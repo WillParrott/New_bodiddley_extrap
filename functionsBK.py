@@ -18,7 +18,8 @@ import math
 ####################################################################################################
 # Global parameters
 ####################################################################################################
-GF = gv.gvar('1.1663787(6)*1e-5') #Gev-2 #PDG
+eta_EW =  gv.gvar('1.007(2)') #for B to K
+GF = eta_EW * gv.gvar('1.1663787(6)*1e-5') #Gev-2 #PDG
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.9766(12)')# gv.gvar('2.98390(50)')  # From Christine not PDG
 Metas_C = gv.gvar('0.432855(40)')#fitted from Judd's data0.432853(42)
@@ -88,8 +89,13 @@ mbphys = gv.gvar('4.18(04)') # b mass GeV
 Del = 0.45 # 0.4 +0.5
 mlmsfac = 5.63/2  #gives ml/(mlmsfac*ms) 10 originally, now 5.63 with factor of 2 for difference in scales
 #Z_T_running = gv.gvar('1.0773(17)')#calcuated to run from m_b to 2GeV using evolvetest.py
+############ Corrections #########################################
+q_h_duality = gv.gvar('1.00(2)')#2% uncertainty on rate for quark hadron duality above vetoed region
+scale_err = gv.gvar('1.000(25)')#2.5% scale uncertainty on rate for quark hadron duality above vetoed region
 ufnorm = gv.gvar('1.00(1)')#adjusts uf matrix elements to allow for topological effects
-isocorr = gv.gvar('1.000(5)')
+isocorr0 = gv.gvar('1.000(5)') #To account for u<->d
+isocorrp = gv.gvar('1.000(5)') #To account for u<->d
+isocorrT = gv.gvar('1.000(5)') #To account for u<->d
 #### Allow for simple d/u test ######
 light = 'ml'
 if light == 'md': #B^0 and K^0 D^-
@@ -102,6 +108,7 @@ if light == 'mu': #B^+ and K^+ D^0
     MBphys0 = MBphysp
     MKphys0 = MKphysp
     #MDphysp = MDphys0
+
 qsqmaxphys = (MBsphys-Metasphys)**2
 qsqmaxphysBK0 = (MBphys0-MKphys0)**2 # This is the smaller of the two
 qsqmaxphysBKp = (MBphysp-MKphysp)**2
@@ -126,8 +133,12 @@ def unmake_gvar_vec(vec):
     mean = []
     sdev = []
     for element in vec:
-        mean.append(element.mean)
-        sdev.append(element.sdev)
+        if isinstance(element,gv._gvarcore.GVar):
+            mean.append(element.mean)
+            sdev.append(element.sdev)
+        elif isinstance(element,float) or isinstance(element,int): 
+            mean.append(element)
+            sdev.append(0)
     return(mean,sdev)
 
 ####################################################################################################
@@ -137,8 +148,12 @@ def make_upp_low(vec):
     upp = []
     low = []
     for element in vec:
-        upp.append(element.mean + element.sdev)
-        low.append(element.mean - element.sdev)
+        if isinstance(element,gv._gvarcore.GVar):
+            upp.append(element.mean + element.sdev)
+            low.append(element.mean - element.sdev)
+        elif isinstance(element,float) or isinstance(element,int):
+            upp.append(element)
+            low.append(element)
     return(upp,low)
 
 ####################################################################################################
@@ -1255,7 +1270,26 @@ C8eff = gv.gvar('-0.1630(6)')
 C10eff = gv.gvar('-4.193(33)')#gv.gvar('-4.103(82)')
 C9effbase = gv.gvar('4.114(14)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
 mu_scale = 4.2 #scale we use in GeV. This is the scale our Wilson coefficients are given in. We run f_T to this scale too.
-corrcut = 8.86 #cut off corrections
+corrcut = 8.68 #cut off corrections
+
+####### Allow for mu_scale test ################
+test_mu_effect = False
+if test_mu_effect: # allows the case where we take mu = 4.8, just move central values on things
+    print('WARNING: USING MU = 4.8GeV')
+    #m_bMSbar = gv.gvar('4.800(21)')
+    m_bMSbar = gv.gvar('4.108(24)') # effect of running m_b(m_b) to m_b(4.8)
+    mu_scale = 4.8
+    C1 = gv.gvar('-0.264(9)')#gv.gvar('-0.257(5)') new ones from 1606.00916
+    C2 = gv.gvar('1.015(1)')#gv.gvar('1.009(20)')
+    C3 = gv.gvar('-0.0051(2)')#  gv.gvar('-0.0050(1)')
+    C4 = gv.gvar('-0.080(1)')# gv.gvar('-0.078(2)')
+    C5 = 0.0004#0
+    C6 = gv.gvar('0.0009(1)')#0.001  # all the same up to C6 
+    C7eff = gv.gvar('-0.2915(5)')#gv.gvar('-0.304(6)')
+    C8eff = gv.gvar('-0.1606(6)')
+    C10eff = gv.gvar('-4.189(33)')#gv.gvar('-4.103(82)')
+    C9effbase = gv.gvar('4.053(14)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
+    
 #############################################################################################################
 
 def make_h(qsq,m):
@@ -1279,8 +1313,8 @@ C9effs = gv.BufferDict() # store C9eff for various q^2 values, to avoid costly r
 C9corrections = gv.load('Fits/C9_corrections.pickle')
 
 def make_C9eff(qsq,fp,charge,corrections=True): #modified by corrections in 1510.02349
-    if '{0}_{1}'.format(qsq,charge) in C9effs:
-        [C9effR,C9effI,C7corrR,C7corrI] = C9effs['{0}_{1}'.format(qsq,charge)]
+    if '{0}_{1}_{2}'.format(qsq,charge,corrections) in C9effs:
+        [C9effR,C9effI,C7corrR,C7corrI] = C9effs['{0}_{1}_{2}'.format(qsq,charge,corrections)]
     else:
         hR0,hI0 = make_h(qsq,0)
         hRc,hIc = make_h(qsq,m_c)
@@ -1341,7 +1375,7 @@ def make_C9eff(qsq,fp,charge,corrections=True): #modified by corrections in 1510
             C7corrI = 0    
         ##########################
         #print('After ',C9effR,C9effI)
-        C9effs['{0}_{1}'.format(qsq,charge)] = [C9effR,C9effI,C7corrR,C7corrI]
+        C9effs['{0}_{1}_{2}'.format(qsq,charge,corrections)] = [C9effR,C9effI,C7corrR,C7corrI]
         
     return(C9effR,C9effI,C7corrR,C7corrI)
 
@@ -1357,9 +1391,9 @@ def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,correction
     else:
         # h is complex -> C9 eff complex, and thus FV
         run_fac = runfT(mu_scale)#runs fT to same scale as Wilson coeffs
-        f0 = isocorr*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
-        fp = isocorr*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
-        fT = run_fac*isocorr*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+        f0 = isocorr0*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+        fp = isocorrp*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        fT = run_fac*isocorrT*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
         C9effR,C9effI,C7corrR,C7corrI = make_C9eff(qsq,fp,p['charge'],corrections=corrections)
         FA = C10eff*fp
         FVR = C9effR*fp + 2*m_bMSbar*(C7eff+C7corrR)*fT/(p['MBphys']+p['MKphys'])#use m_bMSbar here pole mass elsewhere
@@ -1372,6 +1406,11 @@ def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,correction
         C = GF**2 * alphaEW**2 * VtbVts**2 * betal * gv.sqrt(lam) / (2**9 * np.pi**5 * p['MBphys']**3)
         al = C*( qsq*FP**2 + lam/4 * (FA**2 + FVR**2+FVI**2) + 4 * m_l**2 * p['MBphys']**2 * FA**2 + 2 * m_l * (p['MBphys']**2 - p['MKphys']**2 + qsq) * (FP * FA) )
         cl = -C*lam*betal**2/4 * (FA**2 + FVR**2+FVI**2)
+    if qsq > qmax: #uncertainty for quark hadron duality 
+        al *= q_h_duality
+        cl *= q_h_duality
+    al *= scale_err
+    cl *= scale_err
     return(al,cl)
 
 def interpolate_al_cl(p,qsq,qmin,qmax,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True):
@@ -1605,7 +1644,7 @@ def integrate_fp_B(p,qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,
             p3 = ((qsq-p['MKphys']**2-p['MBphys']**2)**2/(4*p['MBphys']**2)-p['MKphys']**2)**(3/2)
             if math.isnan(p3.mean):
                 p3 = 0
-            fp = isocorr * make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+            fp = isocorrp * make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
             integrand = p3 * fp**2
             integrands[qsq] = integrand
         return(integrand)
@@ -1731,9 +1770,9 @@ def BtoKl1l2(p,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1,m2,qsq): #tauB0 s
     if p['charge'] == 'both':
         N_K2 = (tauBpmGeV+tauB0GeV)/2 * alphaEW **2 * GF**2 * VtbVts**2 * lam1**0.5 * lam2**0.5/( 512 * np.pi**5 * p['MBphys']**3 * qsq)
     run_fac = runfT(mu_scale)#runs fT to same scale as Wilson coeffs
-    f0 = isocorr*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
-    fp = isocorr*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
-    fT = run_fac*isocorr*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    f0 = isocorr0*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+    fp = isocorrp*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+    fT = run_fac*isocorrT*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
     psi7 = 2*m_bMSbar**2*fT**2/(p['MBphys']+p['MKphys'])**2 * lam2 * (1 - (m1-m2)**2/qsq - lam1/(3*qsq**2))
     psi9 =  1/2 * f0**2 * (m1-m2)**2 * (p['MBphys']**2-p['MKphys']**2)**2/qsq * (1 - (m1+m2)**2/qsq) + 1/2 * fp**2 * lam2 * (1 - (m1-m2)**2/qsq - lam1/(3*qsq**2))
     psi10 =  1/2 * f0**2 * (m1+m2)**2 * (p['MBphys']**2-p['MKphys']**2)**2/qsq * (1 - (m1-m2)**2/qsq) + 1/2 * fp**2 * lam2 * (1 - (m1+m2)**2/qsq - lam1/(3*qsq**2))

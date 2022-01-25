@@ -340,7 +340,7 @@ for Fit in Fits:
     #mass_corr_plots(Fit,fs_data[Fit['conf']],thpts,F,fs_data['F'])
 #check_poles(Fits) Not working atm
 #plot_gold_non_split(Fits)
-fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
+#fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #Z_V_plots(Fits,fs_data)
 ################################ Test average #####################################
 average_t_0_cases = gv.BufferDict()
@@ -388,8 +388,8 @@ fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
-#headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2,corrections=False)
+headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2,corrections=False)
 #Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Bnu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
@@ -398,6 +398,7 @@ fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #do_phi_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#plot_C7_C9(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ##########################
 #p_in_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 ###############################

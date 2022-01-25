@@ -19,7 +19,7 @@ import pickle
 from collections import defaultdict
 
 ################### global variables ##########################################
-factor = 0.5 #multiplies everything to make smaller for big plots (0.5) usually 1
+factor = 1.0 #multiplies everything to make smaller for big plots (0.5) usually 1
 if factor ==1.0:
     faclab = '1'
 elif factor == 0.5:
@@ -2476,7 +2476,7 @@ def dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             y,yerr = exp.make_y(exp.binBep)
         else:
             y,yerr = exp.make_y(exp.binBmup)
-        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=exp.sym,ms=ms,label=(exp.label),capsize=capsize)
+        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=exp.sym,ms=ms/2,label=(exp.label),capsize=capsize)
         
     plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
@@ -2524,7 +2524,7 @@ def dBdq2_emu0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     for i,exp in enumerate(exps):
         x,xerr = exp.make_x()
         y,yerr = exp.make_y(exp.binBmu0)
-        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i], fmt=exp.sym,ms=ms,label=(exp.label),capsize=capsize)
+        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i], fmt=exp.sym,ms=ms/2,label=(exp.label),capsize=capsize)
         
     plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
@@ -2587,7 +2587,7 @@ def dBdq2_emu(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             y,yerr = exp.make_y(exp.binBmu)
         else:
             y,yerr = exp.make_y(exp.binBemu)
-        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i], fmt=exp.sym,ms=ms,label=(exp.label),capsize=capsize)
+        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i], fmt=exp.sym,ms=ms/2,label=(exp.label),capsize=capsize)
         
     plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
@@ -2641,7 +2641,7 @@ def dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             y,yerr = the.add_errs(the.fix_B_bins(the.binBmup))
         elif the.label in ["Bobeth et al. '12"]:
             y,yerr = the.add_up_down_errs(the.fix_B_bins(the.binBemum))
-        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=the.sym,ms=ms,label=(the.label),capsize=capsize)
+        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=the.sym,ms=ms/2,label=(the.label),capsize=capsize)
         
     plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
@@ -2694,7 +2694,7 @@ def dBdq2_the_0(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             y,yerr = the.add_errs(the.fix_B_bins(the.binBmu0))
         elif the.label in ["Bobeth et al. '12"]:
             y,yerr = the.add_up_down_errs(the.fix_B_bins(the.binBemu0))
-        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=the.sym,ms=ms,label=(the.label),capsize=capsize)
+        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=the.sym,ms=ms/2,label=(the.label),capsize=capsize)
     plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.text((10.11+8.68)/2,0.1,r'$J/\Psi$',va='center',ha='center',fontsize=fontsizelab)
@@ -2753,7 +2753,7 @@ def dBdq2_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     for i,the in enumerate(thes):
         x,xerr = the.make_x()
         y,yerr = the.add_errs(the.fix_B_bins(the.binBemu))
-        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=the.sym,ms=ms,label=(the.label),capsize=capsize)
+        plt.errorbar(x,y,xerr=xerr, yerr=yerr, color=cols[i],fmt=the.sym,ms=ms/2,label=(the.label),capsize=capsize)
     plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.text((10.11+8.68)/2,0.1,r'$J/\Psi$',va='center',ha='center',fontsize=fontsizelab)
@@ -2962,7 +2962,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('My B^0 correction factor: {0}',res/res3)
     plt.errorbar(res.mean,11, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[12,12], color='k',alpha=alpha/2)
-    plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[12,12], edgecolor='k',fc='none',alpha=alpha,hatch='X') 
+    #plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[12,12], edgecolor='k',fc='none',alpha=alpha,hatch='X') 
     labs.append("HPQCD '21")
     plt.text(7,6.5,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab, va='center')
     plt.text(7,3.0,r'$B^0\to{}K^0\mu^+\mu^-$',fontsize=fontsizelab, va='center')
@@ -3021,7 +3021,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     resB = (resB1+resB2)/2
     plt.errorbar(res.mean,9, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
-    plt.fill_between([resB.mean-resB.sdev,resB.mean+resB.sdev],[0,0],[11,11], edgecolor='k',fc='none',alpha=alpha,hatch='X')
+    #plt.fill_between([resB.mean-resB.sdev,resB.mean+resB.sdev],[0,0],[11,11], edgecolor='k',fc='none',alpha=alpha,hatch='X')
     labs.append("HPQCD '21")
     plt.text(1.55,4.5,r'$B\to{}Ke^+e^-$',fontsize=fontsizelab, va='center')
     plt.text(1.55,2,r'$B\to{}K\mu^+\mu^-$',fontsize=fontsizelab, va='center')
@@ -3515,6 +3515,116 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     return()
 
 #############################################################################################################
+def plot_C7_C9(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    p = make_p_physical_point_BK(pfit,Fits,B='p')
+    m_lep = m_e
+    qsq = []
+    C7Rc = []
+    C7Ic = []
+    C9Rc = []
+    C9Ic = []
+    C7R = []
+    C7I = []
+    C9R = []
+    C9I = []
+    for q2 in np.linspace(4*m_lep**2,qsqmaxphysBKp.mean,2*nopts): #q2 now in GeV
+        qsq.append(q2)
+        fp = isocorrp*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        C9effR,C9effI,C7corrR,C7corrI = make_C9eff(q2,fp,p['charge'],corrections=True)
+        C7Rc.append(C7eff + C7corrR)
+        C7Ic.append(C7corrI)
+        C9Rc.append(C9effR)
+        C9Ic.append(C9effI)
+        C9effR,C9effI,C7corrR,C7corrI = make_C9eff(q2,fp,p['charge'],corrections=False)
+        C7R.append(C7eff + C7corrR)
+        C7I.append(C7corrI)
+        C9R.append(C9effR)
+        C9I.append(C9effI)
+    C7Rcmean,C7Rcerr = unmake_gvar_vec(C7Rc)
+    C7Rcupp,C7Rclow = make_upp_low(C7Rc)
+    C7Icmean,C7Icerr = unmake_gvar_vec(C7Ic)
+    C7Icupp,C7Iclow = make_upp_low(C7Ic)
+    
+    C9Rcmean,C9Rcerr = unmake_gvar_vec(C9Rc)
+    C9Rcupp,C9Rclow = make_upp_low(C9Rc)
+    C9Icmean,C9Icerr = unmake_gvar_vec(C9Ic)
+    C9Icupp,C9Iclow = make_upp_low(C9Ic)
+
+    C7Rmean,C7Rerr = unmake_gvar_vec(C7R)
+    C7Rupp,C7Rlow = make_upp_low(C7R)
+    C7Imean,C7Ierr = unmake_gvar_vec(C7I)
+    C7Iupp,C7Ilow = make_upp_low(C7I)
+    
+    C9Rmean,C9Rerr = unmake_gvar_vec(C9R)
+    C9Rupp,C9Rlow = make_upp_low(C9R)
+    C9Imean,C9Ierr = unmake_gvar_vec(C9I)
+    C9Iupp,C9Ilow = make_upp_low(C9I)
+
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, C7Rcmean, color='b',label=r'$\mathrm{Re}[\mathcal{C}_7^{\mathrm{eff}}]$')
+    plt.fill_between(qsq,C7Rclow,C7Rcupp, color='b',alpha=0.6)
+    plt.plot(qsq, C7Rmean, color='b',linestyle=':',label=r'$\mathrm{Re}[C_7^{\mathrm{eff}}]$')
+    plt.fill_between(qsq,C7Rlow,C7Rupp, color='b',alpha=0.3)
+
+    plt.plot(qsq, C7Icmean, color='r',label=r'$\mathrm{Im}[\mathcal{C}_7^{\mathrm{eff}}]$')
+    plt.fill_between(qsq,C7Iclow,C7Icupp, color='r',alpha=0.6)
+    plt.plot(qsq, C7Imean, color='r',linestyle=':',label=r'$\mathrm{Im}[C_7^{\mathrm{eff}}]$')
+    plt.fill_between(qsq,C7Ilow,C7Iupp, color='r',alpha=0.3)
+    
+    plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
+    plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
+    plt.text((10.11+8.68)/2,-0.8,r'$J/\Psi$',va='center',ha='center',fontsize=fontsizelab)
+    plt.text((12.86+14.18)/2,-0.8,r'$\Psi(2S)$',va='center',ha='center',fontsize=fontsizelab)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='lower left')
+    plt.axes().set_ylim([-0.9,0.1])
+    plt.tight_layout()
+    plt.savefig('Plots/C7eff{0}.pdf'.format(faclab))
+    plt.close()
+    
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, C9Rcmean, color='b',label=r'$\mathrm{Re}[\mathcal{C}_9^{\mathrm{eff}}]$')
+    plt.fill_between(qsq,C9Rclow,C9Rcupp, color='b',alpha=0.6)
+    plt.plot(qsq, C9Rmean, color='b',linestyle=':',label=r'$\mathrm{Re}[C_9^{\mathrm{eff}}]$')
+    plt.fill_between(qsq,C9Rlow,C9Rupp, color='b',alpha=0.3)
+
+    plt.plot(qsq, C9Icmean, color='r',label=r'$\mathrm{Im}[\mathcal{C}_9^{\mathrm{eff}}]$')
+    plt.fill_between(qsq,C9Iclow,C9Icupp, color='r',alpha=0.6)
+    plt.plot(qsq, C9Imean, color='r',linestyle=':',label=r'$\mathrm{Im}[C_9^{\mathrm{eff}}]$')
+    plt.fill_between(qsq,C9Ilow,C9Iupp, color='r',alpha=0.3)
+    
+    plt.fill_between([8.68,10.11],[-20,-20],[45,45], color='k',alpha=alpha)
+    plt.fill_between([12.86,14.18],[-20,-20],[45,45], color='k',alpha=alpha)
+    plt.text((10.11+8.68)/2,-7,r'$J/\Psi$',va='center',ha='center',fontsize=fontsizelab)
+    plt.text((12.86+14.18)/2,-7,r'$\Psi(2S)$',va='center',ha='center',fontsize=fontsizelab)
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    #plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+
+    #handles, labels = plt.gca().get_legend_handles_labels()
+    #handles = [h[0] for h in handles]
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='lower left')
+    plt.axes().set_ylim([-8,8])
+    plt.tight_layout()
+    plt.savefig('Plots/C9eff{0}.pdf'.format(faclab))
+    plt.close()
+    
+    return()
+
+################################################################################################################
+
 
 def R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ############### e,mu ########
@@ -3598,12 +3708,12 @@ def F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     Fmean,Ferr = unmake_gvar_vec(F)
     Fupp,Flow = make_upp_low(F)
     plt.figure(figsize=figsize)
-    plt.errorbar(qsq, Fmean,yerr=Ferr, color='k',fmt='*',ms=ms,label="HPQCD '21")
+    plt.errorbar(qsq, Fmean,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '21")
     #plt.fill_between(qsq,Flow,Fupp, color='purple',alpha=alpha)
     exp = LHCb12B
     x,xerr = exp.make_x()
     y,yerr = exp.make_y(exp.FHmup)
-    plt.errorbar(x,y, yerr=yerr, color='r', fmt=exp.sym,ms=ms,label=(exp.label),capsize=capsize)
+    plt.errorbar(x,y, yerr=yerr, color='r', fmt=exp.sym,ms=ms/2,label=(exp.label),capsize=capsize)
     exp = LHCb14B
     x,xerr = exp.make_x()
     y,yerr = make_y_LHCb14B(exp.FHmup)
@@ -3658,48 +3768,59 @@ def make_y_LHCb14B(Fs):
 def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ####### e ###################################
     m_lep = m_e
-    numbs = [1,3,4,2]
+    numbs = [1,4,6,5,3,2]
     labs = []
     i = 0
     plt.figure(figsize=figsize)
     the = Fermi16B
     labs.append(the.label)
     x,xerr = the.add_errs(the.FHe0) #10^8
-    plt.errorbar(x,1, xerr=xerr,ms=ms,fmt=the.sym,color='b' ,capsize=capsize,lw=lw)
+    plt.errorbar(x,1, xerr=xerr,ms=ms,fmt=the.sym,color='b',mfc='none' ,capsize=capsize,lw=lw)
     labs.append(the.label)
     x,xerr = the.add_errs(the.FHep)#10^8
-    plt.errorbar(x,3, xerr=xerr,ms=ms,fmt=the.sym,color='r' ,capsize=capsize,lw=lw)
+    plt.errorbar(x,4, xerr=xerr,ms=ms,fmt=the.sym,color='r',mfc='none' ,capsize=capsize,lw=lw)
     
     #plt.plot([0,0],[-1,10],color='k',linestyle='--')
-    plt.plot([30,300],[2.5,2.5],color='k')
-    #plt.plot([0,30],[4.5,4.5],color='k')
+    plt.plot([30,300],[3.5,3.5],color='k')
+    #plt.plot([0,30],[4.5,4.5],color='k')#
+    ##########################################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     qsq_max = qsqmaxphysBKp.mean
     qsq_min = 4*m_lep**2
     #qsq_min = 4*m_mu**2 # added as test 
     res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
-    plt.errorbar(res.mean,4, xerr=res.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
+    plt.errorbar(res.mean,6, xerr=res.sdev,ms=ms,fmt='*',color='r',mfc='none',capsize=capsize,lw=lw)
     labs.append("HPQCD '21")
+    qsq_min = 4*m_mu**2
+    res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
+    plt.errorbar(res.mean,5, xerr=res.sdev,ms=ms,fmt='*',color='r',mfc='none',capsize=capsize,lw=lw)
+    labs.append("HPQCD '21")
+    
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     qsq_max = qsqmaxphysBK0.mean
+    qsq_min = 4*m_lep**2
     res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
-    plt.errorbar(res.mean,2, xerr=res.sdev,ms=ms,fmt='*',color='b',capsize=capsize,lw=lw)
+    plt.errorbar(res.mean,3, xerr=res.sdev,ms=ms,fmt='*',color='b',mfc='none',capsize=capsize,lw=lw)
+    labs.append("HPQCD '21")
+    qsq_min = 4*m_mu**2
+    res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
+    plt.errorbar(res.mean,2, xerr=res.sdev,ms=ms,fmt='*',color='b',mfc='none',capsize=capsize,lw=lw)
     labs.append("HPQCD '21")
     #res = 1000*(res1418A+res1418B)/2
     #plt.errorbar(res.mean,2, xerr=res.sdev,ms=ms,fmt='*',color='purple',capsize=capsize,lw=lw)
     #labs.append("HPQCD '21")
-    plt.text(80,1.5,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab*0.9, va='center')
-    plt.text(80,3.5,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab*0.9, va='center')
+    plt.text(100,2,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab*0.9, va='center')
+    plt.text(100,5,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab*0.9, va='center')
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.xlabel('$10^8F_H^{e}$',fontsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([30,100])
-    plt.ylim([0.5,4.5])
+    plt.xlim([50,280])
+    plt.ylim([0.5,6.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
-    plt.axes().xaxis.set_major_locator(MultipleLocator(20))
+    plt.axes().xaxis.set_major_locator(MultipleLocator(50))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(10))
     plt.tight_layout()
     plt.savefig('Plots/FH_the_e{0}.pdf'.format(faclab))
@@ -5019,7 +5140,10 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 #################################################################################################################
 def headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True):
-    print('###### Headline results Corrections = ',corrections)
+    if test_mu_effect == True:
+        print('###### Headline results Corrections = ',corrections, 'mu = 4.8 GeV')
+    else:
+        print('###### Headline results Corrections = ',corrections, 'mu = 4.2 GeV')
     m_lep = m_e # just does the bins 
     bins = [[1.1,6],[15,22]]
     ########################## e p########################################
