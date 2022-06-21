@@ -99,6 +99,8 @@ def make_correction1(qsq): # dominant O(alpha_s) correction to C9eff in B11. Cur
     F89 = make_F89(qsq)
     corrR = (alpha_s/(4*np.pi)) * (C1*F19R + C2*F29R + C8*F89 )
     corrI = (alpha_s/(4*np.pi)) * (C1*F19I + C2*F29I)
+    print('C9 qsq = ',qsq)
+    print(C1*F19R , C2*F29R , C8*F89 , C8,F89)
     print('C9eff correction O(alpha_s) =  {0} + {1}i'.format(corrR,corrI))
     return(corrR,corrI)
 
@@ -115,6 +117,8 @@ def make_correction3(qsq): #this is the O(alpha_s) correction to C7eff which is 
     F87R,F87I = make_F87(qsq)
     corrR = (alpha_s/(4*np.pi)) * ((C1-6*C2)*F17R + C8*F87R)
     corrI = (alpha_s/(4*np.pi)) * ((C1-6*C2)*F17I + C8*F87I)
+    print('C7 qsq = ',qsq)
+    print((C1-6*C2)*F17R , C8*F87R)
     print('C7eff correction O(alpha_s) =  {0} + {1}i'.format(corrR,corrI))
     return(corrR,corrI)
 
@@ -206,6 +210,7 @@ def make_F87(qsq):
     s = (qsq/m_b**2)
     B0 = make_B0s(s)
     C0 = make_C0s(s)
+    print('87',B0-C0,s)
     R = -32/9 * gv.log(mu_scale/m_b) - 8/9 * s/(1-s) * gv.log(s) - 4/9 * (11-16*s+8*s**2)/(1-s)**2 + 4/9 * 1/(1-s)**3 * ((9*s-5*s**2+2*s**3)*B0 - (4+2*s)*C0)
     I = -8/9 * np.pi
     return(R,I)
@@ -819,7 +824,7 @@ def do_plots():
     TotC9Ip = []
     TotC9R0 = []
     TotC9I0 = []    
-    for qsq in np.linspace(4*m_e**2,qsqmaxphysBK.mean,200):
+    for qsq in np.linspace(20,qsqmaxphysBK.mean,10):
         print('################### qsq =',qsq)
         Rp = 0
         Ip = 0
@@ -887,7 +892,7 @@ def do_plots():
     plt.axes().set_ylim([-0.25,0.25])
     plt.axes().set_xlim([0,corrcut])
     plt.tight_layout()
-    plt.savefig('Plots/ReDelC9.pdf')
+    #plt.savefig('Plots/ReDelC9.pdf')
     plt.close()
 
     Tm0Im,Tm0Is = unmake_gvar_vec(Tm0I)
@@ -920,7 +925,7 @@ def do_plots():
     plt.axes().set_ylim([-0.8,0.1])
     plt.axes().set_xlim([0,corrcut])
     plt.tight_layout()
-    plt.savefig('Plots/ImDelC9.pdf')
+    #plt.savefig('Plots/ImDelC9.pdf')
     plt.close()
 
     alRm,alRs = unmake_gvar_vec(alphaR)
@@ -970,7 +975,7 @@ def do_plots():
     plt.axes().set_ylim([-0.8,0.8])
     plt.axes().set_xlim([-1,24])
     plt.tight_layout()
-    plt.savefig('Plots/C9effOalOla.pdf')
+    #plt.savefig('Plots/C9effOalOla.pdf')
     plt.close()
 
     Rpm,Rps = unmake_gvar_vec(TotC9Rp)
@@ -1007,7 +1012,7 @@ def do_plots():
     plt.axes().set_ylim([-0.5,0.5])
     plt.axes().set_xlim([0,corrcut])
     plt.tight_layout()
-    plt.savefig('Plots/TotalDelC9eff.pdf')
+    #plt.savefig('Plots/TotalDelC9eff.pdf')
     plt.close()
     return()
 

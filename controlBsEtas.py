@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 ################################## F PARAMETERS ##########################
 F = collections.OrderedDict()
 F['conf']='F'
-F['label'] = 'Set 1'
+F['label'] = 'Set 6'
 F['filename'] = './Corrfits/F5_3pts_Q1.00_Nexp2_NMarg5_Stmin2_Vtmin1_svd0.00157_chi0.342_pl1.0_svdfac1.0'
 F['masses'] = ['0.449','0.566','0.683','0.8']
 F['Zdisc'] = [0.99892,0.99826,0.99648,0.99377]
@@ -35,7 +35,7 @@ F['daughter-Tag'] = ['etas','etas_p0.0728','etas_p0.218','etas_p0.364','etas_p0.
 ######################## SF PARAMETERS ####################################
 SF = collections.OrderedDict()
 SF['conf']='SF'
-SF['label'] = 'Set 2'
+SF['label'] = 'Set 7'
 SF['filename'] = './Corrfits/SF5_3pts_Q1.00_Nexp3_NMarg6_Stmin2_Vtmin2_svd0.00457_chi0.079_pl1.0_svdfac1.0' # in stability plot
 SF['masses'] = ['0.274','0.450','0.6','0.8']
 SF['Zdisc'] = [0.99990,0.99928,0.99783,0.99377]
@@ -54,7 +54,7 @@ SF['daughter-Tag'] = ['etas_p0','etas_p0.143','eta_s_tw2.108_m0.0234','etas_p0.3
 ######################## SF PARAMETERS ####################################
 UF = collections.OrderedDict()
 UF['conf']='UF'
-UF['label'] = 'Set 3'
+UF['label'] = 'Set 8'
 UF['filename'] = './Corrfits/UF5_3pts_Q1.00_Nexp2_NMarg6_Stmin2_Vtmin2_svd0.01000_chi0.047_pl1.0_svdfac1.0'
 #UF['filename'] = '../Fits/UFetasBsscalarvector_118cfgs_negFalse0.1940.450.60.800.7061.5292.2354.705DGNGSV3340chained-marginalised_N22_Nexp5_sfac1.0_pfac1.0_Q1.00_chi0.070_smTrue_Stmin2_Vtmin2.pickle' 
 UF['masses'] = ['0.194','0.45','0.6','0.8']

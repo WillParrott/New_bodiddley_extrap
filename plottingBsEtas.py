@@ -32,7 +32,7 @@ from collections import defaultdict
 # ans and pole masses
 # dict of different lattice spacings #done 
 ################### global variables ##########################################
-factor = 0.5 #multiplies everything to make smaller for big plots etc usually 1
+factor = 1.0 #multiplies everything to make smaller for big plots etc usually 1
 figsca = 14  #size for saving figs
 figsize = ((figsca,2*figsca/(1+np.sqrt(5))))
 lw =2*factor
@@ -567,17 +567,27 @@ def f0_fp_in_qsq(pfit,Fits,t_0,Nijk,Npow,Del,addrho,fpf0same):
     qsq = []
     y0 = []
     yp = []
+    y0_np = []
+    yp_np = []
     p = make_p_physical_point_BsEtas(pfit,Fits,Del)
     for q2 in np.linspace(0,qsqmaxphys.mean,nopts): #q2 now in GeV
         qsq.append(q2)
+        polep = 1 - q2/MBsstarphys**2
+        pole0 = 1 - q2/(MBsphys+Del)**2 
         zed = make_z(q2,t_0,MBsphys,Metasphys) #all GeV dimensions
         #        make_f0_BsEtas(Nijk,Npow,addrho,p,Fit,alat,qsq,z,mass,amh)
-        y0.append(make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
-        yp.append(make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0))
+        f0 = make_f0_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)
+        fp = make_fp_BsEtas(Nijk,Npow,addrho,p,Fits[0],0,q2,zed.mean,Fits[0]['masses'][0],fpf0same,0)
+        y0.append(f0)
+        yp.append(fp)
+        y0_np.append(pole0*f0)
+        yp_np.append(polep*fp)
     save = gv.BufferDict()
     save['qsq'] = qsq
     save['f0'] = y0
     save['fp'] = yp
+    save['f0_np'] = y0_np
+    save['fp_np'] = yp_np
     gv.dump(save,'Fits/Bsetas_for_BK.pickle')
     
     y0mean,y0err = unmake_gvar_vec(y0)
