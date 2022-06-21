@@ -19,7 +19,7 @@ import pickle
 from collections import defaultdict
 
 ################### global variables ##########################################
-factor = 1.0 #multiplies everything to make smaller for big plots (0.5) usually 1
+factor = 0.5 #multiplies everything to make smaller for big plots (0.5) usually 1
 if factor ==1.0:
     faclab = '1'
 elif factor == 0.5:
@@ -302,6 +302,7 @@ Fermi16B = Theory(label="FNAL/MILC '15",arxiv='1510.02349', FHep=[71.5,6.1,2.1],
 
 Fermi16C = Theory(label="FNAL/MILC '15",arxiv='1510.02349', bins=[[15,17],[17,19],[19,22],[15,22]], binBtaup=[[0.3992,0.0217,0.0222,0.0140],[0.3931,0.0214,0.0181,0.0133],[0.4323,0.0235,0.018,0.0157],[1.2246,0.0667,0.0563,0.0417]], binBtau0=[[0.3696,0.0201,0.0204,0.013],[0.3634,0.0198,0.0167,0.0123],[0.3974,0.0216,0.0165,0.0144],[1.1305,0.0616,0.0519,0.0385]],binRmutaup=[[0.16,0.02,0.01],[-0.11,0.02,0.01],[-0.40,0.01,0.01],[-0.13,0.02,0.01]], binRmutau0=[[0.16,0.02,0.01],[-0.11,0.02,0.01],[-0.41,0.01,0.01],[-0.13,0.02,0.01]],binFHtaup=[[0.89,0,0.03],[0.86,0,0.02],[0.87,0,0.02],[0.87,0,0.02]],binFHtau0=[[0.89,0,0.03],[0.86,0,0.02],[0.87,0,0.02],[0.87,0,0.02]],sym='^')#Rmutau is (R-1) NOT 1e-3(R-1) Ftau is as is and both charges the same
 
+Guber22 = Theory(label="Guber. et al. '22", arxiv='2206.03797', bins=[[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8]], binBmup=[[0.418,0.040,0.038],[0.429,0.035,0.037],[0.469,0.036,0.041],[0.457,0.035,0.036],[0.448,0.033,0.035],[0.439,0.034,0.038],[0.428,0.043,0.039],[0.417,0.071,0.049]],sym='>')
 ####################################################################################################
 
 def speed_of_light(Fits):
@@ -1205,7 +1206,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
-    plt.ylabel(r'$\left(1-\frac{q^2}{M^2_{H_{s}^0}} \right)f_0(q^2)$',fontsize=fontsizelab)
+    plt.ylabel(r'$\left(1-\frac{q^2}{M^2_{H_{s0}^*}} \right)f_0(q^2)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
@@ -1225,7 +1226,7 @@ def f0_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
     plt.xlabel('$z$',fontsize=fontsizelab)
-    plt.ylabel(r'$\left(1-\frac{q^2}{M^2_{H_{s}^0}} \right)f_0(z)$',fontsize=fontsizelab)
+    plt.ylabel(r'$\left(1-\frac{q^2}{M^2_{H_{s0}^*}} \right)f_0(z)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
@@ -1380,7 +1381,7 @@ def fp_no_pole_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,addda
     #    plt.errorbar( make_z(qsqmaxphysBK,t_0,MBsphys,Metasphys).mean, datafpmaxBsEtas.mean, xerr=make_z(qsqmaxphysBK,t_0,MBsphys,Metasphys).sdev, yerr=datafpmaxBsEtas.sdev, color='purple', fmt='D',ms=ms, mfc='none',label = r'$arXiv 1510.07446$')    
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
-    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3)#,loc='upper right')
+    plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper right')
     plt.xlabel('$z$',fontsize=fontsizelab)
     plt.ylabel(r'$\left(1-\frac{q^2}{M^2_{H_{s}^*}} \right)f_+(z)$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
@@ -1582,6 +1583,231 @@ def ff_ratios_qsq_MH(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):#from he
     return()
 
 ################################################################################################
+
+def remove_pole(qsqs,fs,pole):
+    new_fs = []
+    for i,qsq in enumerate(qsqs):
+        new_fs.append(fs[i]*(1-(qsq/pole**2)))
+    return(new_fs)
+################################################################################################
+
+def nopole_f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    p = make_p_physical_point_BK(pfit,Fits)
+    BKfppole = (p['MBsstarphys']).mean
+    BKf0pole = (p['MBphys']+Del).mean
+    print('Poles removed in plot f0: ',BKf0pole,'fp: ',BKfppole)
+    #########################
+    qsq = []
+    y0 = []
+    yp = []
+    yT = []
+    for q2 in np.linspace(0,qsqmaxphysBK.mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        f0 = (1-(q2/BKf0pole**2)) * make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)
+        fp = (1-(q2/BKfppole**2)) * make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        fT = (1-(q2/BKfppole**2)) * make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)
+        y0.append(f0) #only need one fit
+        yp.append(fp)
+        yT.append(fT)
+        
+    y0mean,y0err = unmake_gvar_vec(y0)
+    y0upp,y0low = make_upp_low(y0)
+    ypmean,yperr = unmake_gvar_vec(yp)
+    ypupp,yplow = make_upp_low(yp)
+    yTmean,yTerr = unmake_gvar_vec(yT)
+    yTupp,yTlow = make_upp_low(yT)
+    #####################################
+    Bsdata  = gv.load('Fits/Bsetas_for_BK.pickle')
+    Laurence = gv.load('Fits/Laurence_dict.pickle')
+    Bcdata = Laurence['BcDs']
+    #print(data)
+    qsqs = list(Bsdata['qsq'])
+    f0s = list(Bsdata['f0']) # pole
+    fps = list(Bsdata['fp'])
+    f0s = remove_pole(qsqs,f0s,BKf0pole)
+    fps = remove_pole(qsqs,fps,BKfppole)
+    
+    y0smean,y0serr = unmake_gvar_vec(f0s)
+    y0supp,y0slow = make_upp_low(f0s)
+    ypsmean,ypserr = unmake_gvar_vec(fps)
+    ypsupp,ypslow = make_upp_low(fps)
+
+    Bcqsqs = list(Bcdata['qSq'])
+    for i in range(len(Bcqsqs)):
+        new = float(Bcqsqs[i])
+        Bcqsqs[i] = new
+    Bcf0s = list(Bcdata['f0'])
+    Bcfps = list(Bcdata['fplus'])
+    BcfTs = list(Bcdata['ftensor'])
+    
+    Bcf0s = remove_pole(Bcqsqs,Bcf0s,BKf0pole)
+    Bcfps = remove_pole(Bcqsqs,Bcfps,BKfppole)
+    BcfTs = remove_pole(Bcqsqs,BcfTs,BKfppole)
+    
+    Bcy0smean,Bcy0serr = unmake_gvar_vec(Bcf0s)
+    Bcy0supp,Bcy0slow = make_upp_low(Bcf0s)
+    Bcypsmean,Bcypserr = unmake_gvar_vec(Bcfps)
+    Bcypsupp,Bcypslow = make_upp_low(Bcfps)
+    BcyTsmean,BcyTserr = unmake_gvar_vec(BcfTs)
+    BcyTsupp,BcyTslow = make_upp_low(BcfTs)
+    Al = 0.75
+    As = 0.5
+    Ac = 0.25
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, y0mean, color='b',linestyle='-',label='$f_0(q^2)~B\to K$')
+    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=Al)
+    plt.plot(qsq, ypmean, color='r',linestyle='-',label='$f_+(q^2)~B\to K$')
+    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=Al)
+    #plt.plot(qsq, yTmean, color='g',linestyle='-',label='$f_T(q^2)~B\to K$')
+    #plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=alpha)
+    
+    plt.plot(qsqs, y0smean, color='b',linestyle='--',label='$f_0(q^2)~B_s\to\eta_s$')
+    plt.fill_between(qsqs,y0slow,y0supp,color='b',alpha=As)
+    plt.plot(qsqs, ypsmean, color='r',linestyle='--',label='$f_+(q^2)~B_s\to\eta_s$')
+    plt.fill_between(qsqs,ypslow,ypsupp, color='r',alpha=As)
+
+    plt.plot(Bcqsqs, Bcy0smean, color='b',linestyle='-.',label='$f_0(q^2)~B_c\to D_s$')
+    plt.fill_between(Bcqsqs,Bcy0slow,Bcy0supp,color='b',alpha=Ac)
+    plt.plot(Bcqsqs, Bcypsmean, color='r',linestyle='-.',label='$f_+(q^2)~B_c\to D_s$')
+    plt.fill_between(Bcqsqs,Bcypslow,Bcypsupp, color='r',alpha=Ac)
+    #plt.plot(Bcqsqs, BcyTsmean, color='g',linestyle='-.',label='$f_T(q^2)~B_c\to D_s$')
+    #plt.fill_between(Bcqsqs,BcyTslow,BcyTsupp, facecolor='none', edgecolor='g', hatch='+',alpha=alpha)
+
+    f0max = (1 - (qsqmaxphys/BKf0pole**2)) * gv.gvar('0.819(17)')
+    fpmax = (1 - (qsqmaxphys/BKfppole**2)) * gv.gvar('2.45(19)')
+    f00 = gv.gvar('0.3191(85)')
+
+    #plt.errorbar(qsqmaxphys.mean, f0max.mean, yerr=f0max.sdev,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+    #plt.errorbar(qsqmaxphys.mean, fpmax.mean, yerr=fpmax.sdev,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+    #plt.errorbar(0, f00.mean, yerr=f00.sdev,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$P^0(q^2)f_0~B\to K$',alpha=Al),Patch(facecolor='r', edgecolor='r',label=r'$P^+(q^2)f_+~B\to K$',alpha=Al),Patch(facecolor='b', edgecolor='b',label=r'$P^0(q^2)f_0~B_s\to\eta_s$',alpha=As),Patch(facecolor='r', edgecolor='r',label=r'$P^+(q^2)f_+~B_s\to\eta_s$',alpha=As),Patch(facecolor='b', edgecolor='b',label=r'$P^0(q^2)f_0~B_c\to D_s$',alpha=Ac),Patch(facecolor='r', edgecolor='r',label=r'$P^+(q^2)f_+~B_c\to D_s$',alpha=Ac)]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
+    #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
+    plt.ylim([0.1,0.8])
+    plt.tight_layout()
+    plt.savefig('Plots/nopole_f0fpandBsetasinqsq{0}.pdf'.format(faclab))
+    plt.close()
+
+    plt.figure(figsize=figsize)
+    
+    plt.plot(qsq, yTmean, color='g',linestyle='-',label='$f_T(q^2)~B\to K$')
+    plt.fill_between(qsq,yTlow,yTupp, color='g',alpha=Al)
+
+    plt.plot(Bcqsqs, BcyTsmean, color='g',linestyle='-.',label='$f_T(q^2)~B_c\to D_s$')
+    plt.fill_between(Bcqsqs,BcyTslow,BcyTsupp, color='g',alpha=Ac)
+
+    fTmax = (1 - (qsqmaxphys/BKfppole**2)) * gv.gvar('2.32(56)')
+    fT0 = gv.gvar('0.370(78)')
+
+    #plt.errorbar(0, fT0.mean, yerr=fT0.sdev,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+    #plt.errorbar(qsqmaxphys.mean, fTmax.mean, yerr=fTmax.sdev,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+
+    handles = [ Patch(facecolor='g', edgecolor='g',label=r'$P^T(q^2)f_T(\mu=4.8~\mathrm{GeV})~B\to K$',alpha=Al),Patch(facecolor='g', edgecolor='g',label=r'$P^T(q^2)f_T(\mu=4.8~\mathrm{GeV})~B_c\to D_s$',alpha=Ac)]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
+    #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
+    plt.ylim([0,0.8])
+    plt.tight_layout()
+    plt.savefig('Plots/nopole_fTandBcDsinqsq{0}.pdf'.format(faclab))
+    plt.close()
+
+    
+    p = make_p_Mh_BK(pfit,Fits,(pfit['MDphys0']+pfit['MDphysp'])/2)
+    qsq = []
+    y0 = []
+    yp = []
+    for q2 in np.linspace(0,qsqmaxphysDK.mean,nopts): #q2 now in GeV
+        qsq.append(q2)
+        y0.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+        yp.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2))
+     
+    Dsdata  = gv.load('Fits/Dsetas_for_DK.pickle')
+    qsqs = list(Dsdata['qsq'])
+    qsq = np.array(qsq)
+    f0s = list(Dsdata['f0'])
+    fps = list(Dsdata['fp'])
+    #y0_Dsmax = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqs[-1],t_0,Fits[0]['masses'][0],fpf0same,0)
+
+    Bcdata  = gv.load('Fits/data_BcBs.pickle')
+    qsqb = list(Bcdata['qsq'])
+    f0b = list(Bcdata['f0_ctos'])
+    fpb = list(Bcdata['fp_ctos'])
+    #y0_Bcmax = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqc[-1],t_0,Fits[0]['masses'][0],fpf0same,0)
+
+    y0mean,y0err = unmake_gvar_vec(y0)
+    y0upp,y0low = make_upp_low(y0)
+    ypmean,yperr = unmake_gvar_vec(yp)
+    ypupp,yplow = make_upp_low(yp)
+    
+    y0smean,y0serr = unmake_gvar_vec(f0s)
+    y0supp,y0slow = make_upp_low(f0s)
+    ypsmean,ypserr = unmake_gvar_vec(fps)
+    ypsupp,ypslow = make_upp_low(fps)
+
+    y0bmean,y0berr = unmake_gvar_vec(f0b)
+    y0bupp,y0blow = make_upp_low(f0b)
+    ypbmean,ypberr = unmake_gvar_vec(fpb)
+    ypbupp,ypblow = make_upp_low(fpb)
+    
+    
+    plt.figure(figsize=figsize)
+    plt.plot(qsq, y0mean, color='b',linestyle='-',label='$f_0(q^2)~D\to K$')
+    plt.fill_between(qsq,y0low,y0upp, color='b',alpha=Al)
+    plt.plot(qsq, ypmean, color='r',linestyle='-',label='$f_+(q^2)~D\to K$')
+    plt.fill_between(qsq,yplow,ypupp, color='r',alpha=Al)
+    
+    plt.plot(qsqs, y0smean, color='b',linestyle='--',label='$f_0(q^2)~D_s\to\eta_s$')
+    plt.fill_between(qsqs,y0slow,y0supp,color='b',alpha=As)
+    plt.plot(qsqs, ypsmean, color='r',linestyle='--',label='$f_+(q^2)~D_s\to\eta_s$')
+    plt.fill_between(qsqs,ypslow,ypsupp, color='r',alpha=As)
+
+    plt.plot(qsqb, y0bmean, color='b',linestyle=':',label='$f_0(q^2)~B_c\to B_s$')
+    plt.fill_between(qsqb,y0blow,y0bupp,color='b',alpha=Ac)
+    plt.plot(qsqb, ypbmean, color='r',linestyle=':',label='$f_+(q^2)~B_c\to B_s$')
+    plt.fill_between(qsqb,ypblow,ypbupp, color='r',alpha=Ac)
+    #print('f_0 D_s -> eta_s at q^2_max = ',f0s[-1])#need to be clear about what this is saying
+    #print('f_0 D -> K at q^2_max = ',y0_Dsmax)
+    #print('f_0 Bc -> Bs at q^2_max = ',y0_Bcmax)
+    handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0~D\to K$',alpha=Al),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D\to K$',alpha=Al),Patch(facecolor='b', edgecolor='b',label=r'$f_0~D_s\to\eta_s$',alpha=As),Patch(facecolor='r', edgecolor='r',label=r'$f_+~D_s\to\eta_s$',alpha=As),Patch(facecolor='b', edgecolor='b',label=r'$f_0~B_c\to B_s$',alpha=Ac),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B_c\to B_s$',alpha=Ac)]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')
+    plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    #plt.text(10,1.0,'$f_+(q^2)$',fontsize=fontsizelab)
+    #plt.text(18.5,0.9,'$f_0(q^2)$',fontsize=fontsizelab)
+    plt.tight_layout()
+    plt.savefig('Plots/nopole_f0fpandDsetasinqsq{0}.pdf'.format(faclab))
+    plt.close()
+    
+    return()
+################################################################################################
+
 def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     qsq = []
     y0 = []
@@ -1672,7 +1898,10 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.tight_layout()
     plt.savefig('Plots/fToverfp{0}.pdf'.format(faclab))
     plt.close()
-
+    #######################
+    fppole = p['MBsstarphys']
+    f0pole = p['MBphys']+Del
+    
     Bsdata  = gv.load('Fits/Bsetas_for_BK.pickle')
     Laurence = gv.load('Fits/Laurence_dict.pickle')
     Bcdata = Laurence['BcDs']
@@ -1721,6 +1950,10 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #plt.plot(Bcqsqs, BcyTsmean, color='g',linestyle='-.',label='$f_T(q^2)~B_c\to D_s$')
     #plt.fill_between(Bcqsqs,BcyTslow,BcyTsupp, facecolor='none', edgecolor='g', hatch='+',alpha=alpha)
 
+    plt.errorbar(qsqmaxphys.mean, 0.819, yerr=0.017,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+    plt.errorbar(qsqmaxphys.mean, 2.45, yerr=0.19,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+    plt.errorbar(0, 0.3191, yerr=0.0085,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+
     handles = [ Patch(facecolor='b', edgecolor='b',label=r'$f_0~B\to K$',alpha=Al),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B\to K$',alpha=Al),Patch(facecolor='b', edgecolor='b',label=r'$f_0~B_s\to\eta_s$',alpha=As),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B_s\to\eta_s$',alpha=As),Patch(facecolor='b', edgecolor='b',label=r'$f_0~B_c\to D_s$',alpha=Ac),Patch(facecolor='r', edgecolor='r',label=r'$f_+~B_c\to D_s$',alpha=Ac)]
     plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper left')
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
@@ -1746,6 +1979,9 @@ def f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
 
     plt.plot(Bcqsqs, BcyTsmean, color='g',linestyle='-.',label='$f_T(q^2)~B_c\to D_s$')
     plt.fill_between(Bcqsqs,BcyTslow,BcyTsupp, color='g',alpha=Ac)
+
+    plt.errorbar(0, 0.370, yerr=0.078,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
+    plt.errorbar(qsqmaxphys.mean, 2.32, yerr=0.56,fmt='k*',ms=ms,mfc='none',lw=lw,capsize=capsize)
 
     handles = [ Patch(facecolor='g', edgecolor='g',label=r'$f_T(\mu=4.8~\mathrm{GeV})~B\to K$',alpha=Al),Patch(facecolor='g', edgecolor='g',label=r'$f_T(\mu=4.8~\mathrm{GeV})~B_c\to D_s$',alpha=Ac)]
     plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper left')
@@ -1986,9 +2222,9 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
     plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
-    plt.text(p['MDphys'].mean,-0.30,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.text(p['MDphys'].mean,-0.20,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
     plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
-    plt.text(p['MBphys'].mean,-0.30,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.text(p['MBphys'].mean,-0.20,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
     #plt.text(4.0,2.5,'$f_+(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
     #plt.text(2.5,0.3,'$f_{0,+}(0)$',fontsize=fontsizelab)
     #plt.text(4.5,1.0,'$f_0(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
@@ -2023,9 +2259,12 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     #LCSR
     plt.errorbar(p['MBphys'].mean,0.27, yerr=0.08,fmt='kd',ms=ms,mfc='none',lw=lw,capsize=capsize,label="Gubernari et al. '15")#1811.00983
     plt.errorbar(p['MBphys'].mean,0.25, yerr=0.07,fmt='gd',ms=ms,mfc='none',lw=lw,capsize=capsize,label="Gubernari et al. '15")#1811.00983
-    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')#handles=handles,labels=labels)
+    #plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper left')#handles=handles,labels=labels)
+    
+    handles = [ Patch(facecolor='k', edgecolor='k',label=r'$f_{0/+}(0)$',alpha=alpha),Patch(facecolor='g', edgecolor='g',label=r'$f_{T}(0,\mu)$',alpha=alpha),Patch(facecolor='b', edgecolor='b',label=r'$f_{0}(q^2_{\mathrm{max}})$',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'$f_{+}(q^2_{\mathrm{max}})$',alpha=alpha),Patch(facecolor='purple', edgecolor='purple',label=r'$f_{T}(q^2_{\mathrm{max}},\mu)$',alpha=alpha),Line2D([0],[0],color='k',linestyle='None', marker='o',ms=ms, mfc='none',label="HPQCD '13"),Line2D([0],[0],color='k',linestyle='None', marker='s',ms=ms, mfc='none',label="ETMC '17"),Line2D([0],[0],color='k',linestyle='None', marker='*',ms=ms, mfc='none',label="ETMC '18"),Line2D([0],[0],color='k',linestyle='None', marker='^',ms=ms, mfc='none',label="FNAL '15"),Line2D([0],[0],color='k',linestyle='None', marker='d',ms=ms, mfc='none',label="Gubernari et al. '15")]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=3,loc=(0.05, 0.8))   
     ##################################
-    plt.axes().set_ylim([0,4.0])
+    plt.axes().set_ylim([0,3.0])
     plt.tight_layout()
     plt.savefig('Plots/f0fpfTinmh{0}.pdf'.format(faclab))
     plt.close()
@@ -2069,6 +2308,320 @@ def f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.tight_layout()
     plt.savefig('Plots/xvsnoxinmh{0}.pdf'.format(faclab))
     plt.close()
+    return()
+
+##############################################################################################
+def f0_fp_fT_in_Mh_4GeV(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    MHs = []
+    f00 = []
+    f0max = []
+    fpmax = []
+    fT0 = []
+    fTmax = []
+    p = make_p_physical_point_BK(pfit,Fits)
+    qsqmax = (p['MDphys']**2).mean
+    cut_off = gv.sqrt(qsqmax) + p['MKphys'] # where 4 above q^2 max
+    #for Mh in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts): #q2 now in GeV
+    for Mh in np.linspace(cut_off.mean,p['MBphys'].mean,nopts): #q2 now in GeV
+        p = make_p_Mh_BK(pfit,Fits,Mh)
+        Z_T_running = run_mu(p,Mh)
+        qsqmaxphys = (Mh-p['MKphys'])**2
+        MHs.append(Mh)
+        f00.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)) #only need one fit
+        f0max.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0))
+        fpmax.append(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2))
+        fT0.append(Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)) 
+        fTmax.append(Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0))
+
+    
+    f00mean,f00err = unmake_gvar_vec(f00)
+    f0maxmean,f0maxerr = unmake_gvar_vec(f0max)
+    fpmaxmean,fpmaxerr = unmake_gvar_vec(fpmax)
+    fT0mean,fT0err = unmake_gvar_vec(fT0)
+    fTmaxmean,fTmaxerr = unmake_gvar_vec(fTmax)
+    f00upp,f00low = make_upp_low(f00)
+    f0maxupp,f0maxlow = make_upp_low(f0max)
+    fpmaxupp,fpmaxlow = make_upp_low(fpmax)
+    fT0upp,fT0low = make_upp_low(fT0)
+    fTmaxupp,fTmaxlow = make_upp_low(fTmax)
+    plt.figure(figsize=figsize) 
+    plt.plot(MHs, f00mean, color='k',label=r'$f_{0/+}(0)$')
+    plt.fill_between(MHs,f00low,f00upp, color='k',alpha=alpha)
+    plt.plot(MHs, f0maxmean, color='b',label=r'$f_{0}(q^2=M_D^2)$')
+    plt.fill_between(MHs,f0maxlow,f0maxupp, color='b',alpha=alpha)
+    plt.plot(MHs, fpmaxmean, color='r',label=r'$f_{+}(q^2=M_D^2)$')
+    plt.fill_between(MHs,fpmaxlow,fpmaxupp, color='r',alpha=alpha)
+    plt.plot(MHs, fT0mean, color='g',label=r'$f_{T}(0,\mu)$')
+    plt.fill_between(MHs,fT0low,fT0upp, color='g',alpha=alpha)
+    plt.plot(MHs, fTmaxmean, color='purple',label=r'$f_{T}(q^2=M_D^2,\mu)$')
+    plt.fill_between(MHs,fTmaxlow,fTmaxupp, color='purple',alpha=alpha)
+    plt.xlabel('$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.ylabel('$f$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.plot([cut_off.mean,cut_off.mean],[-10,10],'k:',lw=lw,alpha=alpha)
+    #plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw,alpha=alpha)
+    #plt.text(p['MDphys'].mean,0,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.text(cut_off.mean,-0.1,r'$q^2_{\mathrm{max}}=M_D^2$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw,alpha=alpha)
+    plt.text(p['MBphys'].mean,-0.1,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper center')#handles=handles,labels=labels)
+    ##################################
+    plt.axes().set_ylim([0.2,1.8])
+    plt.tight_layout()
+    plt.savefig('Plots/f0fpfTinmh_4GeV{0}.pdf'.format(faclab))
+    plt.close()
+
+    return()
+
+######################################################
+
+def f0_fp_fT_in_Mh_deriv4GeV(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    MHs = []
+    f00 = []
+    f0max = []
+    fpmax = []
+    fT0 = []
+    fTmax = []
+    p = make_p_physical_point_BK(pfit,Fits)
+    eps = 0.01
+    qsqmax = 4
+    cut_off = gv.sqrt(qsqmax) + p['MKphys'] # where 4 above q^2 max
+    #for Mh in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts): #q2 now in GeV
+    for Mh in np.linspace(cut_off.mean,p['MBphys'].mean,nopts): #q2 now in GeV
+        MHs.append(Mh)
+        Mh1 = Mh-eps/2
+        p = make_p_Mh_BK(pfit,Fits,Mh1)
+        Z_T_running = run_mu(p,Mh1)
+        A1 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        B1 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        C1 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        D1 = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        E1  = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        Mh2 = Mh+eps/2
+        p = make_p_Mh_BK(pfit,Fits,Mh2)
+        Z_T_running = run_mu(p,Mh2)
+        A2 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        B2 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        C2 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        D2 = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        E2  = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        f00.append((A2-A1)/eps) #only need one fit
+        f0max.append((B2-B1)/eps)
+        fpmax.append((C2-C1)/eps)
+        fT0.append((D2-D1)/eps) 
+        fTmax.append((E2-E1)/eps)
+
+    
+    f00mean,f00err = unmake_gvar_vec(f00)
+    f0maxmean,f0maxerr = unmake_gvar_vec(f0max)
+    fpmaxmean,fpmaxerr = unmake_gvar_vec(fpmax)
+    fT0mean,fT0err = unmake_gvar_vec(fT0)
+    fTmaxmean,fTmaxerr = unmake_gvar_vec(fTmax)
+    f00upp,f00low = make_upp_low(f00)
+    f0maxupp,f0maxlow = make_upp_low(f0max)
+    fpmaxupp,fpmaxlow = make_upp_low(fpmax)
+    fT0upp,fT0low = make_upp_low(fT0)
+    fTmaxupp,fTmaxlow = make_upp_low(fTmax)
+    plt.figure(figsize=figsize) 
+    plt.plot(MHs, f00mean, color='k',label=r'$f_{0/+}(0)$')
+    plt.fill_between(MHs,f00low,f00upp, color='k',alpha=alpha)
+    plt.plot(MHs, f0maxmean, color='b',label=r'$f_{0}(q^2=4~\mathrm{GeV}^2)$')
+    plt.fill_between(MHs,f0maxlow,f0maxupp, color='b',alpha=alpha)
+    plt.plot(MHs, fpmaxmean, color='r',label=r'$f_{+}(q^2=4~\mathrm{GeV}^2)$')
+    plt.fill_between(MHs,fpmaxlow,fpmaxupp, color='r',alpha=alpha)
+    plt.plot(MHs, fT0mean, color='g',label=r'$f_{T}(0,\mu)$')
+    plt.fill_between(MHs,fT0low,fT0upp, color='g',alpha=alpha)
+    plt.plot(MHs, fTmaxmean, color='purple',label=r'$f_{T}(q^2=4~\mathrm{GeV}^2,\mu)$')
+    plt.fill_between(MHs,fTmaxlow,fTmaxupp, color='purple',alpha=alpha)
+    plt.xlabel('$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.ylabel('$\frac{df}{dM_H}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.plot([cut_off.mean,cut_off.mean],[-10,10],'k:',lw=lw*2,alpha=alpha)
+    plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw*2,alpha=alpha)
+    plt.text(p['MDphys'].mean,-2.3,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw*2,alpha=alpha)
+    plt.text(p['MBphys'].mean,-2.3,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower right')#handles=handles,labels=labels)
+    ##################################
+    plt.axes().set_ylim([-2.2,0])
+    plt.tight_layout()
+    plt.savefig('Plots/f0fpfTinmh_deriv4GeV{0}.pdf'.format(faclab))
+    plt.close()
+
+    return()
+
+######################################################
+
+def f0_fp_fT_in_Mh_deriv2_4GeV(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    MHs = []
+    f00 = []
+    f0max = []
+    fpmax = []
+    fT0 = []
+    fTmax = []
+    p = make_p_physical_point_BK(pfit,Fits)
+    eps = 0.01
+    qsqmax = (p['MDphys']**2).mean
+    cut_off = gv.sqrt(qsqmax) + p['MKphys'] # where 4 above q^2 max
+    #for Mh in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts): #q2 now in GeV
+    for Mh in np.linspace(cut_off.mean,p['MBphys'].mean,nopts): #q2 now in GeV
+        MHs.append(Mh)
+        p = make_p_Mh_BK(pfit,Fits,Mh)
+        Z_T_running = run_mu(p,Mh)
+        A = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        B = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        C = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        D = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        E  = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        Mh1 = Mh-eps/2
+        p = make_p_Mh_BK(pfit,Fits,Mh1)
+        Z_T_running = run_mu(p,Mh1)
+        A1 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        B1 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        C1 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        D1 = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        E1  = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        Mh2 = Mh+eps/2
+        p = make_p_Mh_BK(pfit,Fits,Mh2)
+        Z_T_running = run_mu(p,Mh2)
+        A2 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        B2 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        C2 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        D2 = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
+        E2  = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        f00.append((A2-A1)*Mh/(A*eps)) #only need one fit
+        f0max.append((B2-B1)*Mh/(B*eps))
+        fpmax.append((C2-C1)*Mh/(C*eps))
+        fT0.append((D2-D1)*Mh/(D*eps)) 
+        fTmax.append((E2-E1)*Mh/(E*eps))
+
+    
+    f00mean,f00err = unmake_gvar_vec(f00)
+    f0maxmean,f0maxerr = unmake_gvar_vec(f0max)
+    fpmaxmean,fpmaxerr = unmake_gvar_vec(fpmax)
+    fT0mean,fT0err = unmake_gvar_vec(fT0)
+    fTmaxmean,fTmaxerr = unmake_gvar_vec(fTmax)
+    f00upp,f00low = make_upp_low(f00)
+    f0maxupp,f0maxlow = make_upp_low(f0max)
+    fpmaxupp,fpmaxlow = make_upp_low(fpmax)
+    fT0upp,fT0low = make_upp_low(fT0)
+    fTmaxupp,fTmaxlow = make_upp_low(fTmax)
+    plt.figure(figsize=figsize) 
+    plt.plot(MHs, f00mean, color='k',label=r'$f_{0/+}(0)$')
+    plt.fill_between(MHs,f00low,f00upp, color='k',alpha=alpha)
+    plt.plot(MHs, f0maxmean, color='b',label=r'$f_{0}(q^2=M_D^2)$')
+    plt.fill_between(MHs,f0maxlow,f0maxupp, color='b',alpha=alpha)
+    plt.plot(MHs, fpmaxmean, color='r',label=r'$f_{+}(q^2=M_D^2)$')
+    plt.fill_between(MHs,fpmaxlow,fpmaxupp, color='r',alpha=alpha)
+    plt.plot(MHs, fT0mean, color='g',label=r'$f_{T}(0,\mu)$')
+    plt.fill_between(MHs,fT0low,fT0upp, color='g',alpha=alpha)
+    plt.plot(MHs, fTmaxmean, color='purple',label=r'$f_{T}(q^2=M_D^2,\mu)$')
+    plt.fill_between(MHs,fTmaxlow,fTmaxupp, color='purple',alpha=alpha)
+    plt.xlabel('$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.ylabel(r'$\frac{M_H}{f}\frac{df}{dM_H}$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.plot([cut_off.mean,cut_off.mean],[-10,10],'k:',lw=lw,alpha=alpha)
+    #plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw,alpha=alpha)
+    #plt.text(p['MDphys'].mean,-4,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.text(cut_off.mean,-4.5,r'$q^2_{\mathrm{max}}=M_D^2$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw,alpha=alpha)
+    plt.text(p['MBphys'].mean,-4.5,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower center')#handles=handles,labels=labels)
+    ##################################
+    plt.axes().set_ylim([-3.5,0])
+    plt.tight_layout()
+    plt.savefig('Plots/f0fpfTinmh_deriv2_4GeV{0}.pdf'.format(faclab))
+    plt.close()
+
+    return()
+####################################################################################################
+
+def f0_fp_fT_in_Mh_log4GeV(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    MHs = []
+    f00 = []
+    f0max = []
+    fpmax = []
+    fT0 = []
+    fTmax = []
+    p = make_p_physical_point_BK(pfit,Fits)
+    qsqmax = 4
+    cut_off = gv.sqrt(qsqmax) + p['MKphys'] # where 4 above q^2 max
+    #for Mh in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts): #q2 now in GeV
+    for Mh in np.linspace(cut_off.mean,p['MBphys'].mean,nopts): #q2 now in GeV
+        p = make_p_Mh_BK(pfit,Fits,Mh)
+        Z_T_running = run_mu(p,Mh)
+        #qsqmaxphys = (Mh-p['MKphys'])**2
+        MHs.append(Mh)
+        f00.append(gv.log(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0))/gv.log(Mh)) #only need one fit
+        f0max.append(gv.log(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0))/gv.log(Mh))
+        fpmax.append(gv.log(make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2))/gv.log(Mh))
+        fT0.append(gv.log(Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0))/gv.log(Mh)) 
+        fTmax.append(gv.log(Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0))/gv.log(Mh))
+
+    
+    f00mean,f00err = unmake_gvar_vec(f00)
+    f0maxmean,f0maxerr = unmake_gvar_vec(f0max)
+    fpmaxmean,fpmaxerr = unmake_gvar_vec(fpmax)
+    fT0mean,fT0err = unmake_gvar_vec(fT0)
+    fTmaxmean,fTmaxerr = unmake_gvar_vec(fTmax)
+    f00upp,f00low = make_upp_low(f00)
+    f0maxupp,f0maxlow = make_upp_low(f0max)
+    fpmaxupp,fpmaxlow = make_upp_low(fpmax)
+    fT0upp,fT0low = make_upp_low(fT0)
+    fTmaxupp,fTmaxlow = make_upp_low(fTmax)
+    plt.figure(figsize=figsize) 
+    plt.plot(MHs, f00mean, color='k',label=r'$\log(f_{0/+}(0))/\log(M_H)$')
+    plt.fill_between(MHs,f00low,f00upp, color='k',alpha=alpha)
+    plt.plot(MHs, f0maxmean, color='b',label=r'$\log(f_{0}(q^2=4~\mathrm{GeV}^2))/\log(M_H)$')
+    plt.fill_between(MHs,f0maxlow,f0maxupp, color='b',alpha=alpha)
+    plt.plot(MHs, fpmaxmean, color='r',label=r'$\log(f_{+}(q^2=4~\mathrm{GeV}^2))/\log(M_H)$')
+    plt.fill_between(MHs,fpmaxlow,fpmaxupp, color='r',alpha=alpha)
+    plt.plot(MHs, fT0mean, color='g',label=r'$\log(f_{T}(0,\mu))/\log(M_H)$')
+    plt.fill_between(MHs,fT0low,fT0upp, color='g',alpha=alpha)
+    plt.plot(MHs, fTmaxmean, color='purple',label=r'$\log(f_{T}(q^2=4~\mathrm{GeV}^2,\mu))/\log(M_H)$')
+    plt.fill_between(MHs,fTmaxlow,fTmaxupp, color='purple',alpha=alpha)
+    plt.xlabel(r'$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.plot([cut_off.mean,cut_off.mean],[-10,10],'k:',lw=lw*2,alpha=alpha)
+    plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw*2,alpha=alpha)
+    plt.text(p['MDphys'].mean,-0.9,r'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw*2,alpha=alpha)
+    plt.text(p['MBphys'].mean,-0.9,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='upper right')#handles=handles,labels=labels)
+    ##################################
+    plt.axes().set_ylim([-0.8,0.6])
+    plt.tight_layout()
+    plt.savefig('Plots/f0fpfTinmh_log4GeV{0}.pdf'.format(faclab))
+    plt.close()
+
     return()
 
 #####################################################################################################
@@ -2455,14 +3008,17 @@ def dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     exps = [CDF11,BELLE19,LHCb12B,LHCb14A,LHCb14C,LHCb21]
     m_lep = m_mu # use mu as most data muon and make no difference
     p = make_p_physical_point_BK(pfit,Fits,B='p')
+    #p0 = make_p_physical_point_BK(pfit,Fits,B='0')
     B = []
     qsq = []
-    for q2 in np.linspace(4*m_lep**2,qsqmaxphysBKp.mean,nopts): #q2 now in GeV
+    for q2 in np.linspace(4*m_lep**2,qsqmaxphysBKp.mean,100): #nopts q2 now in GeV
         qsq.append(q2)
         al,cl = make_al_cl(p,q2,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        #al0,cl0 = make_al_cl(p0,q2,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
         if q2 == qsqmaxphysBKp.mean:
             B.append(gv.gvar('0(0)'))
         else:
+            #print(q2,'  ',al,'  ',al0,'  ',cl,'  ',cl0)
             B.append((2*al + 2*cl/3)*tauBpmGeV*1e7)
     Bmean,Berr = unmake_gvar_vec(B)
     Bupp,Blow = make_upp_low(B)
@@ -2631,13 +3187,13 @@ def dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.figure(figsize=figsize)
     plt.plot(qsq, Bmean, color='b')
     plt.fill_between(qsq,Blow,Bupp, color='b',alpha=alpha)
-    cols = ['r','g','purple','m']
-    thes = [Bobeth07,Bobeth11,Bobeth16,Fermi16A]
+    cols = ['r','g','purple','m','c']
+    thes = [Bobeth07,Bobeth11,Bobeth16,Fermi16A,Guber22]
     for i,the in enumerate(thes):
         x,xerr = the.make_x()
         if the.label in ["Bobeth et al. '07","Bobeth '11"]:
             y,yerr = the.add_up_down_errs(the.fix_B_bins(the.binBmum))
-        elif the.label in ["FNAL/MILC '15"]:
+        elif the.label in ["FNAL/MILC '15","Guber. et al. '22"]:
             y,yerr = the.add_errs(the.fix_B_bins(the.binBmup))
         elif the.label in ["Bobeth et al. '12"]:
             y,yerr = the.add_up_down_errs(the.fix_B_bins(the.binBemum))
@@ -2660,7 +3216,7 @@ def dBdq2_the_p(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     handles, labels = plt.gca().get_legend_handles_labels()
     handles = [h[0] for h in handles]
     plt.legend(handles=handles,labels=labels,fontsize=fontsizeleg,frameon=False,ncol=1,loc='upper right')
-    plt.axes().set_ylim([-0.02,0.5])
+    plt.axes().set_ylim([-0.02,0.6])
     plt.tight_layout()
     plt.savefig('Plots/dBdq2_the_p{0}.pdf'.format(faclab))
     plt.close()
@@ -2895,17 +3451,26 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     xLHC = gv.gvar(x[0],xerr[0][0])
     VtbVts_me = gv.sqrt(xLHC/(res/VtbVts**2))
     print("B^+ Tension with LHCb '14A = {0:.2f} sigma  => V_tb*V_ts*e3 = {1}".format((res-xLHC).mean/(res-xLHC).sdev,10**3*VtbVts_me))
+    QEDres = res*Berrormu
+    QEDVtbVts_me = gv.sqrt(xLHC/(QEDres/VtbVts**2))
+    print("B^+ + QED Tension with LHCb '14A = {0:.2f} sigma  => V_tb*V_ts*e3 = {1}".format((QEDres-xLHC).mean/(QEDres-xLHC).sdev,10**3*QEDVtbVts_me))
     res2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps=True,qmax=True)*tauBpmGeV*1e7
     res3 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps='LHCbp',qmax=True)*tauBpmGeV*1e7
     print('My B^+ correction factor: {0}'.format(res/res3))
     tau_res = integrate_Gamma(p,4*m_tau**2,qsq_max,m_tau,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=150,qmax=True)*tauBpmGeV*1e7
     tau_x,tau_xerr = BaBar16.make_1_y(BaBar16.Btaup)
+    reslime = res*Berrore
+    reslimmu = res*Berrormu
+    plt.plot([reslime.mean-reslime.sdev,reslime.mean-reslime.sdev],[7.5,20],linestyle ='--',color='k')
+    plt.plot([reslime.mean+reslime.sdev,reslime.mean+reslime.sdev],[7.5,20],linestyle ='--',color='k')
+    plt.plot([reslimmu.mean-reslimmu.sdev,reslimmu.mean-reslimmu.sdev],[-2,7.5],linestyle ='--',color='k')
+    plt.plot([reslimmu.mean+reslimmu.sdev,reslimmu.mean+reslimmu.sdev],[-2,7.5],linestyle ='--',color='k')
     print('Btau',tau_res,'BaBar16','{0}+{1}-{2}'.format(tau_x[0]*1e7,tau_xerr[1][0]*1e7,tau_xerr[0][0]*1e7))
     plt.errorbar(res.mean,14, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[16,16], color='k',alpha=alpha/2)
     #plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[16,16], edgecolor='k',fc='none',alpha=alpha,hatch='X')
     print('Bp difference without vetoed regions', res,res2,res2/res *100,"%")
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.text(2.1,9.0,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab, va='center')
     plt.text(2.1,4.0,r'$B^+\to{}K^+\mu^+\mu^-$',fontsize=fontsizelab, va='center')
     plt.text(2.1,12.5,r'$B^+\to{}K^+\ell^+\ell^-$',fontsize=fontsizelab, va='center')
@@ -2914,7 +3479,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([2.0,7.7])
+    plt.xlim([2.0,7.8])
     plt.ylim([0.5,14.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -2957,13 +3522,21 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     x,xerr = LHCb14A.make_1_y(LHCb14A.Bmu0)
     xLHC = gv.gvar(x[0],xerr[0][0])
     print("B^0 Tension with LHCb '14A = {0:.2f} sigma".format((res-xLHC).mean/(res-xLHC).sdev))
+    QEDres = res*Berrormu
+    print("B^0 + QED Tension with LHCb '14A = {0:.2f} sigma".format((QEDres-xLHC).mean/(QEDres-xLHC).sdev))
     res2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps=True,qmax=True)*tauB0GeV*1e7
     res3 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps='LHCb0',qmax=True)*tauB0GeV*1e7
-    print('My B^0 correction factor: {0}',res/res3)
+    print('My B^0 correction factor: {0}'.format(res/res3))
+    reslime = res*Berrore
+    reslimmu = res*Berrormu
+    plt.plot([reslime.mean-reslime.sdev,reslime.mean-reslime.sdev],[5.5,20],linestyle ='--',color='k')
+    plt.plot([reslime.mean+reslime.sdev,reslime.mean+reslime.sdev],[5.5,20],linestyle ='--',color='k')
+    plt.plot([reslimmu.mean-reslimmu.sdev,reslimmu.mean-reslimmu.sdev],[-2,5.5],linestyle ='--',color='k')
+    plt.plot([reslimmu.mean+reslimmu.sdev,reslimmu.mean+reslimmu.sdev],[-2,5.5],linestyle ='--',color='k')
     plt.errorbar(res.mean,11, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[12,12], color='k',alpha=alpha/2)
     #plt.fill_between([res2.mean-res2.sdev,res2.mean+res2.sdev],[0,0],[12,12], edgecolor='k',fc='none',alpha=alpha,hatch='X') 
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.text(7,6.5,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab, va='center')
     plt.text(7,3.0,r'$B^0\to{}K^0\mu^+\mu^-$',fontsize=fontsizelab, va='center')
     plt.text(7,9,r'$B^0\to{}K^0\ell^+\ell^-$',fontsize=fontsizelab, va='center')
@@ -2972,7 +3545,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([-0.5,10.0])
+    plt.xlim([-0.5,11.0])
     plt.ylim([0.5,11.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -3019,10 +3592,16 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     resB2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,gaps=True,qmax=True)*tauBpmGeV*1e7
     res = (res1+res2)/2
     resB = (resB1+resB2)/2
+    reslime = res*Berrore
+    reslimmu = res*Berrormu
+    plt.plot([reslime.mean-reslime.sdev,reslime.mean-reslime.sdev],[3.5,20],linestyle ='--',color='k')
+    plt.plot([reslime.mean+reslime.sdev,reslime.mean+reslime.sdev],[3.5,20],linestyle ='--',color='k')
+    plt.plot([reslimmu.mean-reslimmu.sdev,reslimmu.mean-reslimmu.sdev],[-2,3.5],linestyle ='--',color='k')
+    plt.plot([reslimmu.mean+reslimmu.sdev,reslimmu.mean+reslimmu.sdev],[-2,3.5],linestyle ='--',color='k')
     plt.errorbar(res.mean,9, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
     #plt.fill_between([resB.mean-resB.sdev,resB.mean+resB.sdev],[0,0],[11,11], edgecolor='k',fc='none',alpha=alpha,hatch='X')
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.text(1.55,4.5,r'$B\to{}Ke^+e^-$',fontsize=fontsizelab, va='center')
     plt.text(1.55,2,r'$B\to{}K\mu^+\mu^-$',fontsize=fontsizelab, va='center')
     plt.text(1.55,7.5,r'$B\to{}K\ell^+\ell^-$',fontsize=fontsizelab, va='center')
@@ -3031,7 +3610,7 @@ def B_exp_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([1.5,7.1])
+    plt.xlim([1.5,7.4])
     plt.ylim([0.5,9.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -3097,7 +3676,7 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     print('')
     plt.errorbar(res.mean,8, xerr=res.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
     #plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[2.5,2.5],[11,11], color='r',alpha=alpha/2)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     qsq_max = qsqmaxphysBK0.mean
     res = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)*tauB0GeV*1e7
@@ -3105,13 +3684,13 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     res0 = (res0+res)/2
     plt.errorbar(res.mean,5, xerr=res.sdev,ms=ms,fmt='*',color='b',capsize=capsize,lw=lw)
     #plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[2.5,2.5],[11,11], color='b',alpha=alpha/2)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.errorbar(res1418.mean,2, xerr=res1418.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
     #plt.fill_between([res1418.mean-res1418.sdev,res1418.mean+res1418.sdev],[0,0],[2.5,2.5], color='r',alpha=alpha/2)    
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.errorbar(res0.mean,10, xerr=res0.sdev,ms=ms,fmt='*',color='purple',capsize=capsize,lw=lw)
     #plt.fill_between([res0.mean-res0.sdev,res0.mean+res0.sdev],[2.5,2.5],[11,11], color='b',alpha=alpha/2)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.text(1.9,4,r'$B^0\to{}K^0\ell^+\ell^-$',fontsize=fontsizelab, va='center')
     plt.text(1.9,7,r'$B^{\pm}\to{}K^{\pm}\ell^+\ell^-$',fontsize=fontsizelab, va='center')
     plt.text(1.9,9.5,r'$B\to{}K\mu^+\mu^-$',fontsize=fontsizelab, va='center')
@@ -3121,7 +3700,7 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
-    plt.xlim([0.6,7.5])
+    plt.xlim([0.6,8.0])
     plt.ylim([0.5,10.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
@@ -3180,7 +3759,7 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[2.5,2.5],[11,11], color='r',alpha=alpha/2)
     plt.errorbar(res1418.mean,2, xerr=res1418.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
     #plt.fill_between([res1418.mean-res1418.sdev,res1418.mean+res1418.sdev],[0,0],[2.5,2.5], color='r',alpha=alpha/2)  
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     qsq_max = qsqmaxphysBK0.mean
     res = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)*tauB0GeV*1e7
@@ -3191,9 +3770,9 @@ def B_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     res1418 = (res1418+res1418b)/2
     plt.errorbar(res1418.mean,4, xerr=res1418.sdev,ms=ms,fmt='*',color='purple',capsize=capsize,lw=lw)
     #plt.fill_between([res1418.mean-res1418.sdev,res1418.mean+res1418.sdev],[0,0],[2.5,2.5], color='b',alpha=alpha/2) 
-    labs.append("HPQCD '21")  
-    labs.append("HPQCD '21")
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")  
+    labs.append("HPQCD '22")
+    labs.append("HPQCD '22")
     plt.text(0.72,6,r'$B^0\to{}K^0\tau^+\tau^-$',fontsize=fontsizelab*0.9, va='center')
     plt.text(0.72,9,r'$B^{\pm}\to{}K^{\pm}\tau^+\tau^-$',fontsize=fontsizelab*0.9, va='center')
     plt.text(0.72,3.8,r'$B\to{}K\tau^+\tau^-_{(14.18\mathrm{GeV}^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab*0.9, va='center')
@@ -3250,7 +3829,7 @@ def nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
             p3 = 0
         if q2 == qsqmaxphysBKp.mean:
             p3 = 0
-        fp = isocorr*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        fp = isocorrp*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
         yp.append(1e7*(tauBpmGeV * VtbVts**2 * GF**2 * alphaEW**2 * Xt**2 * p3 * fp**2) /(32 * (np.pi)**5 * sinthw2**2)) #only need one fit
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     for q2 in np.linspace(0,qsqmaxphysBK0.mean,nopts): #q2 now in GeV
@@ -3259,7 +3838,7 @@ def nu_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
             p3 = 0
         if q2 == qsqmaxphysBK0.mean:
             p3 = 0
-        fp = isocorr*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+        fp = isocorrp*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],q2,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
         y0.append(1e7*(tauB0GeV * VtbVts**2 * GF**2 * alphaEW**2 * Xt**2 * p3 * fp**2) /(32 * (np.pi)**5 * sinthw2**2))
     y0mean,y0err = unmake_gvar_vec(y0)
     y0upp,y0low = make_upp_low(y0)
@@ -3315,7 +3894,7 @@ def Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         res.append(((res1top/res1bot +res2top/res2bot)/2).mean)
         reserr.append(((res1top/res1bot +res2top/res2bot)/2).sdev)
         
-    plt.errorbar(x,res,xerr=xerr, yerr=reserr,ms=ms,fmt='*',mfc='none',color='k',label="HPQCD '21",capsize=capsize,lw=lw)
+    plt.errorbar(x,res,xerr=xerr, yerr=reserr,ms=ms,fmt='*',mfc='none',color='k',label="HPQCD '22",capsize=capsize,lw=lw)
         
     the = HPQCD14B
     x,xerr = the.make_x()
@@ -3383,7 +3962,7 @@ def Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         res.append(temp.mean)
         reserr.append(temp.sdev)
         
-    plt.errorbar(x,res,xerr=xerr, yerr=reserr,ms=ms,fmt='*',mfc='none',color='k',label="HPQCD '21",capsize=capsize,lw=lw)
+    plt.errorbar(x,res,xerr=xerr, yerr=reserr,ms=ms,fmt='*',mfc='none',color='k',label="HPQCD '22",capsize=capsize,lw=lw)
 
     the = Bobeth07
     x,xerr = the.make_x()
@@ -3439,7 +4018,7 @@ def Rbybin_the(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #2 chargeless and one not (this one over q^2 range 1-6).
     exps = [BELLE09,BELLE19,BaBar09,BaBar12,BaBar16,CDF11,LHCb12A,LHCb12B,LHCb14A,LHCb14A2,LHCb14B,LHCb14C,LHCb21]
-    numbs = [5,3,4,6,1,2,7]
+    numbs = [6,4,5,7,1,2,8,3]
     labs = []
     i = 0
     plt.figure(figsize=figsize)
@@ -3452,6 +4031,8 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
         if exp.label == "LHCb '21":
             labs.append(exp.label)
             x,xerr = exp.make_y(exp.Rmuep)
+            to_print = gv.gvar(x,xerr[1])
+            print('R_mu_e LHCb 21 1.1-6',to_print)
             plt.errorbar(x,numbs[i], xerr=xerr,ms=ms,fmt=exp.sym,color='b' ,capsize=capsize,lw=lw)
             i += 1
         elif exp.Rmuep != []:
@@ -3461,8 +4042,8 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             i += 1
 
     plt.plot([1,1],[-1,10],color='k',linestyle='--')
-    plt.plot([0,2],[2.5,2.5],color='k')
     plt.plot([0,2],[3.5,3.5],color='k')
+    plt.plot([0,2],[4.5,4.5],color='k')
     plt.plot([0,2],[1.5,1.5],color='k')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     qsq_max = qsqmaxphysBKp.mean
@@ -3472,28 +4053,24 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     qsq_max = qsqmaxphysBK0.mean
     res2top = integrate_Gamma(p,4*m_mu**2,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)
     res2bot = integrate_Gamma(p,4*m_e**2,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250,qmax=True)
-    res = (res1top/res1bot +res2top/res2bot)/2
-    plt.errorbar(res.mean,7, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    res = Rerror * (res1top/res1bot +res2top/res2bot)/2
+    plt.errorbar(res.mean,8, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
 
-    #p = make_p_physical_point_BK(pfit,Fits,B='p')
-    #qsq_max = 6
-    #qsq_min = 1
-    #res1top = integrate_Gamma(p,qsq_min,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
-    #res1bot = integrate_Gamma(p,qsq_min,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
-    #p = make_p_physical_point_BK(pfit,Fits,B='0')
-    #res2top = integrate_Gamma(p,qsq_min,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
-    #res2bot = integrate_Gamma(p,qsq_min,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
-    #resp = (res1top/res1bot +res2top/res2bot)/2
-    #plt.errorbar(resp.mean,3, xerr=resp.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    p = make_p_physical_point_BK(pfit,Fits,B='p')
+    qsq_max = 6
+    restop = integrate_Gamma(p,1.1,qsq_max,m_mu,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
+    resbot = integrate_Gamma(p,1.1,qsq_max,m_e,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=250)
+    print('R_mu_e us 1.1-6',restop/resbot)
+    res = Rerror * restop/resbot
+    plt.errorbar(res.mean,3, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
     
-    #plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
-    labs.append("HPQCD '21")
-    #labs.append("HPQCD '21")
-    plt.text(0.62,5.5,r'$R^{\mu}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
-    plt.text(0.62,3,r'$R^{\mu(+)}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
+    labs.append("HPQCD '22")
+    labs.append("HPQCD '22")
+    plt.text(0.62,6.5,r'$R^{\mu}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
+    plt.text(0.62,4,r'$R^{\mu(+)}_e(q^2_{\mathrm{min}},q^2_{\mathrm{max}})$',fontsize=fontsizelab, va='center')
     plt.text(1.02,1.0,r'$R^{\mu (+)}_e (1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
     #plt.text(1.02,3.0,r'$R^{\mu (+)}_e (1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
-    plt.text(1.02,2.0,r'$R^{\mu (+)}_e (1.1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
+    plt.text(1.02,2.5,r'$R^{\mu (+)}_e (1.1\mathrm{GeV}^2,6\mathrm{GeV}^2)$',fontsize=fontsizelab, va='center')
     #plt.text(2.3,9,r'$B^+\to{}K^+\ell^+\ell^-$',fontsize=fontsizelab, va='center')
     plt.xlabel(r'$R^{\mu}_{e}$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
@@ -3501,7 +4078,7 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('none')
     plt.xlim([0.6,1.44])
-    plt.ylim([0.5,7.5])
+    plt.ylim([0.5,8.5])
     plt.gca().set_yticks(numbs)
     plt.gca().set_yticklabels(labs)
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.2))
@@ -3515,8 +4092,8 @@ def Rmue_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     return()
 
 #############################################################################################################
-def plot_C7_C9(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    p = make_p_physical_point_BK(pfit,Fits,B='p')
+def plot_C7_C9(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,B=None):
+    p = make_p_physical_point_BK(pfit,Fits,B=B)
     m_lep = m_e
     qsq = []
     C7Rc = []
@@ -3561,64 +4138,70 @@ def plot_C7_C9(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     C9Iupp,C9Ilow = make_upp_low(C9I)
 
     plt.figure(figsize=figsize)
-    plt.plot(qsq, C7Rcmean, color='b',label=r'$\mathrm{Re}[\mathcal{C}_7^{\mathrm{eff}}]$')
+    plt.plot(qsq, C7Rcmean, color='b',label=r'$\mathrm{Re}[C_7^{\mathrm{eff},1}]$',lw=2*lw)
     plt.fill_between(qsq,C7Rclow,C7Rcupp, color='b',alpha=0.6)
-    plt.plot(qsq, C7Rmean, color='b',linestyle=':',label=r'$\mathrm{Re}[C_7^{\mathrm{eff}}]$')
+    plt.plot(qsq, C7Rmean, color='b',linestyle=':',label=r'$\mathrm{Re}[C_7^{\mathrm{eff},0}]$',lw=2*lw)
     plt.fill_between(qsq,C7Rlow,C7Rupp, color='b',alpha=0.3)
 
-    plt.plot(qsq, C7Icmean, color='r',label=r'$\mathrm{Im}[\mathcal{C}_7^{\mathrm{eff}}]$')
+    plt.plot(qsq, C7Icmean, color='r',label=r'$\mathrm{Im}[C_7^{\mathrm{eff},1}]$',lw=2*lw)
     plt.fill_between(qsq,C7Iclow,C7Icupp, color='r',alpha=0.6)
-    plt.plot(qsq, C7Imean, color='r',linestyle=':',label=r'$\mathrm{Im}[C_7^{\mathrm{eff}}]$')
+    plt.plot(qsq, C7Imean, color='r',linestyle=':',label=r'$\mathrm{Im}[C_7^{\mathrm{eff},0}]$',lw=2*lw)
     plt.fill_between(qsq,C7Ilow,C7Iupp, color='r',alpha=0.3)
     
     plt.fill_between([8.68,10.11],[-5,-5],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-5,-5],[45,45], color='k',alpha=alpha)
-    plt.text((10.11+8.68)/2,-0.8,r'$J/\Psi$',va='center',ha='center',fontsize=fontsizelab)
-    plt.text((12.86+14.18)/2,-0.8,r'$\Psi(2S)$',va='center',ha='center',fontsize=fontsizelab)
+    plt.text((10.11+8.68)/2,-0.45,r'$J/\Psi$',va='center',ha='center',fontsize=fontsizelab)
+    plt.text((12.86+14.18)/2,-0.45,r'$\Psi(2S)$',va='center',ha='center',fontsize=fontsizelab)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    #plt.axes().xaxis.set_major_locator(MultipleLocator(1))
-    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
-    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='lower left')
-    plt.axes().set_ylim([-0.9,0.1])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.05))
+    handles = [ Line2D([0],[0],color='b',label=r'$\mathrm{Re}[C_7^{\mathrm{eff},1}]$',linestyle='-',lw=3*lw),Line2D([0],[0],color='b',label=r'$\mathrm{Re}[C_7^{\mathrm{eff},0}]$',linestyle=':',lw=3*lw),Line2D([0],[0],color='r',label=r'$\mathrm{Im}[C_7^{\mathrm{eff},1}]$',linestyle='-',lw=3*lw),Line2D([0],[0],color='r',label=r'$\mathrm{Im}[C_7^{\mathrm{eff},0}]$',linestyle=':',lw=3*lw)]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc=(0.05, 0.45))   
+    plt.axes().set_ylim([-0.5,0.05])
+    plt.axes().set_xlim([0,qsqmaxphysBK.mean])
     plt.tight_layout()
-    plt.savefig('Plots/C7eff{0}.pdf'.format(faclab))
+    plt.savefig('Plots/C7eff_{0}_{1}.pdf'.format(B,faclab))
     plt.close()
     
     plt.figure(figsize=figsize)
-    plt.plot(qsq, C9Rcmean, color='b',label=r'$\mathrm{Re}[\mathcal{C}_9^{\mathrm{eff}}]$')
+    plt.plot(qsq, C9Rcmean, color='b',label=r'$\mathrm{Re}[C_9^{\mathrm{eff},1}]$',lw=2*lw)
     plt.fill_between(qsq,C9Rclow,C9Rcupp, color='b',alpha=0.6)
-    plt.plot(qsq, C9Rmean, color='b',linestyle=':',label=r'$\mathrm{Re}[C_9^{\mathrm{eff}}]$')
+    plt.plot(qsq, C9Rmean, color='b',linestyle=':',label=r'$\mathrm{Re}[C_9^{\mathrm{eff},0}]$',lw=2*lw)
     plt.fill_between(qsq,C9Rlow,C9Rupp, color='b',alpha=0.3)
 
-    plt.plot(qsq, C9Icmean, color='r',label=r'$\mathrm{Im}[\mathcal{C}_9^{\mathrm{eff}}]$')
+    plt.plot(qsq, C9Icmean, color='r',label=r'$\mathrm{Im}[C_9^{\mathrm{eff},1}]$',lw=2*lw)
     plt.fill_between(qsq,C9Iclow,C9Icupp, color='r',alpha=0.6)
-    plt.plot(qsq, C9Imean, color='r',linestyle=':',label=r'$\mathrm{Im}[C_9^{\mathrm{eff}}]$')
+    plt.plot(qsq, C9Imean, color='r',linestyle=':',label=r'$\mathrm{Im}[C_9^{\mathrm{eff},0}]$',lw=2*lw)
     plt.fill_between(qsq,C9Ilow,C9Iupp, color='r',alpha=0.3)
-    
+    ############################################################
+    plt.plot([qsq[0],qsq[-1]], [4.114,4.114], color='k',label=r'$C_9$',linestyle='--',lw=2*lw)
+    plt.fill_between([qsq[0],qsq[-1]],[4.100,4.100],[4.128,4.128], color='k',alpha=0.3)
+    ############################################################
     plt.fill_between([8.68,10.11],[-20,-20],[45,45], color='k',alpha=alpha)
     plt.fill_between([12.86,14.18],[-20,-20],[45,45], color='k',alpha=alpha)
-    plt.text((10.11+8.68)/2,-7,r'$J/\Psi$',va='center',ha='center',fontsize=fontsizelab)
-    plt.text((12.86+14.18)/2,-7,r'$\Psi(2S)$',va='center',ha='center',fontsize=fontsizelab)
+    plt.text((10.11+8.68)/2,-1.5,r'$J/\Psi$',va='center',ha='center',fontsize=fontsizelab)
+    plt.text((12.86+14.18)/2,-1.5,r'$\Psi(2S)$',va='center',ha='center',fontsize=fontsizelab)
     plt.xlabel('$q^2[\mathrm{GeV}^2]$',fontsize=fontsizelab)
     plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
     plt.axes().tick_params(which='minor',length=minor)
     plt.axes().yaxis.set_ticks_position('both')
-    #plt.axes().xaxis.set_major_locator(MultipleLocator(1))
-    #plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
-    #plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
-
-    #handles, labels = plt.gca().get_legend_handles_labels()
-    #handles = [h[0] for h in handles]
-    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=1,loc='lower left')
-    plt.axes().set_ylim([-8,8])
+    plt.axes().xaxis.set_major_locator(MultipleLocator(5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(2))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(1))
+    handles = [ Line2D([0],[0],color='b',label=r'$\mathrm{Re}[C_9^{\mathrm{eff},1}]$',linestyle='-',lw=3*lw),Line2D([0],[0],color='b',label=r'$\mathrm{Re}[C_9^{\mathrm{eff},0}]$',linestyle=':',lw=3*lw),Line2D([0],[0],color='r',label=r'$\mathrm{Im}[C_9^{\mathrm{eff},1}]$',linestyle='-',lw=3*lw),Line2D([0],[0],color='r',label=r'$\mathrm{Im}[C_9^{\mathrm{eff},0}]$',linestyle=':',lw=3*lw),Line2D([0],[0],color='k',label=r'$C_9$',linestyle='--',lw=3*lw)]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc=(0.05,0.3))
+    plt.axes().set_ylim([-2,6])
+    plt.axes().set_xlim([0,qsqmaxphysBK.mean])
     plt.tight_layout()
-    plt.savefig('Plots/C9eff{0}.pdf'.format(faclab))
+    plt.savefig('Plots/C9eff_{0}_{1}.pdf'.format(B,faclab))
     plt.close()
     
     return()
@@ -3667,9 +4250,9 @@ def R_the_plot(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     restaumu =restaumu-1
     print("Rtaumu-1 tension with HPQCD '13: {0:.2f}".format((restaumu-R).mean/(restaumu-R).sdev))
     plt.errorbar(resmue.mean,2, xerr=resmue.sdev,ms=ms,fmt='*',color='b',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.errorbar(restaumu.mean,4, xerr=restaumu.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.text(-0.205,3.5,r'$(R^{\tau}_{\mu}-1)_{(14.18\mathrm{GeV}^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab, va='center')
     plt.text(-0.205,1.5,r'$10^2\times(R^{\mu}_{e}-1)_{(4m_{\mu}^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab, va='center')
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
@@ -3708,7 +4291,7 @@ def F_h_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     Fmean,Ferr = unmake_gvar_vec(F)
     Fupp,Flow = make_upp_low(F)
     plt.figure(figsize=figsize)
-    plt.errorbar(qsq, Fmean,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '21")
+    plt.errorbar(qsq, Fmean,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '22")
     #plt.fill_between(qsq,Flow,Fupp, color='purple',alpha=alpha)
     exp = LHCb12B
     x,xerr = exp.make_x()
@@ -3782,6 +4365,8 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     
     #plt.plot([0,0],[-1,10],color='k',linestyle='--')
     plt.plot([30,300],[3.5,3.5],color='k')
+    plt.plot([30,300],[2.5,2.5],color='k')
+    plt.plot([30,300],[5.5,5.5],color='k')
     #plt.plot([0,30],[4.5,4.5],color='k')#
     ##########################################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
@@ -3789,28 +4374,30 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     qsq_min = 4*m_lep**2
     #qsq_min = 4*m_mu**2 # added as test 
     res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
-    plt.errorbar(res.mean,6, xerr=res.sdev,ms=ms,fmt='*',color='r',mfc='none',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
-    qsq_min = 4*m_mu**2
-    res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     plt.errorbar(res.mean,5, xerr=res.sdev,ms=ms,fmt='*',color='r',mfc='none',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
+    qsq_min = 4*m_mu**2 # other option
+    res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
+    plt.errorbar(res.mean,6, xerr=res.sdev,ms=ms,fmt='*',color='r',mfc='none',capsize=capsize,lw=lw)
+    labs.append("HPQCD '22")
     
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     qsq_max = qsqmaxphysBK0.mean
     qsq_min = 4*m_lep**2
     res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
-    plt.errorbar(res.mean,3, xerr=res.sdev,ms=ms,fmt='*',color='b',mfc='none',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    plt.errorbar(res.mean,2, xerr=res.sdev,ms=ms,fmt='*',color='b',mfc='none',capsize=capsize,lw=lw)
+    labs.append("HPQCD '22")
     qsq_min = 4*m_mu**2
     res = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
-    plt.errorbar(res.mean,2, xerr=res.sdev,ms=ms,fmt='*',color='b',mfc='none',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    plt.errorbar(res.mean,3, xerr=res.sdev,ms=ms,fmt='*',color='b',mfc='none',capsize=capsize,lw=lw)
+    labs.append("HPQCD '22")
     #res = 1000*(res1418A+res1418B)/2
     #plt.errorbar(res.mean,2, xerr=res.sdev,ms=ms,fmt='*',color='purple',capsize=capsize,lw=lw)
-    #labs.append("HPQCD '21")
-    plt.text(100,2,r'$B^0\to{}K^0e^+e^-$',fontsize=fontsizelab*0.9, va='center')
-    plt.text(100,5,r'$B^+\to{}K^+e^+e^-$',fontsize=fontsizelab*0.9, va='center')
+    #labs.append("HPQCD '22")
+    plt.text(80,1.5,r'$B^0\to{}K^0e^+e^-_{(4m_e^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab*0.9, va='center')
+    plt.text(160,4.5,r'$B^+\to{}K^+e^+e^-_{(4m_e^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab*0.9, va='center')
+    plt.text(80,3,r'$B^0\to{}K^0e^+e^-_{(4m_{\mu}^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab*0.9, va='center')
+    plt.text(160,6,r'$B^+\to{}K^+e^+e^-_{(4m_{\mu}^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab*0.9, va='center')
     plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
     plt.xlabel('$10^8F_H^{e}$',fontsize=fontsizelab)
     plt.axes().tick_params(which='major',length=major)
@@ -3854,16 +4441,16 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     res = 1000*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     res1418A = integrate_FH(p,14.18,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     plt.errorbar(res.mean,6, xerr=res.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     qsq_max = qsqmaxphysBK0.mean
     res = 1000*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     res1418B = integrate_FH(p,14.18,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     plt.errorbar(res.mean,4, xerr=res.sdev,ms=ms,fmt='*',color='b',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     res = 1000*(res1418A+res1418B)/2
     plt.errorbar(res.mean,2, xerr=res.sdev,ms=ms,fmt='*',color='purple',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.text(5,3.5,r'$B^0\to{}K^0\mu^+\mu^-$',fontsize=fontsizelab*0.9, va='center')
     plt.text(5,5.5,r'$B^+\to{}K^+\mu^+\mu^-$',fontsize=fontsizelab*0.9, va='center')
     plt.text(12,1.5,r'$B\to{}K\mu^+\mu^-_{(14.18\mathrm{GeV}^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab*0.9, va='center')
@@ -3914,16 +4501,16 @@ def F_H_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     res = integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     res1418A = integrate_FH(p,14.18,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     plt.errorbar(res.mean,7, xerr=res.sdev,ms=ms,fmt='*',color='r',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     qsq_max = qsqmaxphysBK0.mean
     res = integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     res1418B = integrate_FH(p,14.18,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=200)
     plt.errorbar(res.mean,5, xerr=res.sdev,ms=ms,fmt='*',color='b',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     res = (res1418A+res1418B)/2
     plt.errorbar(res.mean,3, xerr=res.sdev,ms=ms,fmt='*',color='purple',capsize=capsize,lw=lw)
-    labs.append("HPQCD '21")
+    labs.append("HPQCD '22")
     plt.text(0.831,4.5,r'$B^0\to{}K^0\tau^+\tau^-$',fontsize=fontsizelab*0.9, va='center')
     plt.text(0.831,6.5,r'$B^+\to{}K^+\tau^+\tau^-$',fontsize=fontsizelab*0.9, va='center')
     plt.text(0.831,2,r'$B\to{}K\tau^+\tau^-_{(14.18\mathrm{GeV}^2,q^2_{\mathrm{max}})}$',fontsize=fontsizelab*0.9, va='center')
@@ -3965,7 +4552,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     Fmean,Ferr = unmake_gvar_vec(F)
     Fupp,Flow = make_upp_low(F)
     plt.figure(figsize=figsize)
-    plt.errorbar(qsq, Fmean,xerr=qsqerr,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '21",capsize=capsize)
+    plt.errorbar(qsq, Fmean,xerr=qsqerr,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '22",capsize=capsize)
 
     the = HPQCD14A # *10^6
     x,xerr = the.make_x()
@@ -4025,7 +4612,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     Fmean,Ferr = unmake_gvar_vec(F)
     Fupp,Flow = make_upp_low(F)
     plt.figure(figsize=figsize)
-    plt.errorbar(qsq, Fmean,xerr=qsqerr,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '21",capsize=capsize)
+    plt.errorbar(qsq, Fmean,xerr=qsqerr,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '22",capsize=capsize)
 
     the = Bobeth07
     x,xerr = the.make_x()#*10^1
@@ -4112,7 +4699,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     Fmean,Ferr = unmake_gvar_vec(F)
     Fupp,Flow = make_upp_low(F)
     plt.figure(figsize=figsize)
-    plt.errorbar(qsq, Fmean,xerr=qsqerr,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '21",capsize=capsize)
+    plt.errorbar(qsq, Fmean,xerr=qsqerr,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '22",capsize=capsize)
 
     the = Bobeth16
     x,xerr = the.make_x()#*10^1
@@ -4171,7 +4758,7 @@ def FHbybin_the_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     Fmean,Ferr = unmake_gvar_vec(F)
     Fupp,Flow = make_upp_low(F)
     plt.figure(figsize=figsize)
-    plt.errorbar(qsq, Fmean,xerr=qsqerr,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '21",capsize=capsize)
+    plt.errorbar(qsq, Fmean,xerr=qsqerr,yerr=Ferr, color='k',fmt='*',mfc='none',ms=ms,label="HPQCD '22",capsize=capsize)
     
     the = HPQCD14B 
     x,xerr = the.make_x()
@@ -4881,13 +5468,28 @@ def make_emu_bins(m_l,B=False):
         qsq_max = qsqmaxphysBKp.mean
     if B == False:
         qsq_max = qsqmaxphysBK.mean
-    #bins = [[4*m_l**2,qsq_max],[4*m_l**2,2],[2,4.3],[4.3,8.68],[10.09,12.86],[14.18,16.00],[16.00,qsq_max],[1,6],[0.1,2]]# for Bemu 
-    #bins = [[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[11,11.8]]#
-    #bins = [[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
-    bins = [[4*m_l**2,qsq_max],[1,6],[15,22],[0.1,2],[2,4],[4,6],[6,8],[15,17],[17,19],[19,22]]
+    #bins = [[4*m_l**2,qsq_max],[0.05,2],[1,6],[2,4.3],[4.3,8.68],[14.18,16],[16,18],[18,22]] #common bins
+    #bins = [[0.1,2],[2,4],[4,6],[6,8],[15,17],[17,19],[19,22],[1.1,6],[15,22]]  # mainly FNAL
+    bins = [[0.1,4],[4,8.12],[10.2,12.8],[14.18,qsq_max],[10.09,12.86],[16,qsq_max]] #Belle + extras
+    
+    #bins  = [[14.18,16],[16,18],[18,22],[16,qsq_max],[16,23],[15,17],[17,19],[19,22],[15,22]] #for tau
+    #bins = [[4*m_l**2,qsq_max],[1,6],[15,22],[0.1,2],[2,4],[4,6],[6,8],[15,17],[17,19],[19,22]]# for table 4
+   #binsLHCb = [[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22]]##
+    return(bins)
+
+def make_tau_bins(m_l,B=False):
+    if B == '0':
+        qsq_max = qsqmaxphysBK0.mean
+    if B == 'p':
+        qsq_max = qsqmaxphysBKp.mean
+    if B == False:
+        qsq_max = qsqmaxphysBK.mean
+    bins  = [[14.18,16],[16,18],[18,22],[16,qsq_max],[15,17],[17,19],[19,22],[15,22]] #for tau
+    #binsLHCb = [[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22]]##
     return(bins)
 ###############################################################################################################
 def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    Results =  gv.BufferDict()
     m_lep = m_e # just does the bins 
     bins = make_emu_bins(m_lep)
     #bins2 =[[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[11,11.8],[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
@@ -4916,15 +5518,16 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     bins = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     line3 = '     $10^7\\mathcal{B}(B^+\\to K^+e^+e^-)$ &'
-    for element in bins:
+    for b,element in enumerate(bins):
         qsq_min = element[0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBKp.mean:
             B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
         else:
             B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
+        Results['{0}_e_p'.format(b)] = B
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -4933,15 +5536,16 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     bins = make_emu_bins(m_lep,B='0')
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     line3 = '     $10^7\\mathcal{B}(B^0\\to K^0e^+e^-)$ &'
-    for element in bins:
+    for b,element in enumerate(bins):
         qsq_min = element[0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBK0.mean:
             B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
         else:
             B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+        Results['{0}_e_0'.format(b)] = B
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -4950,24 +5554,12 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     
     line3 = '     $10^7\\mathcal{B}(B\\to Ke^+e^-)$ &'
     bins = make_emu_bins(m_lep)
-    for element in bins:
-        qsq_min = element[0]
-        qsq_max = element[1]
-        if qsq_max == qsqmaxphysBK.mean:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            qsq_max = qsqmaxphysBKp.mean
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            qsq_max = qsqmaxphysBK0.mean
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
-        else:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+    for b,element in enumerate(bins):
+        B1 = Results['{0}_e_p'.format(b)]
+        B2 = Results['{0}_e_0'.format(b)]
         B = (B1+B2)/2
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -4979,15 +5571,16 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     bins = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     line3 = '     $10^7\\mathcal{B}(B^+\\to K^+\\mu^+\\mu^-)$ &'
-    for element in bins:
+    for b,element in enumerate(bins):
         qsq_min = element[0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBKp.mean:
             B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
         else:
             B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
+        Results['{0}_mu_p'.format(b)] = B
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -4996,15 +5589,16 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     bins = make_emu_bins(m_lep,B='0')
     line3 = '     $10^7\\mathcal{B}(B^0\\to K^0\\mu^+\\mu^-)$ &'
-    for element in bins:
+    for b,element in enumerate(bins):
         qsq_min = element[0]
         qsq_max = element[1]
         if qsq_max == qsqmaxphysBK0.mean:
             B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
         else:
             B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+        Results['{0}_mu_0'.format(b)] = B
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5012,24 +5606,12 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ######################## mu ###########################################
     bins = make_emu_bins(m_lep)
     line3 = '     $10^7\\mathcal{B}(B\\to K\\mu^+\\mu^-)$ &'
-    for element in bins:
-        qsq_min = element[0]
-        qsq_max = element[1]
-        if qsq_max == qsqmaxphysBK.mean:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            qsq_max = qsqmaxphysBKp.mean
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            qsq_max = qsqmaxphysBK0.mean
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
-        else:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            B2 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+    for b,element in enumerate(bins):
+        B1 = Results['{0}_mu_p'.format(b)]
+        B2 = Results['{0}_mu_0'.format(b)]
         B = (B1+B2)/2
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5038,97 +5620,50 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ########################## e mu ###############################################
      ########################## emu p########################################
     m_lep = m_e
-    binse = make_emu_bins(m_lep,B='p')
-    m_lep = m_mu
-    binsmu = make_emu_bins(m_lep,B='p')
+    bins = make_emu_bins(m_lep,B='p')
+    #m_lep = m_mu
+    #binsmu = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     line3 = '     $10^7\\mathcal{B}(B^+\\to K^+\\ell^+\\ell^-)$ &'
-    for i,element in enumerate(binse):
-        qsq_min = element[0]
-        qsq_minmu = binsmu[i][0]
-        qsq_max = element[1]
-        if qsq_max == qsqmaxphysBKp.mean:
-            m_lep = m_e
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
-            m_lep = m_mu
-            B2 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
-        else:
-            m_lep = m_e
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
-            m_lep = m_mu
-            B2 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
+    for b,element in enumerate(bins):
+        B1 = Results['{0}_e_p'.format(b)]
+        B2 = Results['{0}_mu_p'.format(b)]
         B = (B1+B2)/2
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### e 0 ##########################################
     m_lep = m_e
-    binse = make_emu_bins(m_lep,B='0')
-    m_lep = m_mu
-    binsmu = make_emu_bins(m_lep,B='0')
+    bins = make_emu_bins(m_lep,B='0')
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     line3 = '     $10^7\\mathcal{B}(B^0\\to K^0\\ell^+\\ell^-)$ &'
-    for i,element in enumerate(binse):
-        qsq_min = element[0]
-        qsq_minmu = binsmu[i][0]
-        qsq_max = element[1]
-        if qsq_max == qsqmaxphysBK0.mean:
-            m_lep = m_e
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
-            m_lep = m_mu
-            B2 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
-        else:
-            m_lep = m_e
-            B1 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
-            m_lep = m_mu
-            B2 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+    for b,element in enumerate(bins):
+        B1 = Results['{0}_e_0'.format(b)]
+        B2 = Results['{0}_mu_0'.format(b)]
         B = (B1+B2)/2
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## e ###########################################
     m_lep = m_e
-    binse = make_emu_bins(m_lep)
-    m_lep = m_mu
-    binsmu = make_emu_bins(m_lep)    
+    bins = make_emu_bins(m_lep)
+    #m_lep = m_mu
+    #binsmu = make_emu_bins(m_lep)    
     line3 = '     $10^7\\mathcal{B}(B\\to K\\ell^+\\ell^-)$ &'
-    for i,element in enumerate(binse):
-        qsq_min = element[0]
-        qsq_minmu = binsmu[i][0]
-        qsq_max = element[1]
-        if qsq_max == qsqmaxphysBK.mean:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            qsq_max = qsqmaxphysBKp.mean
-            m_lep = m_e
-            B1p = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
-            m_lep = m_mu
-            B2p = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauBpmGeV*1e7
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            qsq_max = qsqmaxphysBK0.mean
-            m_lep = m_e 
-            B10 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
-            m_lep = m_mu 
-            B20 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,qmax=True,table=True)*tauB0GeV*1e7
-        else:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            m_lep = m_e
-            B1p = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
-            m_lep = m_mu
-            B2p = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauBpmGeV*1e7
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            m_lep = m_e 
-            B10 = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
-            m_lep = m_mu 
-            B20 = integrate_Gamma(p,qsq_minmu,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True)*tauB0GeV*1e7
+    for b,element in enumerate(bins):
+        B1p = Results['{0}_e_p'.format(b)]
+        B2p = Results['{0}_mu_p'.format(b)]
+        B10 = Results['{0}_e_0'.format(b)]
+        B20 = Results['{0}_mu_0'.format(b)]
         B = (B1p+B2p+B10+B20)/4
         if isinstance(B,np.ndarray):
-            B = '{0} ({1})'.format(B[0],B[1])
+            B = '{0} [{1}]'.format(B[0],B[1])
         line3 = '{0} {1} '.format(line3,B)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5140,6 +5675,8 @@ def Bemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 #################################################################################################################
 def headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True):
+    to_plot = [0,1,2,3,4,5,6]
+    cols_2 = [0,1,2,3,4,5,6]
     if test_mu_effect == True:
         print('###### Headline results Corrections = ',corrections, 'mu = 4.8 GeV')
     else:
@@ -5149,46 +5686,178 @@ def headline_results(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,correctio
     ########################## e p########################################
     m_lep = m_e
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    line3 = '     $10^7\\mathcal{B}(B^+\\to K^+e^+e^-)$ &'
+    #line3 = '     $10^7\\mathcal{B}(B^+\\to K^+e^+e^-)$ &'
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
         B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True,corrections=corrections)*tauBpmGeV*1e7
         if qsq_min == 1.1:
             exp = gv.gvar(1.401,np.sqrt(0.074**2+0.064**2))
-            print('B^+->K^+e^+e^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+            print('B^+->K^+e^+e^- ({0},{1}) = {2} [{6}]  exp = {3} Tension = {4:.2f} [{5:.2f}] sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev,(exp-B*Berrore).mean/(exp-B*Berrore).sdev,Berrore*B.mean))
+            to_plot[5] = exp/B
+            cols_2[5] = 'r'
         else:
-            print('B^+->K^+e^+e^- ({0},{1}) = {2}'.format(qsq_min,qsq_max,B))
-    
+            print('B^+->K^+e^+e^- ({0},{1}) = {2} [{3}]'.format(qsq_min,qsq_max,B,Berrore))
+    qsq_min = 1
+    qsq_max = 6
+    B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True,corrections=corrections)*tauBpmGeV*1e7
+    exp = gv.gvar(1.66,np.sqrt(0.32**2+0.04**2))
+    print('B^+->K^+e^+e^- ({0},{1}) = {2} [{6}] exp = {3} Tension = {4:.2f} [{5:.2f}] sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev,(exp-B*Berrormu).mean/(exp-B*Berrormu).sdev,Berrormu*B.mean))
+    to_plot[6] = exp/B
+    cols_2[6] = 'purple'
     ########################## mu p########################################
     m_lep = m_mu
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    line3 = '     $10^7\\mathcal{B}(B^+\\to K^+\\mu^+\\mu^-)$ &'
+    #line3 = '     $10^7\\mathcal{B}(B^+\\to K^+\\mu^+\\mu^-)$ &'
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
         B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True,corrections=corrections)*tauBpmGeV*1e7
         if qsq_min == 1.1:
             exp = gv.gvar(1.186,np.sqrt(0.034**2+0.059**2))
-            print('B^+->K^+mu^+mu^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+            print('B^+->K^+mu^+mu^- ({0},{1}) = {2} [{6}]  exp = {3} Tension = {4:.2f} [{5:.2f}] sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev,(exp-B*Berrormu).mean/(exp-B*Berrormu).sdev,Berrormu*B.mean))
+            to_plot[1] = exp/B
+            cols_2[1] = 'r'
         else:
             exp = gv.gvar(0.847,np.sqrt(0.028**2+0.042**2))
-            print('B^+->K^+mu^+mu^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+            print('B^+->K^+mu^+mu^- ({0},{1}) = {2} [{6}] exp = {3} Tension = {4:.2f} [{5:.2f}] sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev,(exp-B*Berrormu).mean/(exp-B*Berrormu).sdev,Berrormu*B.mean))
+            to_plot[0] = exp/B
+            cols_2[0] = 'b'
+    qsq_min = 1
+    qsq_max = 6
+    B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True,corrections=corrections)*tauBpmGeV*1e7
+    exp = gv.gvar(2.30,np.sqrt(0.41**2+0.05**2))
+    print('B^+->K^+mu^+mu^- ({0},{1}) = {2} [{6}] exp = {3} Tension = {4:.2f} [{5:.2f}] sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev,(exp-B*Berrormu).mean/(exp-B*Berrormu).sdev,Berrormu*B.mean))
+    to_plot[2] = exp/B
+    cols_2[2] = 'purple'    
     ####################### mu 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    line3 = '     $10^7\\mathcal{B}(B^0\\to K^0\\mu^+\\mu^-)$ &'
+    #line3 = '     $10^7\\mathcal{B}(B^0\\to K^0\\mu^+\\mu^-)$ &'
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
         B = integrate_Gamma(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,table=True,corrections=corrections)*tauB0GeV*1e7
         if qsq_min == 1.1:
             exp = gv.gvar(0.92,np.sqrt(0.17**2+0.044**2))
-            print('B^0->K^0mu^+mu^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+            print('B^0->K^0mu^+mu^- ({0},{1}) = {2} [{6}] exp = {3} Tension = {4:.2f} [{5:.2f}] sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev,(exp-B*Berrormu).mean/(exp-B*Berrormu).sdev,Berrormu*B.mean))
+            to_plot[4] = exp/B
+            cols_2[4] = 'r'
         else:
             exp = gv.gvar(0.67,np.sqrt(0.11**2+0.035**2))
-            print('B^0->K^0mu^+mu^- ({0},{1}) = {2}  exp = {3} Tension = {4:.2f} sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev))
+            print('B^0->K^0mu^+mu^- ({0},{1}) = {2}  [{6}] exp = {3} Tension = {4:.2f} [{5:.2f}] sigma'.format(qsq_min,qsq_max,B,exp,(exp-B).mean/(exp-B).sdev,(exp-B*Berrormu).mean/(exp-B*Berrormu).sdev,Berrormu*B.mean))
+            to_plot[3] = exp/B
+            cols_2[3] = 'b'
     
+    plt.figure(figsize=figsize)
+    labs = [BELLE19.label,LHCb21.label,LHCb14A.label,LHCb14A.label,BELLE19.label,LHCb14A.label,LHCb14A.label]
+    numbs = [7,6,5,4,3,2,1]
+    plt.errorbar(to_plot[5].mean,6, xerr=to_plot[5].sdev,ms=ms,fmt=LHCb21.sym,color=cols_2[5] ,capsize=capsize,lw=2*lw)
+    plt.errorbar(to_plot[5].mean,6, xerr=3*(to_plot[5].sdev),ms=ms,fmt=LHCb21.sym,color=cols_2[5] ,capsize=capsize,lw=2*lw)
+    plt.errorbar(to_plot[5].mean,6, xerr=5*(to_plot[5].sdev),ms=ms,fmt=LHCb21.sym,color=cols_2[5] ,capsize=capsize,lw=2*lw)
+    for i in [0,1,3,4]:
+        plt.errorbar(to_plot[i].mean,i+1, xerr=to_plot[i].sdev,ms=ms,fmt=LHCb14A.sym,color=cols_2[i] ,capsize=capsize,lw=2*lw)
+        plt.errorbar(to_plot[i].mean,i+1, xerr=3*(to_plot[i].sdev),ms=ms,fmt=LHCb14A.sym,color=cols_2[i] ,capsize=capsize,lw=2*lw)
+        plt.errorbar(to_plot[i].mean,i+1, xerr=5*(to_plot[i].sdev),ms=ms,fmt=LHCb14A.sym,color=cols_2[i] ,capsize=capsize,lw=2*lw)
+    for i in [2,6]:
+        plt.errorbar(to_plot[i].mean,i+1, xerr=to_plot[i].sdev,ms=ms,fmt=BELLE19.sym,color=cols_2[i] ,capsize=capsize,lw=2*lw)
+        plt.errorbar(to_plot[i].mean,i+1, xerr=3*(to_plot[i].sdev),ms=ms,fmt=BELLE19.sym,color=cols_2[i] ,capsize=capsize,lw=2*lw)
+        plt.errorbar(to_plot[i].mean,i+1, xerr=5*(to_plot[i].sdev),ms=ms,fmt=BELLE19.sym,color=cols_2[i] ,capsize=capsize,lw=2*lw)
+        
+
+    plt.plot([-1,10],[3.5,3.5],color='k')
+    plt.plot([-1,10],[5.5,5.5],color='k')
+    
+    plt.plot([1,1],[-1,10],color='k')
+    plt.text(-0.75,2,r'$B^+\to K^+\mu^+\mu^-$',fontsize=fontsizelab*0.7, va='center')
+    plt.text(-0.75,4.5,r'$B^0\to K^0\mu^+\mu^-$',fontsize=fontsizelab*0.7, va='center')
+    plt.text(-0.75,6.5,r'$B^+\to K^+e^+e^-$',fontsize=fontsizelab*0.7, va='center')
+
+    #plt.text(-0.4,3,r'$(1,6)$',fontsize=fontsizelab, va='center')
+    #plt.text(1.2,6,r'$(1.1,6)$',fontsize=fontsizelab, va='center')
+    #plt.text(1.2,5,r'$(1.1,6)$',fontsize=fontsizelab, va='center')
+    #plt.text(1.2,4,r'$(15,22)$',fontsize=fontsizelab, va='center')
+    #plt.text(-0.4,3,r'$(1,6)$',fontsize=fontsizelab, va='center')
+    #plt.text(1.2,2,r'$(1.1,6)$',fontsize=fontsizelab, va='center')
+    #plt.text(1.2,1,r'$(15,22)$',fontsize=fontsizelab, va='center')
+    
+    handles = [ Patch(facecolor='r', edgecolor='r',label=r'$(1.1,6)$'),Patch(facecolor='b', edgecolor='b',label=r'$(15,22)$'),Patch(facecolor='purple', edgecolor='purple',label=r'$(1,6)$')]
+    plt.legend(handles=handles,fontsize=fontsizeleg,frameon=False,ncol=1,loc=(0.7, 0.43))   
+
+    plt.xlabel(r"$\mathcal{B}^{\mathrm{Exp}}/\mathcal{B}^{\mathrm{HPQCD'22}}$",fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('none')
+    plt.xlim([-0.8,2.2])
+    plt.ylim([0.5,7.5])
+    plt.gca().set_yticks(numbs)
+    plt.gca().set_yticklabels(labs)
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.4))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.2))
+    plt.tight_layout()
+    plt.savefig('Plots/Headline_results{0}.pdf'.format(faclab))
+    plt.close()
     return()
+#################################################################################################################
+
+def plot_neutrino_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    BB0,BBp = neutrino_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2) #included LD effects in p 1e-6 not included
+    res = BBp/1e-6
+    Exp_1 = gv.gvar(16/2,16/2) #Babar no 20
+    Exp_2 = gv.gvar(41/2,41/2) #Belle II no 19
+    Exp_3 = gv.gvar(res.mean,0.3*res.mean) # Belle II 5 ab-1 2101.11573
+    Exp_4 = gv.gvar(res.mean,0.11*res.mean) # Belle II 5 ab-1 2101.11573
+    plt.figure(figsize=figsize)
+    labs = ["HPQCD '22",r"Belle II $50~\mathrm{ab}^{-1}$",r"Belle II $5~\mathrm{ab}^{-1}$", "Belle II", "Babar"]
+    numbs = [5,4,3,2,1]
+    plt.errorbar(res.mean,5, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
+    plt.errorbar(Exp_4.mean,4, xerr=Exp_4.sdev,ms=ms/2,fmt=BELLE19.sym,color='r',mfc='r',capsize=capsize,lw=lw)
+    plt.errorbar(Exp_3.mean,3, xerr=Exp_3.sdev,ms=ms/2,fmt=BELLE19.sym,color='r',mfc='r',capsize=capsize,lw=lw)
+    plt.errorbar(Exp_2.mean,2, xerr=Exp_2.sdev,ms=ms,fmt='none',color='b',capsize=capsize,lw=lw)
+    plt.errorbar(Exp_1.mean,1, xerr=Exp_1.sdev,ms=ms,fmt='none',color='b',capsize=capsize,lw=lw)
+    plt.xlabel(r'$10^{6}\mathcal{B}(B^+\to K^+\nu\bar{\nu})$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('none')
+    plt.xlim([0,45])
+    plt.ylim([0.5,5.5])
+    plt.gca().set_yticks(numbs)
+    plt.gca().set_yticklabels(labs)
+    plt.axes().xaxis.set_major_locator(MultipleLocator(10))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(5))
+    plt.tight_layout()
+    plt.savefig('Plots/neutrino_branching{0}.pdf'.format(faclab))
+    plt.close()
+
+    plt.figure(figsize=figsize)
+    labs = ["Altmann. et al. '09","Wang et al. '12","Buras et al. '14","FNAL/MILC '15","Buras et al. '21","Buras et al. '22","HPQCD '22"]
+    numbs = [1,2,3,4,5,6,7]
+    plt.errorbar(res.mean,7, xerr=res.sdev,ms=ms,fmt='*',color='k',capsize=capsize,lw=lw)
+    plt.fill_between([res.mean-res.sdev,res.mean+res.sdev],[0,0],[11,11], color='k',alpha=alpha/2)
+    plt.errorbar(4.65,6,xerr=0.62,fmt='s',color='b',mfc='none',capsize=capsize,lw=lw,ms=ms)
+    plt.errorbar(4.53,5,xerr=0.64,fmt='s',color='b',mfc='none',capsize=capsize,lw=lw,ms=ms)
+    plt.errorbar(4.94,4,xerr=0.52,fmt=Fermi16A.sym,color='b',mfc='none',capsize=capsize,lw=lw,ms=ms)
+    plt.errorbar(3.98,3,xerr=0.47,fmt='s',color='b',mfc='none',capsize=capsize,lw=lw,ms=ms)
+    plt.errorbar(4.4,2,xerr=[[1.1],[1.4]],fmt=Wang12.sym,color='b',mfc='none',capsize=capsize,lw=lw,ms=ms)
+    plt.errorbar(5.10,1,xerr=0.80,fmt=Altmann12.sym,color='b',mfc='none',capsize=capsize,lw=lw,ms=ms)
+    plt.xlabel(r'$10^{6}\mathcal{B}(B^+\to K^+\nu\bar{\nu})$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=False,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('none')
+    plt.xlim([3,6.5])
+    plt.ylim([0.5,7.5])
+    plt.gca().set_yticks(numbs)
+    plt.gca().set_yticklabels(labs)
+    plt.axes().xaxis.set_major_locator(MultipleLocator(1))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.5))
+    plt.tight_layout()
+    plt.savefig('Plots/the_neutrino_branching{0}.pdf'.format(faclab))
+    plt.close()
+    return()
+
 #################################################################################################################
 
 def Remu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
@@ -5346,7 +6015,10 @@ def Bnu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 ##################################################################################################################
 
+########### New (faster) F_H reuslts tables
+
 def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    Results = gv.BufferDict()
     m_lep = m_e # just does the bins 
     bins = make_emu_bins(m_lep)
     #bins2 =[[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[11,11.8],[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
@@ -5376,10 +6048,11 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     bins = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     line3 = '     $10^8F_H^{e(+)}$ &'
-    for element in bins:
+    for b,element in enumerate(bins):
         qsq_min = element[0]
         qsq_max = element[1]
         F = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        Results['{0}_e_p'.format(b)] = F
         line3 = '{0} {1} '.format(line3,F)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5388,10 +6061,11 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     bins = make_emu_bins(m_lep,B='0')
     line3 = '     $10^8F_H^{e(0)}$ &'
-    for element in bins:
+    for b,element in enumerate(bins):
         qsq_min = element[0]
         qsq_max = element[1]
         F = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        Results['{0}_e_0'.format(b)] = F
         line3 = '{0} {1} '.format(line3,F)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5399,21 +6073,9 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ######################## e ###########################################
     line3 = '     $10^8F_H^{e}$ &'
     bins = make_emu_bins(m_lep)
-    for element in bins:
-        qsq_min = element[0]
-        qsq_max = element[1]
-        if qsq_max == qsqmaxphysBK.mean:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            qsq_max = qsqmaxphysBKp.mean
-            F1 = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            qsq_max = qsqmaxphysBK0.mean
-            F2 = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        else:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            F1 = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            F2 = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    for b,element in enumerate(bins):
+        F1 = Results['{0}_e_p'.format(b)]
+        F2 = Results['{0}_e_0'.format(b)]
         line3 = '{0} {1} '.format(line3,(F1+F2)/2)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5424,10 +6086,11 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     bins = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     line3 = '     $10^3F_H^{\\mu(+)}$ &'
-    for element in bins:
+    for b,element in enumerate(bins):
         qsq_min = element[0]
         qsq_max = element[1]
         F = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        Results['{0}_mu_p'.format(b)] = F
         line3 = '{0} {1} '.format(line3,F)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5436,10 +6099,11 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     bins = make_emu_bins(m_lep,B='0')
     line3 = '     $10^3F_H^{\\mu(0)}$ &'
-    for element in bins:
+    for b,element in enumerate(bins):
         qsq_min = element[0]
         qsq_max = element[1]
         F = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        Results['{0}_mu_0'.format(b)] = F
         line3 = '{0} {1} '.format(line3,F)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5447,21 +6111,9 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ######################## mu ###########################################
     line3 = '     $10^3F_H^{\\mu}$ &'
     bins = make_emu_bins(m_lep)
-    for element in bins:
-        qsq_min = element[0]
-        qsq_max = element[1]
-        if qsq_max == qsqmaxphysBK.mean:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            qsq_max = qsqmaxphysBKp.mean
-            F1 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            qsq_max = qsqmaxphysBK0.mean
-            F2 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        else:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            F1 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            F2 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    for b,element in enumerate(bins):
+        F1 = Results['{0}_mu_p'.format(b)]
+        F2 = Results['{0}_mu_0'.format(b)] 
         line3 = '{0} {1} '.format(line3,(F1+F2)/2)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5473,62 +6125,32 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     bins = make_emu_bins(m_lep,B='p')
     p = make_p_physical_point_BK(pfit,Fits,B='p')
     line3 = '     $10^3F_H^{\\ell(+)}$ &'
-    for element in bins:
-        qsq_min = element[0]
-        qsq_max = element[1]
-        m_lep = m_e
-        F1 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        m_lep = m_mu
-        F2 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    for b,element in enumerate(bins):
+        F1 = Results['{0}_e_p'.format(b)]/(1e5)
+        F2 = Results['{0}_mu_p'.format(b)] 
         line3 = '{0} {1} '.format(line3,(F1+F2)/2)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
-    ####################### e 0 ##########################################
+    ####################### e mu 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
     bins = make_emu_bins(m_lep,B='0')
     line3 = '     $10^3F_H^{\\ell(0)}$ &'
-    for element in bins:
-        qsq_min = element[0]
-        qsq_max = element[1]
-        m_lep = m_e
-        F1 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        m_lep = m_mu
-        F2 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    for b,element in enumerate(bins):
+        F1 = Results['{0}_e_0'.format(b)]/(1e5)
+        F2 = Results['{0}_mu_0'.format(b)] 
         line3 = '{0} {1} '.format(line3,(F1+F2)/2)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
-    ######################## e ###########################################
+    ######################## e mu ###########################################
     line3 = '     $10^3F_H^{\\ell}$ &'
     bins = make_emu_bins(m_lep)
-    for element in bins:
-        qsq_min = element[0]
-        qsq_max = element[1]
-        if qsq_max == qsqmaxphysBK.mean:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            qsq_max = qsqmaxphysBKp.mean
-            m_lep = m_e
-            F1p = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            m_lep = m_mu
-            F2p = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            qsq_max = qsqmaxphysBK0.mean
-            m_lep = m_e 
-            F10 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            m_lep = m_mu 
-            F20 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-        else:
-            p = make_p_physical_point_BK(pfit,Fits,B='p')
-            m_lep = m_e
-            F1p = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            m_lep = m_mu
-            F2p = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            p = make_p_physical_point_BK(pfit,Fits,B='0')
-            m_lep = m_e 
-            F10 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
-            m_lep = m_mu 
-            F20 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+    for b,element in enumerate(bins):
+        F1p = Results['{0}_e_p'.format(b)]/(1e5)
+        F2p = Results['{0}_mu_p'.format(b)]
+        F10 = Results['{0}_e_0'.format(b)]/(1e5)
+        F20 = Results['{0}_mu_0'.format(b)] 
         line3 = '{0} {1} '.format(line3,(F1p+F2p+F10+F20)/4)
         if element != bins[-1]:
             line3 = '{0}&'.format(line3)    
@@ -5540,11 +6162,12 @@ def FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('    \end{tabular}')        
     table.close()
     return()
+
 ###############################################################################################################################
 
 def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    m_lep = m_tau 
-    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    m_lep = m_tau
+    bins = make_tau_bins(m_lep)
     line1 = '    \\begin{tabular}{ c |'
     line2 = '     $q^2$ bin &'
     for element in bins:
@@ -5567,7 +6190,7 @@ def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('      \hline\n')
     ########################## tau p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='p')
     line3 = '     $10^7\\mathcal{B}(B^+\\to K^+\\tau^+\\tau^-)$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5582,7 +6205,7 @@ def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### tau 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='0')
     line3 = '     $10^7\\mathcal{B}(B^0\\to K^0\\tau^+\\tau^-)$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5598,7 +6221,7 @@ def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ######################## tau ###########################################
     
     line3 = '     $10^7\\mathcal{B}(B\\to K\\tau^+\\tau^-)$ &'
-    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep)
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -5628,8 +6251,8 @@ def Btau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 
 def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
-    m_lep = m_tau # just does the bins 
-    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    m_lep = m_tau # just does the bins
+    bins = make_tau_bins(m_lep)
     line1 = '    \\begin{tabular}{ c |'
     line2 = '     $q^2$ bin &'
     for element in bins:
@@ -5652,7 +6275,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('      \hline\n')
     ########################## e p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='p')
     line3 = '     $R^{\\tau(+)}_e$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5669,7 +6292,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### e 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='0')
     line3 = '     $R^{\\tau(0)}_e$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5686,7 +6309,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## e ###########################################
     line3 = '     $R^{\\tau}_e$ &'
-    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep)
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -5714,7 +6337,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ########################## mu ###############################################
     ########################## mu p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='p')
     line3 = '     $R^{\\tau(+)}_{\\mu}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5731,7 +6354,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### mu 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='0')
     line3 = '     $R^{\\tau(0)}_{\\mu}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5748,7 +6371,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## mu ###########################################
     line3 = '     $R^{\\tau}_{\\mu}$ &'
-    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep)
     for element in bins:
         qsq_min = element[0]
         qsq_max = element[1]
@@ -5776,7 +6399,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     ########################## e mu ###############################################
      ########################## emu p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='p')
     line3 = '     $R^{\\tau(+)}_{\\ell}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5795,7 +6418,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### emu 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='0')
     line3 = '     $R^{\\tau(0)}_{\\ell}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5813,7 +6436,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## emu ###########################################
-    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep)
     line3 = '     $R^{\\tau}_{\\ell}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5854,7 +6477,7 @@ def Rtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 
 def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     m_lep = m_tau 
-    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep)
     line1 = '    \\begin{tabular}{ c |'
     line2 = '     $q^2$ bin &'
     for element in bins:
@@ -5877,7 +6500,7 @@ def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('      \hline\n')
     ########################## tau p########################################
     p = make_p_physical_point_BK(pfit,Fits,B='p')
-    bins = [[4*m_lep**2,qsqmaxphysBKp.mean],[14.18,qsqmaxphysBKp.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBKp.mean],[14.18,16],[16,qsqmaxphysBKp.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='p')
     line3 = '     $F_H^{\\tau(+)}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5889,7 +6512,7 @@ def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ####################### tau 0 ##########################################
     p = make_p_physical_point_BK(pfit,Fits,B='0')
-    bins = [[4*m_lep**2,qsqmaxphysBK0.mean],[14.18,qsqmaxphysBK0.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK0.mean],[14.18,16],[16,qsqmaxphysBK0.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep,B='0')
     line3 = '     $F_H^{\\tau(0)}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5900,7 +6523,7 @@ def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
             line3 = '{0}&'.format(line3)    
     table.write('{0}\\\\ [1.0ex]\n'.format(line3))
     ######################## tau ###########################################
-    bins = [[4*m_lep**2,qsqmaxphysBK.mean],[14.18,qsqmaxphysBK.mean],[4*m_lep**2,16],[16,18],[18,qsqmaxphysBK.mean],[14.18,16],[16,qsqmaxphysBK.mean],[15,17],[17,19],[19,22]]
+    bins = make_tau_bins(m_lep)
     line3 = '     $F_H^{\\tau}$ &'
     for element in bins:
         qsq_min = element[0]
@@ -5930,6 +6553,16 @@ def FHtau_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
 ##########################################################################################
 def do_phi_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     #note that only psi10P and psi9S are sensitive to the ordering of m1 and m2
+    charge ='p'
+    m1tag = 'e'
+    m2tag = 'mu'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    m1tag = 'e'
+    m2tag = 'tau'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
+    m1tag = 'mu'
+    m2tag = 'tau'
+    plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
     charge ='0'
     m1tag = 'e'
     m2tag = 'mu'
@@ -5940,16 +6573,6 @@ def do_phi_plots(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     m1tag = 'mu'
     m2tag = 'tau'
     plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
-    charge ='p'
-    m1tag = 'e'
-    m2tag = 'mu'
-    #plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
-    m1tag = 'e'
-    m2tag = 'tau'
-    #plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
-    m1tag = 'mu'
-    m2tag = 'tau'
-    #plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge)
     return()
 
 def plot_phis_for_l1l2(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,m1tag,m2tag,charge):
@@ -7144,4 +7767,200 @@ def plot_h():
     return()
 
 ################################
+
+
+def old_FHemu_results_tables(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    m_lep = m_e # just does the bins 
+    bins = make_emu_bins(m_lep)
+    #bins2 =[[0.1,0.98],[1.1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[11,11.8],[11.8,12.5],[15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[1.1,6],[15,22]]
+    line1 = '    \\begin{tabular}{ c |'
+    line2 = '     $q^2$ bin &'
+    for element in bins:
+        line1 = '{0} c'.format(line1)
+        qsq_min = element[0]
+        qsq_max = element[1]
+        if qsq_min == 4*m_lep**2:
+            qsq_min = '4m_{\ell}^2'
+        if qsq_max == qsqmaxphysBK.mean:
+            qsq_max = 'q^2_{\\text{max}}'
+        line2 = '{0} $({1},{2})$ '.format(line2,qsq_min,qsq_max)
+        if element != bins[-1]:
+            line2 = '{0}&'.format(line2)
+    line1 = '{0} {1}'.format(line1,'}')
+    table = open('Tables/old_FHemu.txt','w')
+    table.write('{0}\n'.format(line1))
+    table.write('      \hline\n')
+    table.write('{0}\\\\ [0.5ex]\n'.format(line2))
+    table.write('      \hline\n')
+    table.write('      \hline\n')
+    ########################## e p########################################
+    m_lep = m_e
+    #bins = make_emu_bins(m_lep)
+    bins = make_emu_bins(m_lep,B='p')
+    p = make_p_physical_point_BK(pfit,Fits,B='p')
+    line3 = '     $10^8F_H^{e(+)}$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        F = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,F)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    ####################### e 0 ##########################################
+    p = make_p_physical_point_BK(pfit,Fits,B='0')
+    bins = make_emu_bins(m_lep,B='0')
+    line3 = '     $10^8F_H^{e(0)}$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        F = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,F)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    ######################## e ###########################################
+    line3 = '     $10^8F_H^{e}$ &'
+    bins = make_emu_bins(m_lep)
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        if qsq_max == qsqmaxphysBK.mean:
+            p = make_p_physical_point_BK(pfit,Fits,B='p')
+            qsq_max = qsqmaxphysBKp.mean
+            F1 = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            p = make_p_physical_point_BK(pfit,Fits,B='0')
+            qsq_max = qsqmaxphysBK0.mean
+            F2 = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        else:
+            p = make_p_physical_point_BK(pfit,Fits,B='p')
+            F1 = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            p = make_p_physical_point_BK(pfit,Fits,B='0')
+            F2 = 1e8*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,(F1+F2)/2)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    table.write('      \hline\n')
+    ########################## mu ###############################################
+    m_lep = m_mu
+    bins = make_emu_bins(m_lep,B='p')
+    p = make_p_physical_point_BK(pfit,Fits,B='p')
+    line3 = '     $10^3F_H^{\\mu(+)}$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        F = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,F)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    ####################### mu 0 ##########################################
+    p = make_p_physical_point_BK(pfit,Fits,B='0')
+    bins = make_emu_bins(m_lep,B='0')
+    line3 = '     $10^3F_H^{\\mu(0)}$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        F = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,F)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    ######################## mu ###########################################
+    line3 = '     $10^3F_H^{\\mu}$ &'
+    bins = make_emu_bins(m_lep)
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        if qsq_max == qsqmaxphysBK.mean:
+            p = make_p_physical_point_BK(pfit,Fits,B='p')
+            qsq_max = qsqmaxphysBKp.mean
+            F1 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            p = make_p_physical_point_BK(pfit,Fits,B='0')
+            qsq_max = qsqmaxphysBK0.mean
+            F2 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        else:
+            p = make_p_physical_point_BK(pfit,Fits,B='p')
+            F1 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            p = make_p_physical_point_BK(pfit,Fits,B='0')
+            F2 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,(F1+F2)/2)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    table.write('      \hline\n')
+    ########################## e mu ###############################################
+     ########################## emu p########################################
+    m_lep = m_mu
+    bins = make_emu_bins(m_lep,B='p')
+    p = make_p_physical_point_BK(pfit,Fits,B='p')
+    line3 = '     $10^3F_H^{\\ell(+)}$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        m_lep = m_e
+        F1 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        m_lep = m_mu
+        F2 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,(F1+F2)/2)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    ####################### e mu 0 ##########################################
+    p = make_p_physical_point_BK(pfit,Fits,B='0')
+    bins = make_emu_bins(m_lep,B='0')
+    line3 = '     $10^3F_H^{\\ell(0)}$ &'
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        m_lep = m_e
+        F1 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        m_lep = m_mu
+        F2 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,(F1+F2)/2)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    ######################## e mu ###########################################
+    line3 = '     $10^3F_H^{\\ell}$ &'
+    bins = make_emu_bins(m_lep)
+    for element in bins:
+        qsq_min = element[0]
+        qsq_max = element[1]
+        if qsq_max == qsqmaxphysBK.mean:
+            p = make_p_physical_point_BK(pfit,Fits,B='p')
+            qsq_max = qsqmaxphysBKp.mean
+            m_lep = m_e
+            F1p = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            m_lep = m_mu
+            F2p = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            p = make_p_physical_point_BK(pfit,Fits,B='0')
+            qsq_max = qsqmaxphysBK0.mean
+            m_lep = m_e 
+            F10 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            m_lep = m_mu 
+            F20 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        else:
+            p = make_p_physical_point_BK(pfit,Fits,B='p')
+            m_lep = m_e
+            F1p = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            m_lep = m_mu
+            F2p = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            p = make_p_physical_point_BK(pfit,Fits,B='0')
+            m_lep = m_e 
+            F10 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+            m_lep = m_mu 
+            F20 = 1e3*integrate_FH(p,qsq_min,qsq_max,m_lep,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
+        line3 = '{0} {1} '.format(line3,(F1p+F2p+F10+F20)/4)
+        if element != bins[-1]:
+            line3 = '{0}&'.format(line3)    
+    table.write('{0}\\\\ [1.0ex]\n'.format(line3))
+    table.write('      \hline\n')
+
+
+    
+    table.write('    \end{tabular}')        
+    table.close()
+    return()
 

@@ -48,7 +48,7 @@ MBsstarphys = gv.gvar('5.4158(15)') #PDG
 w0 = gv.gvar('0.17150(90)')  #fm gv.gvar('0.17236(70)') - BMW 2002.12347
 hbar = gv.gvar('6.58211928(15)').mean # x 10^-25 GeV s
 clight = 2.99792458 #*10^23 fm/s
-slratio = gv.gvar('27.18(10)') 
+slratio = gv.gvar('27.18(10)') # for the valence quarks 
 MetacVCp = gv.gvar('2.283452(45)')# from Bp 
 MetacCp = gv.gvar('1.833947(14)')# '1.833950(18)'2005.01845  1.833947(14) from Judd's data 
 MetacFp = gv.gvar('1.32929(3)')# 1.32929(3) for 0.433 from 1408.4169 can adjust to 1.327173(30) for 0.432  
@@ -91,11 +91,14 @@ mlmsfac = 5.63/2  #gives ml/(mlmsfac*ms) 10 originally, now 5.63 with factor of 
 #Z_T_running = gv.gvar('1.0773(17)')#calcuated to run from m_b to 2GeV using evolvetest.py
 ############ Corrections #########################################
 q_h_duality = gv.gvar('1.00(2)')#2% uncertainty on rate for quark hadron duality above vetoed region
-scale_err = gv.gvar('1.000(25)')#2.5% scale uncertainty on rate for quark hadron duality above vetoed region
+scale_err = gv.gvar('1.000(25)')#2.5% scale uncertainty on rate for mu scale
 ufnorm = gv.gvar('1.00(1)')#adjusts uf matrix elements to allow for topological effects
 isocorr0 = gv.gvar('1.000(5)') #To account for u<->d
 isocorrp = gv.gvar('1.000(5)') #To account for u<->d
 isocorrT = gv.gvar('1.000(5)') #To account for u<->d
+Rerror = gv.gvar('1.00(1)')#1% on R, from 1605.07633
+Berrore = gv.gvar('1.00(5)')#5% error on electorn from QED
+Berrormu = gv.gvar('1.00(2)')#2% error on muon from QED
 #### Allow for simple d/u test ######
 light = 'ml'
 if light == 'md': #B^0 and K^0 D^-
@@ -109,12 +112,28 @@ if light == 'mu': #B^+ and K^+ D^0
     MKphys0 = MKphysp
     #MDphysp = MDphys0
 
+############################## see if we can reproduce B_s to eta_s results
+make_Bsetas = False
+if make_Bsetas == True: # only works at B_s end Del still wrong
+    Bsetas_Bav = (MBphys0 + MBphysp)/2
+    Bsetas_Kav = (MKphys0 + MKphysp)/2
+    MBphys0 = MBsphys
+    MBphysp = MBsphys
+    MDphys0 = MDsphys
+    MDphysp = MDsphys
+    MKphys0 = Metasphys
+    MKphysp = Metasphys
+    slratio = gv.gvar('1.0000(1)')
+    sea_slratio = gv.gvar('27.18(10)') # for the sea light quark  
+    
 qsqmaxphys = (MBsphys-Metasphys)**2
 qsqmaxphysBK0 = (MBphys0-MKphys0)**2 # This is the smaller of the two
 qsqmaxphysBKp = (MBphysp-MKphysp)**2
 qsqmaxphysBK = (MBphys0+MBphysp-MKphys0-MKphysp)**2/4
 print('q^2 B^0,B^+:',qsqmaxphysBK0,qsqmaxphysBKp)
-qsqmaxphysDK = (MDphys0+MDphysp-MKphysp-MKphys0)**2/4 # This is smaller 
+qsqmaxphysDK = (MDphys0+MDphysp-MKphysp-MKphys0)**2/4 # This is smaller
+
+    
 #####################################################################################################
 ############################### Other data #########################################################
 dataf0maxBK = None  #only works for BsEtas for now
@@ -156,6 +175,33 @@ def make_upp_low(vec):
             low.append(element)
     return(upp,low)
 
+def check_converged(a):
+    #takes a list of values and looks for relative change to asses if the integral has converged. Needs to check in cases with floats, gvars, gavrs with 0 mean and gvars with 0 sdev. Returns True if the
+    if isinstance(a[-1],gv._gvarcore.GVar):
+        if a[-1].mean == 0: # some parts are 0 becase the integral is purely real or imaginary. We bypass this case.
+            return(True)
+        elif a[-1].sdev == 0:
+            check = abs((a[-1]-a[-2])/a[-1])
+            if check < 0.001: #absolute value changes by less than 1%
+                return(True)
+            else:
+                return(False)
+        else:
+            check1 = abs((a[-1].mean-a[-2].mean)/a[-1].sdev)
+            check2 = abs((a[-1].sdev-a[-2].sdev)/a[-1].sdev)
+            if check1 < 0.01 and check2 < 0.04: #changes by % of a sigma - allows for slower/quicker convergence 5% seems fine
+                return(True)
+            else:
+                return(False)
+    else:
+        if a[-1] == 0.0:
+            return(True)
+        else:    
+            check = abs((a[-1]-a[-2])/a[-1])
+            if check < 0.001: #absolute value changes by less than 1%
+                return(True)
+            else:
+                return(False)
 ####################################################################################################
 
 def convert_Gev(a):
@@ -277,6 +323,9 @@ def make_MHsstar(MH,p,a=1.0): # need one of these for lattice units and GeV set 
     DeltaD = p['MDsstarphys'] - MDphysav
     DeltaB = p['MBsstarphys'] - MBphysav
     MHsstar = MH + a**2 * MDphysav * DeltaD/MH + a*MBphysav/MH * ( (MH-a*MDphysav)/(MBphysav-MDphysav) * (DeltaB - MDphysav/MBphysav * DeltaD) )
+    if make_Bsetas:
+        if a == 1.0:
+            MHsstar = p['MBsstarphys'] # only works at Bs end 
     return(MHsstar)
     
 ####################################################################################################
@@ -290,6 +339,7 @@ def make_fs(Fit,fs,thpts,Z_T):
             momi = Fit['momenta'][t]/np.sqrt(3)
             delta = (float(mass) - float(Fit['m_s']))*(Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(twist)])
             qsq = (Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(twist)])**2 - Fit['momenta'][t]**2
+            qsqmaxforprint = (Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(0)])**2
             f0 = ((float(mass) - float(Fit['m_s']))*(1/(Fit['M_parent_m{0}'.format(mass)]**2 - Fit['M_daughter']**2))*Fit['S_m{0}_tw{1}'.format(mass,twist)])
             
             A = Fit['M_parent_m{0}'.format(mass)] + Fit['E_daughter_tw{0}_theory'.format(twist)]
@@ -302,6 +352,7 @@ def make_fs(Fit,fs,thpts,Z_T):
             #print(mass,twist,'| A-B',A-B,'A2-B2',A2-B2)
             if twist != '0':
                 fp = (1/(A-B))*(Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0)
+                print('V^0 num',Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0,'denom',A-B,'result',fp,'qsq/max',qsq/qsqmaxforprint)
                 if 'T' in thpts[Fit['conf']]:
                     fT = Z_T[Fit['conf']]*Fit['T_m{0}_tw{1}'.format(mass,twist)]*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])/(2*Fit['M_parent_m{0}'.format(mass)]*momi)
                     #q0 = Fit['M_parent_m{0}'.format(mass)]-Fit['E_daughter_tw{0}_theory'.format(twist)]
@@ -314,9 +365,11 @@ def make_fs(Fit,fs,thpts,Z_T):
                     
             if 'X_m{0}_tw{1}'.format(mass,twist) in Fit:
                 fp2 = (1/(A2-B2))*(-1*Z_v*Fit['X_m{0}_tw{1}'.format(mass,twist)] - B2*f0)
+                num_exp  = f0*(Fit['M_parent_m{0}'.format(mass)]+Fit['M_daughter'])**2*Fit['X_m{0}_tw{1}'.format(mass,twist)]/Fit['V_m{0}_tw{1}'.format(mass,twist)] -momi/qsq
+                print('V^1 num',-1*Z_v*Fit['X_m{0}_tw{1}'.format(mass,twist)] - B2*f0,'expected num',num_exp,'denom',A2-B2,'result',fp2,'qsq/max',qsq/qsqmaxforprint)
                 print('fp0: ',fp,'fp1: ',fp2,'fp1/fp0: ',fp2/fp)
-                XV0 = (A2-B2)/(A-B) * (Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0) + f0*B2
-                print('X = ', Fit['X_m{0}_tw{1}'.format(mass,twist)],'X from V^0 = ',-XV0)
+                #XV0 = (A2-B2)/(A-B) * (Z_v*Fit['V_m{0}_tw{1}'.format(mass,twist)] - B*f0) + f0*B2
+                #print('X = ', Fit['X_m{0}_tw{1}'.format(mass,twist)],'X from V^0 = ',-XV0)
             fs['qsq_m{0}_tw{1}'.format(mass,twist)] = qsq
             fs['f0_m{0}_tw{1}'.format(mass,twist)] = f0
             fs['fp_m{0}_tw{1}'.format(mass,twist)] = fp
@@ -384,6 +437,11 @@ def make_function(p,Fit,Nijk,Npow,Nm,addrho,t_0,mass,twist,fpf0same,const2,eleme
         return(T)
 #######################################################################################################
 def make_t_plus(M_H,M_K): # This should ALWAYS be M_H,M_K because it is sea mass based
+    if make_Bsetas == True: # I THINK that lattice values should still be fine, i.e. they are M_H and M_K. Need to adjust continuum
+        if isinstance(M_H,gv._gvarcore.GVar):
+            if M_H.mean/MBphysp.mean > 0.999 and M_H.mean/MBphysp.mean < 1.001 and M_K.mean/MKphysp.mean > 0.999 and M_K.mean/MKphysp.mean < 1.001: # if we're in the continuum, we need M_K and M_B here
+                M_H = Bsetas_Bav
+                M_K = Bsetas_Kav 
     t_plus = (M_H + M_K)**2
     return(t_plus)
 #####################################################################################################
@@ -491,7 +549,9 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         prior['mstuned_{0}'.format(fit)] = ms0val*(prior['Metasphys']/Metas)**2
         prior['ml10ms_{0}'.format(fit)] = ml0val/(mlmsfac*prior['mstuned_{0}'.format(fit)])
         #print(prior['ml10ms_{0}'.format(fit)]-1/(mlmsfac*prior['slratio']))
-        prior['mltuned_{0}'.format(fit)] = prior['mstuned_{0}'.format(fit)]/prior['slratio'] 
+        prior['mltuned_{0}'.format(fit)] = prior['mstuned_{0}'.format(fit)]/prior['slratio']
+        if make_Bsetas: # m_ltuned is only used for delta_l, the sea quark mistuning
+            prior['mltuned_{0}'.format(fit)] = prior['mstuned_{0}'.format(fit)]/sea_slratio
         prior['MD_{0}'.format(fit)] = Fit['M_parent_m{0}'.format(Fit['m_c'])] #lat units think about this for s
         prior['deltas_{0}'.format(fit)] = ms0-prior['mstuned_{0}'.format(fit)]     
         prior['deltasval_{0}'.format(fit)] = ms0val-prior['mstuned_{0}'.format(fit)]
@@ -736,12 +796,16 @@ def make_f0_BK(Nijk,Npow,Nm,addrho,p,Fit,qsq,t_0,mass,fpf0same,amh,newdata=False
             MHs0 = p['MH_{0}_m{1}'.format(fit.split('s')[0],mass)] + a*Del
         else:
             MHs0 = p['MH_{0}_m{1}'.format(fit,mass)] + Del
+            if make_Bsetas:
+                MHs0 = p['MH_{0}_m{1}'.format(fit,mass)] + Del + Bsetas_Bav - MBphysp #takes of B_s and adds B
         z  = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit.split('s')[0],mass)],p['MK_{0}'.format(fit.split('s')[0])],p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)] )
     else:        
         if a != 0:
             MHs0 = p['MH_{0}_m{1}'.format(fit,mass)] + a*Del
         else: 
             MHs0 = p['MH_{0}_m{1}'.format(fit,mass)] + Del
+            if make_Bsetas:
+                MHs0 = p['MH_{0}_m{1}'.format(fit,mass)] + Del + Bsetas_Bav - MBphysp #takes off B_s and adds B
         z  = make_z(qsq,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)] )
     z0 = make_z(0,t_0,p['MH_{0}_m{1}'.format(fit,mass)],p['MK_{0}'.format(fit)]) # take this for correctly tuned quarks. Does not have to be the case. May be better to not do this? 
 
@@ -1051,6 +1115,8 @@ def errs_per_ens(res,dat):
 ######################################################################################################
 
 def fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+    if make_Bsetas:
+        Print('WARNING! These are B_setas results. Only valid at the B end.')
     dict_for_plot = collections.OrderedDict()
     data_for_err = collections.OrderedDict()
     list_for_results = [] #this order B: MK, MB, MBs0, MBsstar, logs, a0, a+, aT, ,qsqmax then same for D 
@@ -1256,7 +1322,7 @@ VtbVts = gv.gvar('0.04185(93)')#1907.01025
 #m_c = gv.gvar('1.27(2)')#pdg
 #m_b = gv.gvar('4.18(3)')#pdg
 m_bMSbar = gv.gvar('4.209(21)')#1510.02349 for now
-m_sMSbar = gv.gvar('0.093(11)')#pdg
+m_sMSbar = gv.gvar('0.07966(80)')# run from  3GeV 0.08536(85) from 1805.06225 
 m_b = gv.gvar('4.87(20)')#200Mev for renormalons
 m_c = gv.gvar('1.68(20)')#
 C1 = gv.gvar('-0.294(9)')#gv.gvar('-0.257(5)') new ones from 1606.00916
@@ -1270,7 +1336,7 @@ C8eff = gv.gvar('-0.1630(6)')
 C10eff = gv.gvar('-4.193(33)')#gv.gvar('-4.103(82)')
 C9effbase = gv.gvar('4.114(14)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
 mu_scale = 4.2 #scale we use in GeV. This is the scale our Wilson coefficients are given in. We run f_T to this scale too.
-corrcut = 8.68 #cut off corrections
+corrcut = 8.68 #cut off corrections should be 8.68 but increase so included in interpolation
 
 ####### Allow for mu_scale test ################
 test_mu_effect = False
@@ -1356,7 +1422,7 @@ def make_C9eff(qsq,fp,charge,corrections=True): #modified by corrections in 1510
         if corrections == True:
             C7corrR = -C7OalphasR
             C7corrI = -C7OalphasI
-            if qsq >= corrcut: #or qsq<=0.1: #cut off at first band and below 0.1 as test
+            if qsq > corrcut: #or qsq<=0.1: #cut off at first band and below 0.1 as test
                 DelC9Rp = 0
                 DelC9Ip = 0
                 DelC9R0 = 0
@@ -1388,6 +1454,8 @@ def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,correction
     INTERPOLATE = True
     if qsq < qmax and qsq > qmin and INTERPOLATE==True and m_l != m_tau: 
         al,cl = interpolate_al_cl(p,qsq,qmin,qmax,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=corrections)
+        al /= scale_err
+        cl /= scale_err
     else:
         # h is complex -> C9 eff complex, and thus FV
         run_fac = runfT(mu_scale)#runs fT to same scale as Wilson coeffs
@@ -1397,7 +1465,7 @@ def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,correction
         C9effR,C9effI,C7corrR,C7corrI = make_C9eff(qsq,fp,p['charge'],corrections=corrections)
         FA = C10eff*fp
         FVR = C9effR*fp + 2*m_bMSbar*(C7eff+C7corrR)*fT/(p['MBphys']+p['MKphys'])#use m_bMSbar here pole mass elsewhere
-        FVI = C9effI*fp + 2*m_bMSbar*(C7corrI)*fT/(p['MBphys']+p['MKphys'])    # this was in here. Mistake?
+        FVI = C9effI*fp + 2*m_bMSbar*(C7corrI)*fT/(p['MBphys']+p['MKphys'])    
         FP = -m_l*C10eff*(fp - (p['MBphys']**2-p['MKphys']**2)*(f0-fp)/qsq)
         betal = gv.sqrt(1-4*m_l**2/qsq)
         lam = make_lambda(gv.sqrt(qsq),p['MBphys'],p['MKphys'])
@@ -1406,7 +1474,7 @@ def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,correction
         C = GF**2 * alphaEW**2 * VtbVts**2 * betal * gv.sqrt(lam) / (2**9 * np.pi**5 * p['MBphys']**3)
         al = C*( qsq*FP**2 + lam/4 * (FA**2 + FVR**2+FVI**2) + 4 * m_l**2 * p['MBphys']**2 * FA**2 + 2 * m_l * (p['MBphys']**2 - p['MKphys']**2 + qsq) * (FP * FA) )
         cl = -C*lam*betal**2/4 * (FA**2 + FVR**2+FVI**2)
-    if qsq > qmax: #uncertainty for quark hadron duality 
+    if qsq >= qmax: #uncertainty for quark hadron duality 
         al *= q_h_duality
         cl *= q_h_duality
     al *= scale_err
@@ -1483,8 +1551,8 @@ def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,
         results.append(result1)
         iters *= 2
         if len(results)>=2:
-            check = abs((results[-1].mean-results[-2].mean)/results[-1].sdev)
-            if check <= 0.02:
+            check = check_converged(results)
+            if check:
                 Test = True            
     if table == True and qsq_min == 4*m_l**2 and qmax == True: # in case where we integrate whole q^2 range for table, we also give value with gaps. Shouldn't need to change iters as should be fine. 
         gaps = True
@@ -1504,8 +1572,8 @@ def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,
             results.append(result2)
             iters *= 2
             if len(results)>=2:
-                check = abs((results[-1].mean-results[-2].mean)/results[-1].sdev)
-                if check <= 0.02:
+                check = check_converged(results)
+                if check:
                     Test = True
         return(np.array([result1,result2]))
     else:
@@ -1611,14 +1679,15 @@ def do_integral_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,c
         #print('Results bot', resultsbot)
         iters *= 2
         if len(resultstop)>=2:
-            check = abs((results[-1].mean-results[-2].mean)/results[-1].sdev)
-            #print('check',check)
-            #checktop = abs((resultstop[-1].mean-resultstop[-2].mean)/resultstop[-1].sdev)
-            #print('checktop',checktop)
-            #checkbot = abs((resultsbot[-1].mean-resultsbot[-2].mean)/resultsbot[-1].sdev)
-            #print('checkbot',checkbot)
-            if check <= 0.02: 
-                Test = True
+            check = check_converged(results)
+            checktop = check_converged(resultstop)
+            checkbot = check_converged(resultsbot)
+            if split == False:
+                if check: 
+                    Test = True
+            if split == True:
+                if checktop and checkbot: 
+                    Test = True
     #print('FINAL ITERS AND RESULT: ',int(iters/2),result)
     if split == True:
         return(int_top,int_bot)
@@ -1664,12 +1733,12 @@ def integrate_fp_B(p,qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,
         results.append(result)
         iters *= 2
         if len(results)>=2:
-            check = abs((results[-1].mean-results[-2].mean)/results[-1].sdev)
-            if check <= 0.02:
+            check = check_converged(results)
+            if check:
                 Test = True
     return(result)
     
-def neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
+def neutrino_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     iters = 250
     qsq_min = 0
     ######## B0 SD ###########
@@ -1689,36 +1758,11 @@ def neutrio_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     BBpLD = ( (GF**2 * VubVusfK * fBp )**2 * 2 * np.pi * m_tau * (p['MBphys']**2 - m_tau**2)**2 * (p['MKphys']**2 - m_tau**2)**2 ) / (256 * np.pi**3 * p['MBphys']**3 * Gammatau * GammaB ) 
     print('B^+ -> K^+ nu nu (LD) {0} x 10^-7 c.f. 6.22(60)'.format(BBpLD/1e-7))
     print('B^+ -> K^+ nu nu (SD+LD) {0} x 10^-6'.format((BBp+BBpLD)/1e-6))
-    return()
+    return(BB0,(BBp+BBpLD))
 
 
 ######################### Now to look at B to K l1 l2 outlined in 1602.00881 #################
-def check_converged(a):
-    #takes a list of values and looks for relative change to asses if the integral has converged. Needs to check in cases with floats, gvars, gavrs with 0 mean and gvars with 0 sdev. Returns True if the
-    if isinstance(a[-1],gv._gvarcore.GVar):
-        if a[-1].mean == 0: # some parts are 0 becase the integral is purely real or imaginary. We bypass this case.
-            return(True)
-        elif a[-1].sdev == 0:
-            check = abs((a[-1]-a[-2])/a[-1])
-            if check < 0.001: #absolute value changes by less than 1%
-                return(True)
-            else:
-                return(False)
-        else:
-            check = abs((a[-1].mean-a[-2].mean)/a[-1].sdev)
-            if check < 0.01: #changes by % of a sigma - allows for slower/quicker convergence 5% seems fine
-                return(True)
-            else:
-                return(False)
-    else:
-        if a[-1] == 0.0:
-            return(True)
-        else:    
-            check = abs((a[-1]-a[-2])/a[-1])
-            if check < 0.001: #absolute value changes by less than 1%
-                return(True)
-            else:
-                return(False)
+
 
 def do_integral(fcn,low,upp): # generic integrator for a real function (one value). Takes the function of the integrand and uses the trapeziodal rule. Starts with 16 iters and doubles until stability condition is met. 
     integrands = gv.BufferDict() # Use this to save integrands at certain values, to avoid calculating again
