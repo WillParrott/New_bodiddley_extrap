@@ -18,7 +18,7 @@ import math
 ####################################################################################################
 # Global parameters
 ####################################################################################################
-eta_EW =  gv.gvar('1.007(2)') #for B to K
+eta_EW = gv.gvar('1.007(2)') #for B to K
 GF = eta_EW * gv.gvar('1.1663787(6)*1e-5') #Gev-2 #PDG
 Metasphys = gv.gvar('0.6885(22)')   # 1303.1670
 Metacphys = gv.gvar('2.9766(12)')# gv.gvar('2.98390(50)')  # From Christine not PDG
@@ -207,7 +207,6 @@ def check_converged(a):
 def convert_Gev(a):
     #converts lattice spacings from fm to GeV-1
     aGev = gv.gvar(a)/(gv.gvar(hbar)*clight*1e-2) #bar in x10^-25 GeV seconds so hence 1e-2
-    
     return(aGev)
 
 ####################################################################################################
@@ -613,9 +612,9 @@ def make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,
         prior['0rho'] =gv.gvar(Npow*[rhopri])*wndisc
         prior['prho'] =gv.gvar(Npow*[rhopri])*wndisc
         prior['Trho'] =gv.gvar(Npow*[rhopri])*wndisc
-    #prior['0rho'][0] = gv.gvar('0.0(2)')
+    #prior['0rho'][0] = gv.gvar('0.000(1)')
     #prior['prho'][0] = gv.gvar('0.0(2)')
-    #prior['Trho'][0] = gv.gvar('0.0(2)') 
+    #prior['Trho'][0] = gv.gvar('0.000(1)') 
     prior['0d'] = gv.gvar(Nijk[0]*[Nijk[1]*[Nijk[2]*[Nijk[3]*[Npow*[dpri]]]]])*wndisc
     prior['0cs'] = gv.gvar(Npow*[cpri])
     prior['0cl'] = gv.gvar(Npow*[cpri])
@@ -1006,8 +1005,45 @@ def do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0sam
     #fit2, w = lsqfit.empbayes_fit(1.1, fitargs)
     #print(fit2.format(True))
     #print("w = ",w)
+    make_prior_tables(prior,fit.p,Nijk,Npow)
     return(fit.p)
 
+#####################################################################################################
+def make_prior_tables(pri,post,Nijk,Npow):
+    tab = open('Tables/BKpritab.txt','w')
+    for key in pri:
+        if key in ['0d','pd','Td']:
+            tag1 = label_convert(key)
+            for i in range(Nijk[0]):
+                for j in range(Nijk[1]):
+                    for k in range(Nijk[2]):
+                        for l in range(Nijk[3]):
+                            for n in range(Npow):
+                                lab = '$d^{0}_{6}{1}{2}{3}{4}{5}{7}$'.format(tag1,i,j,k,l,n,'{','}')
+                                tab.write('      {0}&{1}&{2}\\\\ [1ex]\n'.format(lab,pri[key][i][j][k][l][n],post[key][i][j][k][l][n]))
+        elif key in ['0rho','0cs','0cl','0cc','0csval','Trho','Tcs','Tcl','Tcc','pcsval','prho','pcs','pcl','pcc','pcsval']:
+            for n in range(Npow):
+                lab = label_convert(key)    
+                lab += '{0}{1}'.format(n,'}')
+                tab.write('      ${0}$&{1}&{2}\\\\ [1ex]\n'.format(lab,pri[key][n],post[key][n]))
+        elif key in ['ginf','c1','c2','xpower']:
+            lab = label_convert(key)
+            tab.write('      ${0}$&{1}&{2}\\\\ [1ex]\n'.format(lab,pri[key],post[key]))
+    tab.close()    
+    return()
+
+def label_convert(prilab):
+    keys = ['Trho','Tcs','Tcl','Tcc','Tcsval','0rho','0cs','0cl','0cc','0csval','prho','pcs','pcl','pcc','pcsval','ginf','c1','c2','xpower']
+    labs = ['\\rho^T_{','c^{\\mathrm{sea},T}_{s,','c^{\\mathrm{sea},T}_{l,','c^{\\mathrm{sea},T}_{c,','c^{\\mathrm{val},T}_{s,','\\rho^0_{','c^{\\mathrm{sea},0}_{s,','c^{\\mathrm{sea},0}_{l,','c^{\\mathrm{sea},0}_{c,','c^{\\mathrm{val},0}_{s,','\\rho^+_{','c^{\\mathrm{sea},+}_{s,','c^{\\mathrm{sea},+}_{l,','c^{\\mathrm{sea},+}_{c,','c^{\\mathrm{val},+}_{s,','g_{\infty}','C_1','C_2','\zeta_0']
+    if prilab in ['0d']:
+        lab = '0'
+    elif prilab in ['pd']:
+        lab = '+'
+    elif prilab in ['Td']:
+        lab = 'T'
+    elif prilab in keys:
+        lab = labs[keys.index(prilab)]
+    return(lab)
 #####################################################################################################
 def make_p_physical_point_BK(pfit,Fits,B=False):
     #only need to evaluate at one Fit one mass but change all anyway
@@ -1317,14 +1353,14 @@ def make_beta_delta_BK(Fits,t_0,Nijk,Npow,Nm,addrho,p,fpf0same,MH,const2):
 
 ##############################################################################################################
 alphaEW = 1/gv.gvar('127.952(9)')#PDG  #1/gv.gvar('128.957(20)')  #1/0.027515±0.000149 0807.4206 at M_Z**2
-#alphae = 1/gv.gvar('127.952(9)') #PDG is this correct? At M_Z
-VtbVts = gv.gvar('0.04185(93)')#1907.01025
+VtbVts =  gv.gvar('0.04185(93)')*gv.gvar('0.999142(23)')#1907.01025 0.04189(93) * 0.999142(23)
+#VtbVts =  gv.gvar('0.0419(4)')*gv.gvar('0.999142(23)')# Requested by BV '22
 #m_c = gv.gvar('1.27(2)')#pdg
 #m_b = gv.gvar('4.18(3)')#pdg
 m_bMSbar = gv.gvar('4.209(21)')#1510.02349 for now
 m_sMSbar = gv.gvar('0.07966(80)')# run from  3GeV 0.08536(85) from 1805.06225 
-m_b = gv.gvar('4.87(20)')#200Mev for renormalons
-m_c = gv.gvar('1.68(20)')#
+m_b = gv.gvar('4.87(20)')#200Mev for renormalons gv.gvar('4.91(12)')FNAL
+m_c = gv.gvar('1.68(20)')#gv.gvar('1.77(14)') FNAL
 C1 = gv.gvar('-0.294(9)')#gv.gvar('-0.257(5)') new ones from 1606.00916
 C2 = gv.gvar('1.017(1)')#gv.gvar('1.009(20)')
 C3 = gv.gvar('-0.0059(2)')#  gv.gvar('-0.0050(1)')
@@ -1333,8 +1369,8 @@ C5 = 0.0004#0
 C6 = gv.gvar('0.0011(1)')#0.001  # all the same up to C6 
 C7eff = gv.gvar('-0.2957(5)')#gv.gvar('-0.304(6)')
 C8eff = gv.gvar('-0.1630(6)')
-C10eff = gv.gvar('-4.193(33)')#gv.gvar('-4.103(82)')
-C9effbase = gv.gvar('4.114(14)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
+C9effbase = gv.gvar('4.114(14)') #gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
+C10eff = gv.gvar('-4.193(33)')  #gv.gvar('-4.103(82)')
 mu_scale = 4.2 #scale we use in GeV. This is the scale our Wilson coefficients are given in. We run f_T to this scale too.
 corrcut = 8.68 #cut off corrections should be 8.68 but increase so included in interpolation
 
@@ -1353,8 +1389,35 @@ if test_mu_effect: # allows the case where we take mu = 4.8, just move central v
     C6 = gv.gvar('0.0009(1)')#0.001  # all the same up to C6 
     C7eff = gv.gvar('-0.2915(5)')#gv.gvar('-0.304(6)')
     C8eff = gv.gvar('-0.1606(6)')
-    C10eff = gv.gvar('-4.189(33)')#gv.gvar('-4.103(82)')
     C9effbase = gv.gvar('4.053(14)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
+    C10eff = gv.gvar('-4.189(33)')#gv.gvar('-4.103(82)'
+
+FNAL_Wilson = False
+if FNAL_Wilson:
+    C1 = gv.gvar('-0.29(16)')#gv.gvar('-0.257(5)') new ones from 1606.00916
+    C2 = gv.gvar('1.009(10)')#gv.gvar('1.009(20)')
+    C3 = gv.gvar('-0.0047(42)')#  gv.gvar('-0.0050(1)')
+    C4 = gv.gvar('-0.081(39)')# gv.gvar('-0.078(2)')
+    C5 = gv.gvar('0.00036(31)')
+    C6 = gv.gvar('0.00082(97)')#0.001  # all the same up to C6 
+    C7eff = gv.gvar('-0.297(26)')#gv.gvar('-0.304(6)')
+    C8eff = gv.gvar('-0.152(15)')
+    C9effbase = gv.gvar('4.04(33)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
+    C10eff = gv.gvar('-4.292(73)')#gv.gvar('-4.103(82)')
+
+Guber_Wilson = False
+if Guber_Wilson:
+    C1 = gv.gvar('-0.2906(90)')#gv.gvar('-0.257(5)') new ones from 1606.00916
+    C2 = gv.gvar('1.010(1)')#gv.gvar('1.009(20)') 
+    C3 = gv.gvar('-0.0062(2)')#  gv.gvar('-0.0050(1)')
+    C4 = gv.gvar('-0.0873(10)')# gv.gvar('-0.078(2)')
+    C5 = 0.0004#0
+    C6 = gv.gvar('0.0011(1)')#0.001  # all the same up to C6 
+    C7eff = gv.gvar('-0.3373(5)')#gv.gvar('-0.304(6)')
+    C8eff = gv.gvar('-0.1829(6)')
+    C9effbase = gv.gvar('4.273(14)')#gv.gvar('4.211(84)') #note that uncertainty not inlcuded.
+    C10eff = gv.gvar('-4.166(33)')#gv.gvar('-4.103(82)')
+    
     
 #############################################################################################################
 
@@ -1371,7 +1434,8 @@ def make_h(qsq,m):
     elif x <= 1:
         #h = -4/9 * (gv.log(x/4) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x)) - 1j*np.pi/2 ))
         hR = -4/9 * (gv.log(m**2/mu_scale**2) - 2/3 - x) - 4/9 * (2 + x) * ( gv.sqrt(1-x) * (gv.log( (1+gv.sqrt(1-x))/gv.sqrt(x))  ))
-        hI =  4/9 * (2 + x) *  gv.sqrt(1-x) *  np.pi/2 
+        hI =  4/9 * (2 + x) *  gv.sqrt(1-x) *  np.pi/2
+    #print(m,qsq,hR,hI)
     return(hR,hI)
 
 ##############################################################################################################
@@ -1448,7 +1512,7 @@ def make_C9eff(qsq,fp,charge,corrections=True): #modified by corrections in 1510
 def make_lambda(a,b,c):
     return(a**4 + b**4 + c**4 - 2*(a**2*b**2 + a**2*c**2 + b**2*c**2))
 
-def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True):
+def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True,partial_sdev=False):
     qmin = 8.68 #start of first cut off
     qmax = 14.18 #end of second cut off
     INTERPOLATE = True
@@ -1479,7 +1543,92 @@ def make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,correction
         cl *= q_h_duality
     al *= scale_err
     cl *= scale_err
-    return(al,cl)
+    #branching = 2*(al+cl/3)
+    #if branching != 0:
+    #    print(qsq,branching,branching.partialsdev([f0])/branching.sdev,branching.partialsdev([fp])/branching.sdev,branching.partialsdev([fT])/branching.sdev)
+    #al2,cl2 =make_al_cl_FNAL(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True)
+    #al3,cl3 =make_al_cl_orig(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True)
+    #print(qsq,al,al2,cl,cl2)
+    if partial_sdev:
+        return(al,cl,f0,fp,fT)
+    else:
+        return(al,cl)
+
+########################### Testing ##############################################################
+#def make_al_cl_FNAL(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True):
+#    qmin = 8.68 #start of first cut off
+#    qmax = 14.18 #end of second cut off
+#    INTERPOLATE = True
+#    if qsq < qmax and qsq > qmin and INTERPOLATE==True and m_l != m_tau: 
+#        al,cl = interpolate_al_cl(p,qsq,qmin,qmax,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=corrections)
+#        al /= scale_err
+#        cl /= scale_err
+#    else:
+#        # h is complex -> C9 eff complex, and thus FV
+#        run_fac = runfT(mu_scale)#runs fT to same scale as Wilson coeffs
+#        f0 = isocorr0*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+#        fp = isocorrp*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+#        fT = run_fac*isocorrT*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+#        C9effR,C9effI,C7corrR,C7corrI = make_C9eff(qsq,fp,p['charge'],corrections=corrections)
+#        #FA = C10eff*fp
+#        GR = C9effR*fp + 2*m_bMSbar*(C7eff+C7corrR)*fT/(p['MBphys']+p['MKphys'])#use m_bMSbar here pole mass elsewhere
+#        GI = C9effI*fp + 2*m_bMSbar*(C7corrI)*fT/(p['MBphys']+p['MKphys'])    
+#        #FP = -m_l*C10eff*(fp - (p['MBphys']**2-p['MKphys']**2)*(f0-fp)/qsq)
+#        betal = gv.sqrt(1-4*m_l**2/qsq)
+#        lam = make_lambda(gv.sqrt(qsq),p['MBphys'],p['MKphys'])
+#        if lam.mean == 0:
+#            lam = 0
+#        Gam0 = GF**2 * alphaEW**2 * VtbVts**2 / (2**9 * np.pi**5 * p['MBphys']**3)
+#        al = Gam0 * gv.sqrt(lam) * betal * (lam/4 * (GI**2 + GR**2) + C10eff**2*(lam/4 * betal**2*fp**2 + m_l**2/qsq *(p['MBphys']**2-p['MKphys']**2)*f0**2) )
+#        cl = - 1/4 * Gam0 * gv.sqrt(lam)**3 * betal**3 * (GR**2 + GI**2 + (C10eff*fp)**2)
+#    if qsq >= qmax: #uncertainty for quark hadron duality 
+#        al *= q_h_duality
+#        cl *= q_h_duality
+#    al *= scale_err
+#    cl *= scale_err
+    #branching = 2*(al+cl/3)
+    #if branching != 0:
+    #    print(qsq,branching,branching.partialsdev([f0])/branching.sdev,branching.partialsdev([fp])/branching.sdev,branching.partialsdev([fT])/branching.sdev)
+#    return(al,cl)
+
+#def make_al_cl_orig(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True):
+#    qmin = 8.68 #start of first cut off
+#    qmax = 14.18 #end of second cut off
+#    INTERPOLATE = True
+#    if qsq < qmax and qsq > qmin and INTERPOLATE==True and m_l != m_tau: 
+#        al,cl = interpolate_al_cl(p,qsq,qmin,qmax,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=corrections)
+#        al /= scale_err
+#        cl /= scale_err
+#    else:
+#        # h is complex -> C9 eff complex, and thus FV
+#        run_fac = runfT(mu_scale)#runs fT to same scale as Wilson coeffs
+#        f0 = isocorr0*make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+#        fp = isocorrp*make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
+#        fT = run_fac*isocorrT*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsq,t_0,Fits[0]['masses'][0],fpf0same,0)
+#        C9effR,C9effI,C7corrR,C7corrI = make_C9eff(qsq,fp,p['charge'],corrections=corrections)
+#        FA = C10eff
+#        FVR = C9effR + 2*m_bMSbar*p['MBphys'](C7eff+C7corrR)/(qsq)#use m_bMSbar here pole mass elsewhere
+#        GI = C9effI*fp + 2*m_bMSbar*(C7corrI)*fT/(p['MBphys']+p['MKphys'])    
+#        #FP = -m_l*C10eff*(fp - (p['MBphys']**2-p['MKphys']**2)*(f0-fp)/qsq)
+#        betal = gv.sqrt(1-4*m_l**2/qsq)
+#        lam = make_lambda(gv.sqrt(qsq),p['MBphys'],p['MKphys'])
+#        if lam.mean == 0:
+#            lam = 0
+#        Gam0 = GF**2 * alphaEW**2 * VtbVts**2 / (2**9 * np.pi**5 * p['MBphys']**3)
+#        al = Gam0 * gv.sqrt(lam) * betal * (lam/4 * (GI**2 + GR**2) + C10eff**2*(lam/4 * betal**2*fp**2 + m_l**2/qsq *(p['MBphys']**2-p['MKphys']**2)*f0**2) )
+#        cl = - 1/4 * Gam0 * gv.sqrt(lam)**3 * betal**3 * (GR**2 + GI**2 + (C10eff*fp)**2)
+#    if qsq >= qmax: #uncertainty for quark hadron duality 
+#        al *= q_h_duality
+#        cl *= q_h_duality
+#    al *= scale_err
+#    cl *= scale_err
+    #branching = 2*(al+cl/3)
+    #if branching != 0:
+    #    print(qsq,branching,branching.partialsdev([f0])/branching.sdev,branching.partialsdev([fp])/branching.sdev,branching.partialsdev([fT])/branching.sdev)
+#    return(al,cl)
+
+###################################################################################
+
 
 def interpolate_al_cl(p,qsq,qmin,qmax,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=True):
     #interpolates al and cl linerly between the two vetoed regions
@@ -1521,13 +1670,22 @@ def check_gaps(qsq,gaps):
     return(zero)
     
 
-def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=None,gaps=False,qmax=False,table=False,corrections=True):
+def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=None,gaps=False,qmax=False,table=False,corrections=True,partial_sdev=False):
+    f0s = []
+    fps = []
+    fTs = []
     integrands = gv.BufferDict()
     def integrand(qsq,gaps):
         if qsq in integrands:
             integrand = integrands[qsq]
-        else:    
-            al,cl = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=corrections)
+        else:
+            if partial_sdev:
+                al,cl,f0,fp,fT = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=corrections,partial_sdev=partial_sdev)
+                f0s.append(f0)
+                fps.append(fp)
+                fTs.append(fT)
+            else:
+                al,cl = make_al_cl(p,qsq,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,corrections=corrections)
             integrand = 2*al + 2*cl/3
         if integrand != 0 and np.isnan(integrand.mean):
             integrand = 0
@@ -1576,6 +1734,8 @@ def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,
                 if check:
                     Test = True
         return(np.array([result1,result2]))
+    elif partial_sdev:
+        return(result1,f0s,fps,fTs)
     else:
         return(result1)
 
@@ -1583,7 +1743,7 @@ def integrate_Gamma(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,
 def integrate_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2,iters=None):
     # this acts as a shell for do_integral_FH. If the integral starts below 2, then it will take a very long time to do. Splitting up into qsq_min ->2 and 2-> qsq_max will speed this up as the latter half of the integral is smooth
     threshold = 10 * 4*m_e**2 # want to focus on region where Beta <1  split into 3 firstly 10 * limit, then work in powers of 10 up to 1.0 that 100000*threshold gives~ 0.1
-    lower_threshold = 4*m_mu**2
+    lower_threshold = 0.1 #4*m_mu**2
     if qsq_min < lower_threshold:
         print('SPLITTING INTEGRAL','m_l = ',m_l,'qsq_min = ',qsq_min,'qsq_max = ',qsq_max)
         parts = ['A','B','C','D','F','G','H','I','J','K','L']
@@ -1606,8 +1766,8 @@ def integrate_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,con
         tops.append(t)
         bots.append(b)
         result = sum(tops)/sum(bots)
-        print('tops',tops)
-        print('bots',bots)
+        print('tops',tops,'top',sum(tops))
+        print('bots',bots,'bot',sum(bots))
         print('Result:',result)
     else:
         result = do_integral_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2)
@@ -1692,6 +1852,7 @@ def do_integral_FH(p,qsq_min,qsq_max,m_l,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,c
     if split == True:
         return(int_top,int_bot)
     else:
+        print('top',int_top,'bot',int_bot)
         return(result)
 
 #####################################################################
@@ -1747,6 +1908,7 @@ def neutrino_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     result = integrate_fp_B(p,qsq_min,qsq_max,pfit,Fits,Nijk,Npow,Nm,addrho,t_0,fpf0same,const2,iters=150,qmax=True)
     BB0 = (tauB0GeV * VtbVts**2 * GF**2 * alphaEW**2 * Xt**2 * result) /(32 * (np.pi)**5 * sinthw2**2)
     print('B^0 -> K^0 nu nu (SD) {0} x 10^-6'.format(BB0/1e-6))
+    print('Error from fp',BB0.partialsdev(result)/1e-6)
     ######### Bp SD #####################
     qsq_max = qsqmaxphysBKp.mean
     p = make_p_physical_point_BK(pfit,Fits,B='p')
@@ -1758,6 +1920,7 @@ def neutrino_branching(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,const2):
     BBpLD = ( (GF**2 * VubVusfK * fBp )**2 * 2 * np.pi * m_tau * (p['MBphys']**2 - m_tau**2)**2 * (p['MKphys']**2 - m_tau**2)**2 ) / (256 * np.pi**3 * p['MBphys']**3 * Gammatau * GammaB ) 
     print('B^+ -> K^+ nu nu (LD) {0} x 10^-7 c.f. 6.22(60)'.format(BBpLD/1e-7))
     print('B^+ -> K^+ nu nu (SD+LD) {0} x 10^-6'.format((BBp+BBpLD)/1e-6))
+    print('Error from fp',BBp.partialsdev(result)/1e-6)
     return(BB0,(BBp+BBpLD))
 
 
