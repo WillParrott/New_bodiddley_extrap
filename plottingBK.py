@@ -2451,6 +2451,211 @@ def f0_fp_fT_in_Mh_no_data(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     plt.close()
     return()
 
+def f0_in_Mh_qsqmax_data(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    ################################################################################
+    MHs = []
+    f0max = []
+    fpmax = []
+    fTmax = []
+    p = make_p_physical_point_BK(pfit,Fits)
+    for Mh in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts): #q2 now in GeV
+        p = make_p_Mh_BK(pfit,Fits,Mh)
+        Z_T_running = run_mu(p,Mh)
+        qsqmax = (Mh-p['MKphys'])**2
+        MHs.append(Mh)
+        f0max.append(make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0))
+    f0maxmean,f0maxerr = unmake_gvar_vec(f0max)
+    f0maxupp,f0maxlow = make_upp_low(f0max)
+    plt.figure(figsize=figsize)
+    plt.plot(MHs, f0maxmean, color='b')
+    plt.fill_between(MHs,f0maxlow,f0maxupp, color='b',alpha=alpha)
+    plt.xlabel('$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.ylabel('$f_0(q^2_{\mathrm{max}})$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(p['MDphys'].mean,0.75,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(p['MBphys'].mean,0.75,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    ###############
+    plotfits = []
+    for Fit in Fits:
+        if Fit['conf'] not in ['UFs']:
+            plotfits.append(Fit)
+    i = 0
+    for_s = collections.OrderedDict()
+    for Fit in plotfits:
+        for_s[Fit['conf']] = {}
+        for_s[Fit['conf']] = {}
+        if Fit['conf'] in ['VCp','Cp','Fp']:
+            col = 'b'
+        elif Fit['conf'] in ['Fs','SFs']:
+            col = 'r'
+        else:
+            col = 'k'
+        x = []
+        f0 = []
+        y = []
+        MHs = []
+        for mass in Fit['masses']:
+            Mh = Fit['M_parent_m{0}'.format(mass)]/Fit['a']
+            p = make_p_Mh_BK(pfit,Fits,Mh.mean)
+            x.append(Mh)
+            f0.append(fs_data[Fit['conf']]['f0_m{0}_tw0'.format(mass)])
+        if len(Fit['masses']) != 1:
+            MH_0 =  Fit['M_parent_m{0}'.format(Fit['masses'][0])]/Fit['a'] # in GeV
+            MH_1 = Fit['M_parent_m{0}'.format(Fit['masses'][-1])]/Fit['a'] # in GeV
+            amh_0 = float(Fit['masses'][0]) # in lat units
+            amh_1 = float(Fit['masses'][-1]) # in lat units
+            grad = (amh_1-amh_0)/(MH_1-MH_0) # in GeV^-1
+            for_s[Fit['conf']]['MH_0'] = MH_0
+            for_s[Fit['conf']]['MH_1'] = MH_1
+            for Mh in np.linspace(MH_0.mean,MH_1.mean,50): #GeV
+                p = make_p_Mh_BK(pfit,Fits,Mh)
+                amh = amh_0 + grad * (Mh-MH_0) #lat units
+                pfit_Mh = copy.deepcopy(pfit)
+                pfit_Mh['MH_{0}_m{1}'.format(Fit['conf'],mass)] = Mh*Fit['a']
+                if Fit['conf'] == 'Fs':
+                    Mh_l = for_s['F']['MH_0'] + (for_s['F']['MH_1']-for_s['F']['MH_0'])/(MH_1-MH_0)*(Mh-MH_0)
+                    pfit_Mh['MH_{0}_m{1}'.format('F',mass)] = Mh_l*Fit['a']
+                if Fit['conf'] == 'SFs':
+                    Mh_l = for_s['SF']['MH_0'] + (for_s['SF']['MH_1']-for_s['SF']['MH_0'])/(MH_1-MH_0)*(Mh-MH_0)
+                    pfit_Mh['MH_{0}_m{1}'.format('SF',mass)] = Mh_l*Fit['a']
+                qsqmax = (Mh*Fit['a']-Fit['M_daughter'])**2 #lat units, always true?
+                y.append(make_f0_BK(Nijk,Npow,Nm,addrho,pfit_Mh,Fit,qsqmax,t_0,mass,fpf0same,amh))
+                MHs.append(Mh)            
+            
+        x,xerr = unmake_gvar_vec(x)
+        f0,f0err = unmake_gvar_vec(f0)
+        y,yerr = unmake_gvar_vec(y)
+        plt.plot(MHs, y, color=col,linestyle='--') 
+        plt.errorbar(x, f0, xerr=xerr, yerr=f0err, color=col, fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])))
+        i+=1
+    #########################
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+
+    #handles = [Patch(facecolor='b', edgecolor='b',label=r'$f_{0}(q^2_{\mathrm{max}})$',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'$f_{+}(q^2_{\mathrm{max}})$',alpha=alpha),Patch(facecolor='purple', edgecolor='purple',label=r'$f_{T}(q^2_{\mathrm{max}},\mu)$',alpha=alpha)]
+    #handles = [Patch(facecolor='b', edgecolor='b',label=r'$f_{0}(q^2_{\mathrm{max}})$',alpha=alpha)]
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper right')   
+    ##################################
+    plt.axes().set_ylim([0.8,1.05])
+    plt.tight_layout()
+    plt.savefig('Plots/f0inmh_qsqmaxdata{0}.pdf'.format(faclab))
+    plt.close()
+    return()
+
+#####################################################################################################
+def f0_in_Mh_qsqmax_data_norm(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
+    ################################################################################
+    MHs = []
+    f0max = []
+    fpmax = []
+    fTmax = []
+    p = make_p_physical_point_BK(pfit,Fits)
+    for Mh in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts): #q2 now in GeV
+        p = make_p_Mh_BK(pfit,Fits,Mh)
+        Z_T_running = run_mu(p,Mh)
+        qsqmax = (Mh-p['MKphys'])**2
+        MHs.append(Mh)
+        thing = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        f0max.append(thing/thing.mean)
+    f0maxmean,f0maxerr = unmake_gvar_vec(f0max)
+    f0maxupp,f0maxlow = make_upp_low(f0max)
+    plt.figure(figsize=figsize)
+    plt.plot(MHs, f0maxmean, color='b')
+    plt.fill_between(MHs,f0maxlow,f0maxupp, color='b',alpha=alpha)
+    plt.xlabel('$M_{H}[\mathrm{GeV}]$',fontsize=fontsizelab)
+    plt.ylabel(r'$f_0(q^2_{\mathrm{max}})/\mathrm{mean}(f_0(q^2_{\mathrm{max}})^{\mathrm{cont.}})$',fontsize=fontsizelab)
+    plt.axes().tick_params(labelright=True,which='both',width=2,labelsize=fontsizelab)
+    plt.axes().tick_params(which='major',length=major)
+    plt.axes().tick_params(which='minor',length=minor)
+    plt.axes().yaxis.set_ticks_position('both')
+    plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(p['MDphys'].mean,0.93,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw/2,alpha=alpha)
+    plt.text(p['MBphys'].mean,0.93,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    ###############
+    plotfits = []
+    for Fit in Fits:
+        if Fit['conf'] not in ['UFs']:
+            plotfits.append(Fit)
+    i = 0
+    for_s = collections.OrderedDict()
+    for Fit in plotfits:
+        for_s[Fit['conf']] = {}
+        for_s[Fit['conf']] = {}
+        if Fit['conf'] in ['VCp','Cp','Fp']:
+            col = 'b'
+        elif Fit['conf'] in ['Fs','SFs']:
+            col = 'r'
+        else:
+            col = 'k'
+        x = []
+        f0 = []
+        y = []
+        MHs = []
+        for mass in Fit['masses']:
+            Mh = Fit['M_parent_m{0}'.format(mass)]/Fit['a']
+            p = make_p_Mh_BK(pfit,Fits,Mh.mean)
+            qsqmax = (Mh-p['MKphys'])**2
+            f0max = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+            x.append(Mh)
+            f0.append(fs_data[Fit['conf']]['f0_m{0}_tw0'.format(mass)]/f0max.mean)
+        if len(Fit['masses']) != 1:
+            MH_0 =  Fit['M_parent_m{0}'.format(Fit['masses'][0])]/Fit['a'] # in GeV
+            MH_1 = Fit['M_parent_m{0}'.format(Fit['masses'][-1])]/Fit['a'] # in GeV
+            amh_0 = float(Fit['masses'][0]) # in lat units
+            amh_1 = float(Fit['masses'][-1]) # in lat units
+            grad = (amh_1-amh_0)/(MH_1-MH_0) # in GeV^-1
+            for_s[Fit['conf']]['MH_0'] = MH_0
+            for_s[Fit['conf']]['MH_1'] = MH_1
+            for Mh in np.linspace(MH_0.mean,MH_1.mean,50): #GeV
+                p = make_p_Mh_BK(pfit,Fits,Mh)
+                amh = amh_0 + grad * (Mh-MH_0) #lat units
+                pfit_Mh = copy.deepcopy(pfit)
+                pfit_Mh['MH_{0}_m{1}'.format(Fit['conf'],mass)] = Mh*Fit['a']
+                if Fit['conf'] == 'Fs':
+                    Mh_l = for_s['F']['MH_0'] + (for_s['F']['MH_1']-for_s['F']['MH_0'])/(MH_1-MH_0)*(Mh-MH_0)
+                    pfit_Mh['MH_{0}_m{1}'.format('F',mass)] = Mh_l*Fit['a']
+                if Fit['conf'] == 'SFs':
+                    Mh_l = for_s['SF']['MH_0'] + (for_s['SF']['MH_1']-for_s['SF']['MH_0'])/(MH_1-MH_0)*(Mh-MH_0)
+                    pfit_Mh['MH_{0}_m{1}'.format('SF',mass)] = Mh_l*Fit['a']
+                qsqmax = (Mh*Fit['a']-Fit['M_daughter'])**2 #lat units, always true?
+                qsqmax_cont = (Mh-p['MKphys'])**2
+                thing = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax_cont,t_0,Fits[0]['masses'][0],fpf0same,0)
+                y.append(make_f0_BK(Nijk,Npow,Nm,addrho,pfit_Mh,Fit,qsqmax,t_0,mass,fpf0same,amh)/thing.mean)
+                MHs.append(Mh)            
+              
+        x,xerr = unmake_gvar_vec(x)
+        f0,f0err = unmake_gvar_vec(f0)
+        y,yerr = unmake_gvar_vec(y)
+        plt.plot(MHs, y, color=col,linestyle='--') 
+        plt.errorbar(x, f0, xerr=xerr, yerr=f0err, color=col, fmt=symbs[i],ms=ms, mfc='none',label=('{0}'.format(Fit['label'])))
+        i+=1
+        
+    #########################
+    plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.01))
+
+    #handles = [Patch(facecolor='b', edgecolor='b',label=r'$f_{0}(q^2_{\mathrm{max}})$',alpha=alpha),Patch(facecolor='r', edgecolor='r',label=r'$f_{+}(q^2_{\mathrm{max}})$',alpha=alpha),Patch(facecolor='purple', edgecolor='purple',label=r'$f_{T}(q^2_{\mathrm{max}},\mu)$',alpha=alpha)]
+    #handles = [Patch(facecolor='b', edgecolor='b',label=r'$f_{0}(q^2_{\mathrm{max}})$',alpha=alpha)]
+    plt.legend(fontsize=fontsizeleg*0.8,frameon=False,ncol=4,loc='upper left')   
+    ##################################
+    plt.axes().set_ylim([0.95,1.05])
+    plt.tight_layout()
+    plt.savefig('Plots/f0inmh_qsqmaxdata_norm{0}.pdf'.format(faclab))
+    plt.close()
+    return()
+
+######################################################################################################
+
 def fp_fT_rat_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2):
     ################################################################################
     MHs = []
@@ -2759,7 +2964,7 @@ def f0_fp_fT_in_Mh_deriv2_qmax(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2
     fT0 = []
     fTmax = []
     p = make_p_physical_point_BK(pfit,Fits)
-    eps = 0.01
+    eps = 0.05
     for Mh in np.linspace(p['MDphys'].mean,p['MBphys'].mean,nopts):
         MHs.append(Mh)
         p = make_p_Mh_BK(pfit,Fits,Mh)
@@ -2772,6 +2977,7 @@ def f0_fp_fT_in_Mh_deriv2_qmax(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2
         E  = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
         Mh1 = Mh-eps/2
         p = make_p_Mh_BK(pfit,Fits,Mh1)
+        qsqmax = (Mh1-p['MKphys'])**2
         Z_T_running = run_mu(p,Mh1)
         A1 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
         B1 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
@@ -2780,12 +2986,14 @@ def f0_fp_fT_in_Mh_deriv2_qmax(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2
         E1  = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
         Mh2 = Mh+eps/2
         p = make_p_Mh_BK(pfit,Fits,Mh2)
+        qsqmax = (Mh2-p['MKphys'])**2
         Z_T_running = run_mu(p,Mh2)
         A2 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
         B2 = make_f0_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
         C2 = make_fp_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0,const2=const2)
         D2 = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],0,t_0,Fits[0]['masses'][0],fpf0same,0)
         E2  = Z_T_running*make_fT_BK(Nijk,Npow,Nm,addrho,p,Fits[0],qsqmax,t_0,Fits[0]['masses'][0],fpf0same,0)
+        #print(Mh,Mh1,Mh2,C1,C2, C2-C1)
         f00.append((A2-A1)*Mh/(A*eps)) #only need one fit
         f0max.append((B2-B1)*Mh/(B*eps))
         fpmax.append((C2-C1)*Mh/(C*eps))
@@ -2822,17 +3030,17 @@ def f0_fp_fT_in_Mh_deriv2_qmax(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,const2
     plt.axes().yaxis.set_ticks_position('both')
     #plt.plot([cut_off.mean,cut_off.mean],[-10,10],'k:',lw=lw,alpha=alpha)
     plt.plot([p['MDphys'].mean,p['MDphys'].mean],[-10,10],'k--',lw=lw,alpha=alpha)
-    #plt.text(p['MDphys'].mean,-4.1,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.text(p['MDphys'].mean,-2.1,'$M_{D}$',fontsize=fontsizelab,horizontalalignment='center')
     #plt.text(cut_off.mean,-4.1,r'$q^2_{\mathrm{max}}=M_D^2$',fontsize=fontsizelab,horizontalalignment='center')
     plt.plot([p['MBphys'].mean,p['MBphys'].mean],[-10,10],'k--',lw=lw,alpha=alpha)
-    #plt.text(p['MBphys'].mean,-4.1,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
+    plt.text(p['MBphys'].mean,-2.1,'$M_{B}$',fontsize=fontsizelab,horizontalalignment='center')
     plt.axes().xaxis.set_major_locator(MultipleLocator(0.5))
     plt.axes().xaxis.set_minor_locator(MultipleLocator(0.1))
-    plt.axes().yaxis.set_major_locator(MultipleLocator(1.0))
-    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.2))
-    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=2,loc='lower center')#handles=handles,labels=labels)
+    plt.axes().yaxis.set_major_locator(MultipleLocator(0.5))
+    plt.axes().yaxis.set_minor_locator(MultipleLocator(0.1))
+    plt.legend(fontsize=fontsizeleg,frameon=False,ncol=3,loc='upper center')#handles=handles,labels=labels)
     ##################################
-    plt.axes().set_ylim([-10,1])
+    plt.axes().set_ylim([-1.5,1.7])
     plt.tight_layout()
     plt.savefig('Plots/f0fpfTinmh_deriv2_qmax{0}.pdf'.format(faclab))
     plt.close()
