@@ -342,13 +342,19 @@ for Fit in Fits:
 #plot_gold_non_split(Fits)
 #fp_V0_V1_diff(fs_data,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2)
 #Z_V_plots(Fits,fs_data)
+Heavy_mass_plots(Fits,fs_data)
 ################################ Test average #####################################
 average_t_0_cases = gv.BufferDict()
 #fpf0same = True
 #constraint = False#add constraint the f0(0)=fp(0)
 #t_0 = '0'
 prior,f = make_prior_BK(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,adddata,constraint)
+                        
+#prior_qsqmax,f_qsqmax = make_prior_qsqmax(fs_data,Fits,addrho,t_0,Npow,Nijk,Nm,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,adddata,constraint)
+
 pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0same,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,constraint,constraint2)
+#p_f0qsqmaxfit = do_fit_f0_qsqmax(fs_data,adddata,Fits,f_qsqmax,Nijk,Npow,Nm,t_0,addrho,noise,prior_qsqmax,fpf0same,rhopri,dpri,cpri,cvalpri,d0000npri,di0000pri,di100npri,d000lnpri,constraint,constraint2)
+
 #average_t_0_cases = fp_in_qsq_z(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,adddata,constraint2,average_t_0_cases)
 #fs_at_lims_BK(f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 
@@ -369,6 +375,7 @@ pfit = do_fit_BK(fs_data,adddata,Fits,f,Nijk,Npow,Nm,t_0,addrho,noise,prior,fpf0
 ###################################################################################
 
 fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
+#fs_at_lims_qsqmax(prior_qsqmax,f_qsqmax,p_f0qsqmaxfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 ################
 #ensemble_error_breakdown()
 #dBdq2_emup(pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
@@ -414,7 +421,7 @@ fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #f0_fp_fT_in_qsq_with_D(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #nopole_f0_fp_fT_in_qsq(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+f0_fp_fT_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #f0_fp_fT_in_Mh_no_data(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #fp_fT_rat_in_Mh(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
 #f0_fp_fT_in_Mh_4GeV(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
@@ -426,6 +433,7 @@ fs_at_lims_BK(prior,f,pfit,t_0,Fits,fpf0same,Nijk,Npow,Nm,addrho,constraint2)
 #DKfT_table_of_as(Fits,pfit,Nijk,Npow,Nm,fpf0same,addrho)
 #error_plot(pfit,prior,Fits,Nijk,Npow,Nm,f,t_0,addrho,fpf0same,constraint2)
 ##################### referee
-#f0_in_Mh_qsqmax_data(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#f0_in_Mh_qsqmax_data_norm(fs_data,pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
-#f0_fp_fT_in_Mh_deriv2_qmax(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#f0_in_Mh_qsqmax_data(fs_data,pfit,p_f0qsqmaxfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#f0_in_Mh_qsqmax_data_norm(fs_data,pfit,p_f0qsqmaxfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2)
+#f0_fp_fT_in_Mh_deriv2_qmax(pfit,Fits,t_0,Nijk,Npow,Nm,addrho,fpf0same,constraint2,0.001)
+
